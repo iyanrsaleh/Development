@@ -1,0 +1,24 @@
+/* ============================================================
+   SEARCH / STATUSBAR — Layout
+   ============================================================ */
+.ubuntu-workbench .search { position:relative; display:flex; align-items:center; }
+/* Ukuran/padding .search-input dipindah ke templates/workbench/index.css
+   (di-import PALING TERAKHIR di workspace.css) — supaya menang di cascade
+   lewat urutan file, bukan lewat perlombaan specificity :not() reset
+   input.css yang bertambah tiap kali app baru (SCM, Chat, dst) di-exclude
+   dari reset generik. Lihat index.css untuk definisi lengkapnya. */
+.ubuntu-workbench .search .uicon,
+.ubuntu-workbench .search [class*="icon-ic_fluent_"] {
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  z-index: 1;
+  --uicon-size: 14px;
+  font-size: 14px;
+  color: #5e5c64;
+}
+.ubuntu-workbench .search-icon { display:none; }
+
+.ubuntu-workbench .statusbar { display:flex; align-items:center; justify-content:space-between; padding:4px 12px; background:var(--window-bg-color); border-top:1px solid var(--border-color); font-size:12px; color:#5e5c64; min-height:24px; }

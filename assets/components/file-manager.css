@@ -1,0 +1,576 @@
+/* ============================================================
+   FILE MANAGER — Yaru / Libadwaita style (GNOME 46)
+   ════════════════════════════════════════════════════════════
+   Cocok untuk Ubuntu 24.04 — Nautilus/GNOME Files style.
+   ============================================================ */
+
+.ubuntu-workbench .ubuntu-fm-app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--window-bg-color);
+  color: var(--window-fg-color);
+  font-family: var(--nx-font-sans);
+  font-size: 14px;
+  overflow: hidden;
+}
+
+/* ────────── Toolbar ────────── */
+.ubuntu-workbench .ubuntu-fm-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 8px;
+  background: var(--window-bg-color);
+  border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
+}
+.ubuntu-workbench .ubuntu-fm-toolbar button {
+  min-width: 26px;
+  min-height: 26px;
+  padding: 2px;
+  font-size: 13px;
+}
+.ubuntu-workbench .ubuntu-fm-toolbar .uicon {
+  color: var(--window-fg-color);
+  --uicon-size: 14px !important;
+}
+.ubuntu-workbench .ubuntu-fm-toolbar button.active {
+  background: rgba(53, 132, 228, 0.2);
+  color: var(--accent-bg-color);
+}
+.ubuntu-workbench .ubuntu-fm-toolbar button.active .uicon {
+  color: var(--accent-bg-color);
+}
+
+/* ────────── Tab Bar ────────── */
+/* display:none sebagai default — renderTabs() di core.js men-set 'flex'
+   hanya kalau ada lebih dari 1 tab. Dengan 1 tab saja, bar hanya memakan
+   ruang tanpa fungsi (tidak ada yang perlu di-switch). */
+.ubuntu-workbench .ubuntu-fm-tabbar {
+  display: none;
+  background: var(--window-bg-color);
+  border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.ubuntu-workbench .ubuntu-fm-tabbar::-webkit-scrollbar {
+  height: 4px;
+}
+.ubuntu-workbench .ubuntu-fm-tabbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.ubuntu-workbench .ubuntu-fm-tabbar::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 2px;
+}
+.ubuntu-workbench .fm-tabs-container {
+  display: flex;
+  gap: 2px;
+  padding: 4px 8px;
+  flex: 1;
+}
+.ubuntu-workbench .fm-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(0, 0, 0, 0.04);
+  border: 1px solid transparent;
+  border-radius: 6px 6px 0 0;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--window-fg-color);
+  transition: background 80ms ease, border-color 80ms ease;
+  flex-shrink: 0;
+  max-width: 200px;
+}
+.ubuntu-workbench .fm-tab:hover {
+  background: rgba(0, 0, 0, 0.08);
+}
+.ubuntu-workbench .fm-tab.active {
+  background: var(--view-bg-color);
+  border-color: var(--border-color);
+  border-bottom-color: var(--view-bg-color);
+  font-weight: 500;
+}
+.ubuntu-workbench .fm-tab-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+.ubuntu-workbench .fm-tab-close {
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  font-size: 14px;
+  line-height: 1;
+  color: #77767b;
+  transition: background 80ms ease, color 80ms ease;
+  flex-shrink: 0;
+}
+.ubuntu-workbench .fm-tab-close:hover {
+  background: rgba(235, 76, 76, 0.2);
+  color: #eb4c4c;
+}
+.ubuntu-workbench .ubuntu-fm-pathbar {
+  flex: 1;
+  margin: 0 4px;
+  min-height: 28px;
+  padding: 2px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  background: var(--view-bg-color);
+  font-size: 13px;
+  font-family: var(--nx-font-sans);
+  color: var(--view-fg-color);
+  outline: none;
+  cursor: text;
+}
+.ubuntu-workbench .ubuntu-fm-pathbar:focus {
+  border-color: var(--ub-orange);
+  box-shadow: inset 0 0 0 1px var(--ub-orange);
+}
+
+/* ────────── Main area: sidebar + content ────────── */
+.ubuntu-workbench .ubuntu-fm-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ────────── Sidebar ────────── */
+.ubuntu-workbench .ubuntu-fm-sidebar {
+  width: 200px;
+  min-width: 160px;
+  max-width: 480px;
+  background: var(--border-color)
+  border-right: 1px solid var(--border-color);
+  overflow-y: auto;
+  padding: 6px 0;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ────────── Sidebar resizer ────────── */
+.ubuntu-workbench .ubuntu-fm-sidebar-resizer {
+  width: 2px;
+  flex-shrink: 0;
+  cursor: ew-resize;
+  background: transparent;
+}
+.ubuntu-workbench .ubuntu-fm-sidebar-resizer:hover,
+.ubuntu-workbench .ubuntu-fm-sidebar-resizer.is-dragging {
+  background: var(--accent-color, #3584e4);
+}
+.ubuntu-workbench .ubuntu-fm-sidebar .fm-place {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  cursor: pointer;
+  border-radius: 0;
+  font-size: 13px;
+  color: var(--window-fg-color);
+  transition: background 80ms ease;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  box-sizing: border-box;
+}
+.ubuntu-workbench .ubuntu-fm-sidebar .fm-place:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+.ubuntu-workbench .ubuntu-fm-sidebar .fm-place:active {
+  background: rgba(0, 0, 0, 0.10);
+}
+.ubuntu-workbench .ubuntu-fm-sidebar .fm-place.active {
+  background: rgba(0, 0, 0, 0.10);
+  font-weight: 500;
+}
+.ubuntu-workbench .ubuntu-fm-sidebar .fm-place .fm-place-icon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.ubuntu-workbench .ubuntu-fm-sidebar .fm-place .fm-place-icon .uicon-img {
+  --uicon-size: 16px;
+}
+.ubuntu-workbench .ubuntu-fm-sidebar .fm-section-label {
+  padding: 8px 12px 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #77767b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ────────── Drives Section ────────── */
+.ubuntu-workbench .ubuntu-fm-sidebar .fm-drives-section {
+  flex-shrink: 0;
+}
+.ubuntu-workbench .ubuntu-fm-sidebar .fm-drives-section .fm-place {
+  font-size: 12px;
+  padding: 5px 12px;
+}
+.ubuntu-workbench .ubuntu-fm-sidebar .fm-drives-section .fm-place span[style*="font-size:11px"] {
+  opacity: 0.6;
+  font-size: 10px;
+}
+
+/* ────────── Folder Tree ────────── */
+.ubuntu-workbench .ubuntu-fm-sidebar .fm-tree {
+  padding: 2px 0;
+  font-size: 12px;
+  overflow-y: auto;
+  flex: 1;
+}
+.ubuntu-workbench .ubuntu-fm-sidebar .fm-tree-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px 3px 12px;
+  cursor: pointer;
+  border-radius: 0;
+  transition: background 80ms ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ubuntu-workbench .ubuntu-fm-sidebar .fm-tree-item:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+.ubuntu-workbench .ubuntu-fm-sidebar .fm-tree-item.active {
+  background: rgba(0, 0, 0, 0.10);
+  font-weight: 500;
+}
+.ubuntu-workbench .ubuntu-fm-sidebar .fm-tree-arrow {
+  font-size: 8px;
+  color: #77767b;
+  width: 12px;
+  text-align: center;
+  flex-shrink: 0;
+  transition: transform 0.15s ease;
+  user-select: none;
+}
+.ubuntu-workbench .ubuntu-fm-sidebar .fm-tree-arrow.expanded {
+  transform: rotate(90deg);
+}
+.ubuntu-workbench .ubuntu-fm-sidebar .fm-tree-icon {
+  width: 18px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+.ubuntu-workbench .ubuntu-fm-sidebar .fm-tree-label {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ubuntu-workbench .ubuntu-fm-sidebar .fm-tree-children {
+  display: none;
+}
+.ubuntu-workbench .ubuntu-fm-sidebar .fm-tree-children .fm-tree-item {
+  padding-left: 28px;
+}
+.ubuntu-workbench .ubuntu-fm-sidebar .fm-tree-children .fm-tree-children .fm-tree-item {
+  padding-left: 44px;
+}
+.ubuntu-workbench .ubuntu-fm-sidebar .fm-tree-children .fm-tree-children .fm-tree-children .fm-tree-item {
+  padding-left: 60px;
+}
+
+/* ────────── Content area ────────── */
+.ubuntu-workbench .ubuntu-fm-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--view-bg-color);
+}
+
+/* ────────── Grid view ────────── */
+.ubuntu-workbench .ubuntu-fm-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 4px;
+  padding: 8px;
+  overflow-y: auto;
+  flex: 1;
+  align-content: start;
+  position: relative;
+}
+.ubuntu-workbench .fm-select-box {
+  position: absolute;
+  border: 1px solid var(--accent-color, #3584e4);
+  background: rgba(53, 132, 228, 0.15);
+  pointer-events: none;
+  z-index: 5;
+}
+.ubuntu-workbench .ubuntu-fm-grid.has-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ubuntu-workbench .ubuntu-fm-grid .fm-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 4px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 80ms ease;
+  text-align: center;
+  min-height: 72px;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  justify-content: flex-start;
+}
+.ubuntu-workbench .ubuntu-fm-grid .fm-item:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+.ubuntu-workbench .ubuntu-fm-grid .fm-item:active {
+  background: rgba(0, 0, 0, 0.10);
+}
+.ubuntu-workbench .ubuntu-fm-grid .fm-item.selected {
+  background: rgba(53, 132, 228, 0.15);
+  outline: 1px solid var(--accent-bg-color);
+}
+.ubuntu-workbench .ubuntu-fm-grid .fm-item.selected:focus {
+  outline: 2px solid var(--accent-bg-color);
+  outline-offset: -1px;
+}
+.ubuntu-workbench .ubuntu-fm-grid .fm-item.fm-dragging {
+  opacity: 0.4;
+}
+.ubuntu-workbench .ubuntu-fm-grid .fm-item.fm-drag-over {
+  background: rgba(233, 84, 32, 0.15);
+  outline: 2px dashed var(--ub-orange);
+  outline-offset: -2px;
+}
+.ubuntu-workbench .ubuntu-fm-grid .fm-item .fm-icon {
+  font-size: 0;
+  line-height: 1;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ubuntu-workbench .ubuntu-fm-grid .fm-item .fm-icon .uicon-img {
+  --uicon-size: 48px;
+}
+.ubuntu-workbench .ubuntu-fm-grid .fm-item .fm-icon .icon {
+  width: 48px;
+  height: 48px;
+}
+.ubuntu-workbench .ubuntu-fm-grid .fm-item .fm-name {
+  font-size: 11px;
+  color: var(--view-fg-color);
+  text-align: center;
+  line-height: 1.3;
+  max-width: 100%;
+  width: 100%;
+  flex-shrink: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+}
+.ubuntu-workbench .ubuntu-fm-grid .fm-item .fm-drive-info {
+  font-size: 9px;
+  color: #77767b;
+  text-align: center;
+  line-height: 1.2;
+  max-width: 100%;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ────────── List view ────────── */
+.ubuntu-workbench .ubuntu-fm-list {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  flex: 1;
+}
+.ubuntu-workbench .ubuntu-fm-list .fm-list-header {
+  display: flex;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 12px;
+  font-weight: 500;
+  color: #77767b;
+  background: var(--window-bg-color);
+  flex-shrink: 0;
+}
+.ubuntu-workbench .ubuntu-fm-list .fm-list-header span {
+  cursor: pointer;
+  user-select: none;
+}
+.ubuntu-workbench .ubuntu-fm-list .fm-list-header span:hover {
+  color: var(--window-fg-color);
+}
+.ubuntu-workbench .ubuntu-fm-list .fm-list-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: background 80ms ease;
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+}
+.ubuntu-workbench .ubuntu-fm-list .fm-list-item:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+.ubuntu-workbench .ubuntu-fm-list .fm-list-item:active {
+  background: rgba(0, 0, 0, 0.08);
+}
+.ubuntu-workbench .ubuntu-fm-list .fm-list-item.selected {
+  background: rgba(53, 132, 228, 0.12);
+  outline: 1px solid var(--accent-bg-color);
+}
+.ubuntu-workbench .ubuntu-fm-list .fm-list-item.selected:focus {
+  outline: 2px solid var(--accent-bg-color);
+  outline-offset: -1px;
+}
+.ubuntu-workbench .ubuntu-fm-list .fm-list-item.fm-dragging {
+  opacity: 0.4;
+}
+.ubuntu-workbench .ubuntu-fm-list .fm-list-item.fm-drag-over {
+  background: rgba(233, 84, 32, 0.15);
+  outline: 2px dashed var(--ub-orange);
+  outline-offset: -2px;
+}
+.ubuntu-workbench .ubuntu-fm-list .fm-list-item .fm-icon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.ubuntu-workbench .ubuntu-fm-list .fm-list-item .fm-icon .uicon-img {
+  --uicon-size: 24px;
+}
+.ubuntu-workbench .ubuntu-fm-list .fm-list-item .fm-icon .icon {
+  width: 24px;
+  height: 24px;
+}
+.ubuntu-workbench .ubuntu-fm-list .fm-list-item .fm-name {
+  flex: 1;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ubuntu-workbench .ubuntu-fm-list .fm-list-item .fm-size {
+  width: 72px;
+  text-align: right;
+  font-size: 12px;
+  color: #77767b;
+  flex-shrink: 0;
+}
+.ubuntu-workbench .ubuntu-fm-list .fm-list-item .fm-date {
+  width: 130px;
+  text-align: right;
+  font-size: 12px;
+  color: #77767b;
+  flex-shrink: 0;
+}
+
+/* ────────── Breadcrumb ────────── */
+/* display:none sebagai default (bukan flex) — updateBreadcrumb() di
+   renderer.js men-set 'flex' hanya kalau path cukup dalam (bukan root/drive
+   level). Tanpa ini, sebelum updateBreadcrumb() sempat dipanggil sekali,
+   strip kosong (padding+border tanpa isi) sempat "berkedip" tampil. */
+.ubuntu-workbench .ubuntu-fm-breadcrumb {
+  display: none;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--window-bg-color);
+  flex-shrink: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.ubuntu-workbench .ubuntu-fm-breadcrumb::-webkit-scrollbar {
+  display: none;
+}
+.ubuntu-workbench .ubuntu-fm-breadcrumb .fm-bc-arrow {
+  display: inline-flex;
+  align-items: center;
+  color: #9a9996;
+  font-size: 16px;
+  font-weight: 300;
+  user-select: none;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.ubuntu-workbench .ubuntu-fm-breadcrumb .badge {
+  flex-shrink: 0;
+}
+.ubuntu-workbench .ubuntu-fm-breadcrumb .badge.orange {
+  cursor: default;
+}
+
+/* ────────── Status bar ────────── */
+.ubuntu-workbench .ubuntu-fm-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 3px 12px;
+  background: var(--window-bg-color);
+  border-top: 1px solid var(--border-color);
+  font-size: 12px;
+  color: #77767b;
+  flex-shrink: 0;
+  min-height: 22px;
+}
+
+/* ────────── Empty state ────────── */
+.ubuntu-workbench .ubuntu-fm-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  width: 100%;
+  color: #9a9996;
+  gap: 12px;
+  padding: 40px 20px;
+  box-sizing: border-box;
+}
+.ubuntu-workbench .ubuntu-fm-empty .fm-empty-icon {
+  font-size: 48px;
+  opacity: 0.4;
+}
+.ubuntu-workbench .ubuntu-fm-empty .fm-empty-text {
+  font-size: 14px;
+}
+
+/* ────────── Loading ────────── */
+.ubuntu-workbench .ubuntu-fm-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: 40px;
+}

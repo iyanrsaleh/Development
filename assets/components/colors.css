@@ -1,0 +1,66 @@
+/* ============================================================
+   GNOME HIG Color Palette — nilai AKTUAL dari
+   https://developer.gnome.org/hig/reference/palette.html
+   ============================================================ */
+
+/* Primer / forms tokens — dipakai index.css (.form-control, .input-group).
+   Tanpa ini, `var(--x, var(--y))` invalid (kedua token kosong) → border
+   & warna form hilang (lihat showcase "Input dengan Icon"). */
+:root {
+  --fgColor-default: #241f31;
+  --color-fg-default: #241f31;
+  --fgColor-muted: #5e5c64;
+  --color-fg-muted: #5e5c64;
+  --fgColor-danger: #cf222e;
+  --color-danger-fg: #cf222e;
+  --fgColor-success: #1a7f37;
+  --color-success-fg: #1a7f37;
+  --fgColor-attention: #9a6700;
+  --color-attention-fg: #9a6700;
+  --bgColor-default: #ffffff;
+  --color-canvas-default: #ffffff;
+  --bgColor-muted: #f6f5f4;
+  --color-canvas-inset: #f6f5f4;
+  --control-borderColor-rest: #d0d7de;
+  --control-borderColor-disabled: #d8d8d8;
+  --color-border-default: #d0d7de;
+  --borderColor-default: #d0d7de;
+  --focus-outlineColor: #3584e4;
+  --color-accent-fg: #3584e4;
+  --shadow-inset: inset 0 1px 0 rgba(31, 35, 40, 0.04);
+  --color-primer-shadow-inset: inset 0 1px 0 rgba(31, 35, 40, 0.04);
+  --base-size-4: 4px;
+  --base-size-8: 8px;
+}
+
+.ubuntu-workbench {
+  /* Light theme */
+  --window-bg-color: #f6f5f4;  /* Light 2 */
+  --window-fg-color: #241f31;  /* Dark 4 */
+  --view-bg-color: #ffffff;    /* Light 1 */
+  --view-fg-color: #241f31;    /* Dark 4 */
+  --border-color: #deddda;     /* Light 3 */
+  --border-radius: 6px;
+
+  /* Accent — Blue 3 dari HIG */
+  --accent-bg-color: #3584e4;
+  --accent-fg-color: #ffffff;
+  --accent-color: #3584e4;
+
+  /* Font — sumber: assets/style.css (:root). Fallback jika style.css belum load. */
+  --nx-font-sans: "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+  --nx-font-mono: "Cascadia Mono", "Consolas", "Segoe UI Mono", ui-monospace, monospace;
+  font-family: var(--nx-font-sans);
+
+  /* Ubuntu Orange — warna dominan Ubuntu 24.04 */
+  --ub-orange: #E95420;
+
+  /* Semantic dari HIG */
+  --success-bg-color: #33d17a; /* Green 3 */
+  --warning-bg-color: #f6d32d; /* Yellow 3 */
+  --error-bg-color: #e01b24;   /* Red 3 */
+
+  /* Panel/Dark (Yaru style) */
+  --panel-bg: #151515;
+  --panel-fg: #ffffff;
+}

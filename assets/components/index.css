@@ -1,0 +1,1714 @@
+/*
+  Alias: Class lama NexaUI agar kompatibel dengan class baru
+*/
+.form-nexa-group,
+.form-group,
+.ubuntu-form-nexa-group,
+.ubuntu-form-group{
+	margin: 3px 0;
+  position: relative;
+}
+
+
+.form-nexa-control,
+.form-control,
+.form-select,
+.ubuntu-form-nexa-control,
+.ubuntu-form-control,
+.ubuntu-form-select{
+	padding: 5px 12px;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--fgColor-default, var(--color-fg-default));
+  vertical-align: middle;
+  background-color: var(--bgColor-default, var(--color-canvas-default));
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  border: 1px solid var(--control-borderColor-rest, var(--color-border-default));
+  border-radius: 6px;
+  box-shadow: var(--shadow-inset, var(--color-primer-shadow-inset));
+  transition: 80ms cubic-bezier(0.33, 1, 0.68, 1);
+  transition-property: color, background-color, box-shadow, border-color;
+}
+
+
+.form-nexa-control:focus,
+.form-control:focus,
+.form-select:focus,
+.ubuntu-form-nexa-control:focus,
+.ubuntu-form-control:focus,
+.ubuntu-form-select:focus{
+	border-color: var(--focus-outlineColor, var(--color-accent-fg));
+  outline: none;
+  box-shadow: inset 0 0 0 1px var(--focus-outlineColor, var(--color-accent-fg));
+}
+
+
+.form-nexa-control-sm,
+.input-sm,
+.ubuntu-form-nexa-control-sm,
+.ubuntu-input-sm{
+	min-height: 28px;
+  padding-top: 3px;
+  padding-bottom: 3px;
+  font-size: 12px;
+  line-height: 20px;
+}
+
+
+.form-nexa-control-lg,
+.input-lg,
+.ubuntu-form-nexa-control-lg,
+.ubuntu-input-lg{
+	font-size: 16px;
+}
+
+
+.form-nexa-check,
+.form-checkbox,
+.ubuntu-form-nexa-check,
+.ubuntu-form-checkbox{
+	padding-left: 20px;
+  margin: 15px 0;
+  vertical-align: middle;
+}
+
+
+.form-nexa-check-input,
+.form-checkbox input[type=checkbox],
+.form-checkbox input[type=radio],
+.ubuntu-form-nexa-check-input,
+.ubuntu-form-checkbox input[type=checkbox],
+.ubuntu-form-checkbox input[type=radio]{
+	float: left;
+  margin: 5px 0 0 -20px;
+  vertical-align: middle;
+}
+
+
+.form-nexa-check-label,
+.form-checkbox label,
+.ubuntu-form-nexa-check-label,
+.ubuntu-form-checkbox label{
+	position: static;
+}
+
+
+/*
+============================
+  NexaUI Form - Class Mapping (Migrasi)
+  Standar baru: Bootstrap-like
+============================
+  .form-group         : Container grup input/form
+  .form-control       : Input, textarea, select utama
+  .form-select        : Select dropdown
+  .form-checkbox      : Checkbox container
+  .form-checkbox input: Checkbox input
+  .form-checkbox label: Checkbox label
+  .form-radio         : Radio container
+  .form-radio input   : Radio input
+  .form-radio label   : Radio label
+  .form-actions       : Container tombol aksi
+  .input-sm           : Input kecil
+  .input-lg           : Input besar
+  .input-block        : Input full width
+  .form-warning       : Peringatan/form error
+  .form-label-icon    : Label dengan ikon
+  .form-floating      : Floating label
+  .form-switch        : Switch toggle modern
+  .form-range         : Range slider
+  .form-note          : Catatan/keterangan kecil
+*/
+.form-control,
+.form-select,
+.form-nexa-control,
+.ubuntu-form-control,
+.ubuntu-form-select,
+.ubuntu-form-nexa-control{
+	padding: 5px 12px;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--fgColor-default, var(--color-fg-default));
+  vertical-align: middle;
+  background-color: var(--bgColor-default, var(--color-canvas-default));
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  border: 1px solid var(--control-borderColor-rest, var(--color-border-default));
+  border-radius: 6px;
+  box-shadow: var(--shadow-inset, var(--color-primer-shadow-inset));
+  transition: 80ms cubic-bezier(0.33, 1, 0.68, 1);
+  transition-property: color, background-color, box-shadow, border-color;
+}
+
+
+.form-control:focus,
+.form-select:focus,
+.form-nexa-control:focus,
+.ubuntu-form-control:focus,
+.ubuntu-form-select:focus,
+.ubuntu-form-nexa-control:focus{
+	border-color: var(--focus-outlineColor, var(--color-accent-fg));
+  outline: none;
+  box-shadow: inset 0 0 0 1px var(--focus-outlineColor, var(--color-accent-fg));
+}
+
+
+.form-control:focus:not(:focus-visible),
+.form-select:focus:not(:focus-visible),
+.ubuntu-form-control:focus:not(:focus-visible),
+.ubuntu-form-select:focus:not(:focus-visible){
+	border-color: transparent;
+  border-color: var(--focus-outlineColor, var(--color-accent-fg));
+  outline: none;
+  box-shadow: inset 0 0 0 1px transparent;
+}
+
+
+.form-control:focus-visible,
+.form-select:focus-visible,
+.ubuntu-form-control:focus-visible,
+.ubuntu-form-select:focus-visible{
+	border-color: var(--focus-outlineColor, var(--color-accent-fg));
+  outline: none;
+  box-shadow: inset 0 0 0 1px var(--focus-outlineColor, var(--color-accent-fg));
+}
+
+
+.form-control.border-0:focus,
+.form-control.border-0:focus-visible,
+.form-select.border-0:focus,
+.form-select.border-0:focus-visible,
+.ubuntu-form-control.ubuntu-border-0:focus,
+.ubuntu-form-control.ubuntu-border-0:focus-visible,
+.ubuntu-form-select.ubuntu-border-0:focus,
+.ubuntu-form-select.ubuntu-border-0:focus-visible{
+	border: 1px solid var(--borderColor-accent-emphasis, var(--color-accent-fg)) !important;
+}
+
+
+.form-control[disabled],
+fieldset[disabled] .form-control,
+.form-select[disabled],
+fieldset[disabled] .form-select,
+.ubuntu-form-control[disabled],
+fieldset[disabled] .ubuntu-form-control,
+.ubuntu-form-select[disabled],
+fieldset[disabled] .ubuntu-form-select{
+	color: var(--control-fgColor-disabled, var(--color-primer-fg-disabled));
+  background-color: var(--control-bgColor-disabled, var(--color-input-disabled-bg));
+  border-color: var(--control-borderColor-disabled, var(--color-border-default));
+  -webkit-text-fill-color: var(--control-fgColor-disabled, var(--color-primer-fg-disabled));
+  opacity: 1;
+}
+
+
+.form-control[disabled]::placeholder,
+fieldset[disabled] .form-control::placeholder,
+.form-select[disabled]::placeholder,
+fieldset[disabled] .form-select::placeholder,
+.ubuntu-form-control[disabled]::placeholder,
+fieldset[disabled] .ubuntu-form-control::placeholder,
+.ubuntu-form-select[disabled]::placeholder,
+fieldset[disabled] .ubuntu-form-select::placeholder{
+	color: var(--control-fgColor-disabled, var(--color-primer-fg-disabled));
+}
+
+
+@supports (-webkit-touch-callout: none){
+
+  .form-control,
+.form-select,
+.ubuntu-form-control,
+.ubuntu-form-select{
+	font-size: 16px;
+}
+
+
+  @media (min-width: 768px){
+
+    .form-control,
+.form-select,
+.ubuntu-form-control,
+.ubuntu-form-select{
+	font-size: 14px;
+}
+
+
+  }
+
+
+}
+
+
+
+textarea.form-control,
+textarea.ubuntu-form-control{
+	padding-top: var(--base-size-8);
+  padding-bottom: var(--base-size-8);
+  line-height: 1.5;
+}
+
+
+
+.input-contrast,
+.ubuntu-input-contrast{
+	background-color: var(--bgColor-default);
+}
+
+
+.input-contrast:focus,
+.ubuntu-input-contrast:focus{
+	background-color: var(--bgColor-default, var(--color-canvas-default));
+}
+
+
+
+.input-sm,
+.form-nexa-control-sm,
+.ubuntu-input-sm,
+.ubuntu-form-nexa-control-sm{
+	min-height: 28px;
+  padding-top: 3px;
+  padding-bottom: 3px;
+  font-size: 12px;
+  line-height: 20px;
+}
+
+
+
+.input-lg,
+.ubuntu-input-lg{
+	font-size: 16px;
+}
+
+
+
+.input-block,
+.ubuntu-input-block{
+	display: block;
+  width: 100%;
+}
+
+
+
+.input-monospace,
+.ubuntu-input-monospace{
+	font-family: var(--nx-font-mono);
+}
+
+
+
+.input-hide-webkit-autofill::-webkit-contacts-auto-fill-button,
+.ubuntu-input-hide-webkit-autofill::-webkit-contacts-auto-fill-button{
+	position: absolute;
+  right: 0;
+  display: none !important;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+
+
+.form-checkbox,
+.ubuntu-form-checkbox{
+	padding-left: 20px;
+  margin: 15px 0;
+  vertical-align: middle;
+}
+
+
+.form-checkbox label em.highlight,
+.ubuntu-form-checkbox label em.ubuntu-highlight{
+	position: relative;
+  left: calc(var(--base-size-4) * -1);
+  padding: 2px var(--base-size-4);
+  font-style: normal;
+  background: var(--bgColor-attention-muted, var(--color-attention-subtle));
+  border-radius: 6px;
+}
+
+
+.form-checkbox input[type=checkbox],
+.form-checkbox input[type=radio],
+.ubuntu-form-checkbox input[type=checkbox],
+.ubuntu-form-checkbox input[type=radio]{
+	float: left;
+  margin: 5px 0 0 -20px;
+  vertical-align: middle;
+}
+
+
+.form-checkbox .note,
+.ubuntu-form-checkbox .ubuntu-note{
+	display: block;
+  margin: 0;
+  font-size: 12px;
+  font-weight: var(--base-text-weight-normal, 400);
+  color: var(--fgColor-muted, var(--color-fg-muted));
+}
+
+
+
+/* Radio — pola yang sama dengan checkbox (standar migrasi form-nexa / Primer-like) */
+.form-radio,
+.ubuntu-form-radio{
+	padding-left: 20px;
+  margin: 15px 0;
+  vertical-align: middle;
+}
+
+
+.form-radio input[type="radio"],
+.ubuntu-form-radio input[type="radio"]{
+	float: left;
+  margin: 5px 0 0 -20px;
+  vertical-align: middle;
+}
+
+
+.form-radio label,
+.ubuntu-form-radio label{
+	position: static;
+}
+
+
+
+.form-checkbox-details,
+.ubuntu-form-checkbox-details{
+	display: none;
+}
+
+
+
+.form-checkbox-details-trigger:checked ~ * .form-checkbox-details,
+.form-checkbox-details-trigger:checked ~ .form-checkbox-details,
+.ubuntu-form-checkbox-details-trigger:checked ~ * .ubuntu-form-checkbox-details,
+.ubuntu-form-checkbox-details-trigger:checked ~ .ubuntu-form-checkbox-details{
+	display: block;
+}
+
+
+
+.hfields,
+.ubuntu-hfields{
+	margin: 15px 0;
+}
+
+
+.hfields::before,
+.ubuntu-hfields::before{
+	display: table;
+  content: "";
+}
+
+
+.hfields::after,
+.ubuntu-hfields::after{
+	display: table;
+  clear: both;
+  content: "";
+}
+
+
+.hfields .form-group,
+.ubuntu-hfields .ubuntu-form-group{
+	float: left;
+  margin: 0 30px 0 0;
+}
+
+
+.hfields .form-group dt label,
+.hfields .form-group .form-group-header label,
+.ubuntu-hfields .ubuntu-form-group dt label,
+.ubuntu-hfields .ubuntu-form-group .ubuntu-form-group-header label{
+	display: inline-block;
+  margin: 5px 0 0;
+  color: var(--fgColor-muted, var(--color-fg-muted));
+}
+
+
+.hfields .form-group dt img,
+.hfields .form-group .form-group-header img,
+.ubuntu-hfields .ubuntu-form-group dt img,
+.ubuntu-hfields .ubuntu-form-group .ubuntu-form-group-header img{
+	position: relative;
+  top: -2px;
+}
+
+
+.hfields .btn,
+.ubuntu-hfields .ubuntu-btn{
+	float: left;
+  margin: 28px 25px 0 -20px;
+}
+
+
+.hfields .form-select,
+.ubuntu-hfields .ubuntu-form-select{
+	margin-top: 5px;
+}
+
+
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button{
+	margin: 0;
+  appearance: none;
+}
+
+
+
+.form-actions::before,
+.ubuntu-form-actions::before{
+	display: table;
+  content: "";
+}
+
+
+.form-actions::after,
+.ubuntu-form-actions::after{
+	display: table;
+  clear: both;
+  content: "";
+}
+
+
+.form-actions .btn,
+.ubuntu-form-actions .ubuntu-btn{
+	float: right;
+}
+
+
+.form-actions .btn + .btn,
+.ubuntu-form-actions .ubuntu-btn + .ubuntu-btn{
+	margin-right: 5px;
+}
+
+
+
+.form-warning,
+.ubuntu-form-warning{
+	padding: var(--base-size-8) 10px;
+  margin: 10px 0;
+  font-size: 14px;
+  color: var(--fgColor-attention, var(--color-attention-fg));
+  background: var(--bgColor-attention-muted, var(--color-attention-subtle));
+  border: 1px solid var(--borderColor-attention-emphasis, var(--color-attention-emphasis));
+  border-radius: 6px;
+}
+
+
+.form-warning p,
+.ubuntu-form-warning p{
+	margin: 0;
+  line-height: 1.5;
+}
+
+
+.form-warning a,
+.ubuntu-form-warning a{
+	font-weight: var(--base-text-weight-semibold, 600);
+}
+
+
+
+.form-select,
+.ubuntu-form-select{
+	display: inline-block;
+  max-width: 100%;
+  height: 32px;
+  padding-right: var(--base-size-24);
+  background-color: var(--bgColor-default, var(--color-canvas-default));
+  background-image: url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0iIzU4NjA2OSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNNC40MjcgOS40MjdsMy4zOTYgMy4zOTZhLjI1MS4yNTEgMCAwMC4zNTQgMGwzLjM5Ni0zLjM5NkEuMjUuMjUgMCAwMDExLjM5NiA5SDQuNjA0YS4yNS4yNSAwIDAwLS4xNzcuNDI3ek00LjQyMyA2LjQ3TDcuODIgMy4wNzJhLjI1LjI1IDAgMDEuMzU0IDBMMTEuNTcgNi40N2EuMjUuMjUgMCAwMS0uMTc3LjQyN0g0LjZhLjI1LjI1IDAgMDEtLjE3Ny0uNDI3eiIgLz48L3N2Zz4=");
+  background-repeat: no-repeat;
+  background-position: right 4px center;
+  background-size: 16px;
+  appearance: none;
+}
+
+
+.form-select::-ms-expand,
+.ubuntu-form-select::-ms-expand{
+	opacity: 0;
+}
+
+
+.form-select[multiple],
+.ubuntu-form-select[multiple]{
+	height: auto;
+}
+
+
+
+[data-color-mode=light][data-light-theme*=dark] .form-select,
+[data-color-mode=dark][data-dark-theme*=dark] .form-select,
+[data-color-mode=light][data-light-theme*=dark] .ubuntu-form-select,
+[data-color-mode=dark][data-dark-theme*=dark] .ubuntu-form-select{
+	background-image: url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0iIzZlNzY4MSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNNC40MjcgOS40MjdsMy4zOTYgMy4zOTZhLjI1MS4yNTEgMCAwMC4zNTQgMGwzLjM5Ni0zLjM5NkEuMjUuMjUgMCAwMDExLjM5NiA5SDQuNjA0YS4yNS4yNSAwIDAwLS4xNzcuNDI3ek00LjQyMyA2LjQ3TDcuODIgMy4wNzJhLjI1LjI1IDAgMDEuMzU0IDBMMTEuNTcgNi40N2EuMjUuMjUgMCAwMS0uMTc3LjQyN0g0LjZhLjI1LjI1IDAgMDEtLjE3Ny0uNDI3eiIgLz48L3N2Zz4=");
+}
+
+
+
+@media (prefers-color-scheme: light){
+
+  [data-color-mode=auto][data-light-theme*=dark] .form-select,
+[data-color-mode=auto][data-light-theme*=dark] .ubuntu-form-select{
+	background-image: url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0iIzZlNzY4MSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNNC40MjcgOS40MjdsMy4zOTYgMy4zOTZhLjI1MS4yNTEgMCAwMC4zNTQgMGwzLjM5Ni0zLjM5NkEuMjUuMjUgMCAwMDExLjM5NiA5SDQuNjA0YS4yNS4yNSAwIDAwLS4xNzcuNDI3ek00LjQyMyA2LjQ3TDcuODIgMy4wNzJhLjI1LjI1IDAgMDEuMzU0IDBMMTEuNTcgNi40N2EuMjUuMjUgMCAwMS0uMTc3LjQyN0g0LjZhLjI1LjI1IDAgMDEtLjE3Ny0uNDI3eiIgLz48L3N2Zz4=");
+}
+
+
+}
+
+
+@media (prefers-color-scheme: dark){
+
+  [data-color-mode=auto][data-dark-theme*=dark] .form-select,
+[data-color-mode=auto][data-dark-theme*=dark] .ubuntu-form-select{
+	background-image: url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0iIzZlNzY4MSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNNC40MjcgOS40MjdsMy4zOTYgMy4zOTZhLjI1MS4yNTEgMCAwMC4zNTQgMGwzLjM5Ni0zLjM5NkEuMjUuMjUgMCAwMDExLjM5NiA5SDQuNjA0YS4yNS4yNSAwIDAwLS4xNzcuNDI3ek00LjQyMyA2LjQ3TDcuODIgMy4wNzJhLjI1LjI1IDAgMDEuMzU0IDBMMTEuNTcgNi40N2EuMjUuMjUgMCAwMS0uMTc3LjQyN0g0LjZhLjI1LjI1IDAgMDEtLjE3Ny0uNDI3eiIgLz48L3N2Zz4=");
+}
+
+
+}
+
+
+.select-sm,
+.ubuntu-select-sm{
+	height: 28px;
+  padding-top: 3px;
+  padding-bottom: 3px;
+  font-size: 12px;
+}
+
+
+.select-sm[multiple],
+.ubuntu-select-sm[multiple]{
+	height: auto;
+  min-height: 0;
+}
+
+
+
+.form-group,
+.ubuntu-form-group{
+	margin: 3px 0;
+  position: relative;
+}
+
+
+.form-group .form-control.autocomplete-embedded-icon-wrap:focus-within,
+.ubuntu-form-group .ubuntu-form-control.ubuntu-autocomplete-embedded-icon-wrap:focus-within{
+	background-color: var(--bgColor-default, var(--color-canvas-default));
+}
+
+
+.form-group .form-control,
+.ubuntu-form-group .ubuntu-form-control{
+	width: 440px;
+  max-width: 100%;
+  margin-right: 5px;
+  background-color: var(--bgColor-muted, var(--color-canvas-inset));
+}
+
+
+.form-group .form-control:focus,
+.ubuntu-form-group .ubuntu-form-control:focus{
+	background-color: var(--bgColor-default, var(--color-canvas-default));
+}
+
+
+.form-group .form-control.shorter,
+.ubuntu-form-group .ubuntu-form-control.ubuntu-shorter{
+	width: 130px;
+}
+
+
+.form-group .form-control.short,
+.ubuntu-form-group .ubuntu-form-control.ubuntu-short{
+	width: 250px;
+}
+
+
+.form-group .form-control.input-block,
+.form-group .form-control.long,
+.ubuntu-form-group .ubuntu-form-control.ubuntu-input-block,
+.ubuntu-form-group .ubuntu-form-control.ubuntu-long{
+	width: 100%;
+}
+
+
+.form-group textarea.form-control,
+.ubuntu-form-group textarea.ubuntu-form-control{
+	width: 100%;
+  height: 200px;
+  min-height: 200px;
+}
+
+
+.form-group textarea.form-control.short,
+.ubuntu-form-group textarea.ubuntu-form-control.ubuntu-short{
+	height: 50px;
+  min-height: 50px;
+}
+
+
+.form-group dt,
+.form-group .form-group-header,
+.ubuntu-form-group dt,
+.ubuntu-form-group .ubuntu-form-group-header{
+	margin: 0 0 6px;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+
+.form-group .form-group-header .error,
+.ubuntu-form-group .ubuntu-form-group-header .ubuntu-error{
+	font-size: 11px;
+  font-weight: 400;
+  color: var(--fgColor-danger, #cf222e);
+  display: none;
+}
+
+
+.form-group label,
+.ubuntu-form-group label{
+	position: static;
+}
+
+
+
+/* Label icons: dukung Octicon, Font Awesome, dan Material Icons */
+.form-label-icon,
+.form-group .form-group-header label .octicon,
+.form-group .form-group-header label .fa,
+.form-group .form-group-header label .fas,
+.form-group .form-group-header label .far,
+.form-group .form-group-header label .fab,
+.form-group .form-group-header label .material-icons,
+.form-group .form-group-header label .material-icons-outlined,
+.form-group .form-group-header label .material-icons-round,
+.form-group .form-group-header label .material-symbols-outlined,
+.form-group .form-group-header label .material-symbols-rounded,
+.form-group dt label .octicon,
+.form-group dt label .fa,
+.form-group dt label .fas,
+.form-group dt label .far,
+.form-group dt label .fab,
+.form-group dt label .material-icons,
+.form-group dt label .material-icons-outlined,
+.form-group dt label .material-icons-round,
+.form-group dt label .material-symbols-outlined,
+.form-group dt label .material-symbols-rounded,
+.ubuntu-form-label-icon,
+.ubuntu-form-group .ubuntu-form-group-header label .ubuntu-octicon,
+.ubuntu-form-group .ubuntu-form-group-header label .ubuntu-fa,
+.ubuntu-form-group .ubuntu-form-group-header label .ubuntu-fas,
+.ubuntu-form-group .ubuntu-form-group-header label .ubuntu-far,
+.ubuntu-form-group .ubuntu-form-group-header label .ubuntu-fab,
+.ubuntu-form-group .ubuntu-form-group-header label .ubuntu-material-icons,
+.ubuntu-form-group .ubuntu-form-group-header label .ubuntu-material-icons-outlined,
+.ubuntu-form-group .ubuntu-form-group-header label .ubuntu-material-icons-round,
+.ubuntu-form-group .ubuntu-form-group-header label .ubuntu-material-symbols-outlined,
+.ubuntu-form-group .ubuntu-form-group-header label .ubuntu-material-symbols-rounded,
+.ubuntu-form-group dt label .ubuntu-octicon,
+.ubuntu-form-group dt label .ubuntu-fa,
+.ubuntu-form-group dt label .ubuntu-fas,
+.ubuntu-form-group dt label .ubuntu-far,
+.ubuntu-form-group dt label .ubuntu-fab,
+.ubuntu-form-group dt label .ubuntu-material-icons,
+.ubuntu-form-group dt label .ubuntu-material-icons-outlined,
+.ubuntu-form-group dt label .ubuntu-material-icons-round,
+.ubuntu-form-group dt label .ubuntu-material-symbols-outlined,
+.ubuntu-form-group dt label .ubuntu-material-symbols-rounded{
+	margin-right: 6px;
+  color: inherit;
+  vertical-align: text-bottom;
+  flex: 0 0 auto;
+}
+
+
+
+.form-group .form-group-header label .fa,
+.form-group .form-group-header label .fas,
+.form-group .form-group-header label .far,
+.form-group .form-group-header label .fab,
+.form-group dt label .fa,
+.form-group dt label .fas,
+.form-group dt label .far,
+.form-group dt label .fab,
+.ubuntu-form-group .ubuntu-form-group-header label .ubuntu-fa,
+.ubuntu-form-group .ubuntu-form-group-header label .ubuntu-fas,
+.ubuntu-form-group .ubuntu-form-group-header label .ubuntu-far,
+.ubuntu-form-group .ubuntu-form-group-header label .ubuntu-fab,
+.ubuntu-form-group dt label .ubuntu-fa,
+.ubuntu-form-group dt label .ubuntu-fas,
+.ubuntu-form-group dt label .ubuntu-far,
+.ubuntu-form-group dt label .ubuntu-fab{
+	font-size: 14px;
+  line-height: 1;
+}
+
+
+
+.form-group .form-group-header label .material-icons,
+.form-group .form-group-header label .material-icons-outlined,
+.form-group .form-group-header label .material-icons-round,
+.form-group .form-group-header label .material-symbols-outlined,
+.form-group .form-group-header label .material-symbols-rounded,
+.form-group dt label .material-icons,
+.form-group dt label .material-icons-outlined,
+.form-group dt label .material-icons-round,
+.form-group dt label .material-symbols-outlined,
+.form-group dt label .material-symbols-rounded,
+.ubuntu-form-group .ubuntu-form-group-header label .ubuntu-material-icons,
+.ubuntu-form-group .ubuntu-form-group-header label .ubuntu-material-icons-outlined,
+.ubuntu-form-group .ubuntu-form-group-header label .ubuntu-material-icons-round,
+.ubuntu-form-group .ubuntu-form-group-header label .ubuntu-material-symbols-outlined,
+.ubuntu-form-group .ubuntu-form-group-header label .ubuntu-material-symbols-rounded,
+.ubuntu-form-group dt label .ubuntu-material-icons,
+.ubuntu-form-group dt label .ubuntu-material-icons-outlined,
+.ubuntu-form-group dt label .ubuntu-material-icons-round,
+.ubuntu-form-group dt label .ubuntu-material-symbols-outlined,
+.ubuntu-form-group dt label .ubuntu-material-symbols-rounded{
+	font-size: 16px;
+  line-height: 1;
+}
+
+
+.form-group.flattened dt,
+.form-group.flattened .form-group-header,
+.ubuntu-form-group.ubuntu-flattened dt,
+.ubuntu-form-group.ubuntu-flattened .ubuntu-form-group-header{
+	float: left;
+  margin: 0;
+  line-height: 32px;
+}
+
+
+.form-group.flattened dd,
+.form-group.flattened .form-group-body,
+.ubuntu-form-group.ubuntu-flattened dd,
+.ubuntu-form-group.ubuntu-flattened .ubuntu-form-group-body{
+	line-height: 32px;
+}
+
+
+.form-group dd h4,
+.form-group .form-group-body h4,
+.ubuntu-form-group dd h4,
+.ubuntu-form-group .ubuntu-form-group-body h4{
+	margin: var(--base-size-4) 0 0;
+}
+
+
+.form-group dd h4.is-error,
+.form-group .form-group-body h4.is-error,
+.ubuntu-form-group dd h4.ubuntu-is-error,
+.ubuntu-form-group .ubuntu-form-group-body h4.ubuntu-is-error{
+	color: var(--fgColor-danger, var(--color-danger-fg));
+}
+
+
+.form-group dd h4.is-success,
+.form-group .form-group-body h4.is-success,
+.ubuntu-form-group dd h4.ubuntu-is-success,
+.ubuntu-form-group .ubuntu-form-group-body h4.ubuntu-is-success{
+	color: var(--fgColor-success, var(--color-success-fg));
+}
+
+
+.form-group dd h4 + .note,
+.form-group .form-group-body h4 + .note,
+.ubuntu-form-group dd h4 + .ubuntu-note,
+.ubuntu-form-group .ubuntu-form-group-body h4 + .ubuntu-note{
+	margin-top: 0;
+}
+
+
+.form-group.required dt label::after,
+.form-group.required .form-group-header label::after,
+.ubuntu-form-group.ubuntu-required dt label::after,
+.ubuntu-form-group.ubuntu-required .ubuntu-form-group-header label::after{
+	padding-left: 5px;
+  color: var(--fgColor-danger, var(--color-danger-fg));
+  content: "*";
+}
+
+
+.form-group .success,
+.form-group .error,
+.form-group .indicator,
+.ubuntu-form-group .ubuntu-success,
+.ubuntu-form-group .ubuntu-error,
+.ubuntu-form-group .ubuntu-indicator{
+	display: none;
+  font-size: 12px;
+  font-weight: var(--base-text-weight-semibold, 600);
+}
+
+
+.form-group.loading,
+.ubuntu-form-group.ubuntu-loading{
+	opacity: 0.5;
+}
+
+
+.form-group.loading .indicator,
+.ubuntu-form-group.ubuntu-loading .ubuntu-indicator{
+	display: inline;
+}
+
+
+.form-group.loading .spinner,
+.ubuntu-form-group.ubuntu-loading .ubuntu-spinner{
+	display: inline-block;
+  vertical-align: middle;
+}
+
+
+.form-group.successful .success,
+.ubuntu-form-group.ubuntu-successful .ubuntu-success{
+	display: inline;
+  color: var(--fgColor-success, var(--color-success-fg));
+}
+
+
+.form-group.successed .success,
+.form-group.successed .warning,
+.form-group.successed .error,
+.form-group.warn .success,
+.form-group.warn .warning,
+.form-group.warn .error,
+.form-group.errored .success,
+.form-group.errored .warning,
+.form-group.errored .error,
+.ubuntu-form-group.ubuntu-successed .ubuntu-success,
+.ubuntu-form-group.ubuntu-successed .ubuntu-warning,
+.ubuntu-form-group.ubuntu-successed .ubuntu-error,
+.ubuntu-form-group.ubuntu-warn .ubuntu-success,
+.ubuntu-form-group.ubuntu-warn .ubuntu-warning,
+.ubuntu-form-group.ubuntu-warn .ubuntu-error,
+.ubuntu-form-group.ubuntu-errored .ubuntu-success,
+.ubuntu-form-group.ubuntu-errored .ubuntu-warning,
+.ubuntu-form-group.ubuntu-errored .ubuntu-error{
+	position: absolute;
+  z-index: 10;
+  display: block;
+  max-width: 450px;
+  padding: var(--base-size-4) var(--base-size-8);
+  margin: var(--base-size-8) 0 0;
+  font-size: 12px;
+  font-weight: var(--base-text-weight-normal, 400);
+  border-style: solid;
+  border-width: 1px;
+  border-radius: 6px;
+}
+
+
+.form-group.successed .success::after,
+.form-group.successed .success::before,
+.form-group.successed .warning::after,
+.form-group.successed .warning::before,
+.form-group.successed .error::after,
+.form-group.successed .error::before,
+.form-group.warn .success::after,
+.form-group.warn .success::before,
+.form-group.warn .warning::after,
+.form-group.warn .warning::before,
+.form-group.warn .error::after,
+.form-group.warn .error::before,
+.form-group.errored .success::after,
+.form-group.errored .success::before,
+.form-group.errored .warning::after,
+.form-group.errored .warning::before,
+.form-group.errored .error::after,
+.form-group.errored .error::before,
+.ubuntu-form-group.ubuntu-successed .ubuntu-success::after,
+.ubuntu-form-group.ubuntu-successed .ubuntu-success::before,
+.ubuntu-form-group.ubuntu-successed .ubuntu-warning::after,
+.ubuntu-form-group.ubuntu-successed .ubuntu-warning::before,
+.ubuntu-form-group.ubuntu-successed .ubuntu-error::after,
+.ubuntu-form-group.ubuntu-successed .ubuntu-error::before,
+.ubuntu-form-group.ubuntu-warn .ubuntu-success::after,
+.ubuntu-form-group.ubuntu-warn .ubuntu-success::before,
+.ubuntu-form-group.ubuntu-warn .ubuntu-warning::after,
+.ubuntu-form-group.ubuntu-warn .ubuntu-warning::before,
+.ubuntu-form-group.ubuntu-warn .ubuntu-error::after,
+.ubuntu-form-group.ubuntu-warn .ubuntu-error::before,
+.ubuntu-form-group.ubuntu-errored .ubuntu-success::after,
+.ubuntu-form-group.ubuntu-errored .ubuntu-success::before,
+.ubuntu-form-group.ubuntu-errored .ubuntu-warning::after,
+.ubuntu-form-group.ubuntu-errored .ubuntu-warning::before,
+.ubuntu-form-group.ubuntu-errored .ubuntu-error::after,
+.ubuntu-form-group.ubuntu-errored .ubuntu-error::before{
+	position: absolute;
+  bottom: 100%;
+  left: 10px;
+  z-index: 15;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  content: " ";
+  border: solid transparent;
+}
+
+
+.form-group.successed .success::after,
+.form-group.successed .warning::after,
+.form-group.successed .error::after,
+.form-group.warn .success::after,
+.form-group.warn .warning::after,
+.form-group.warn .error::after,
+.form-group.errored .success::after,
+.form-group.errored .warning::after,
+.form-group.errored .error::after,
+.ubuntu-form-group.ubuntu-successed .ubuntu-success::after,
+.ubuntu-form-group.ubuntu-successed .ubuntu-warning::after,
+.ubuntu-form-group.ubuntu-successed .ubuntu-error::after,
+.ubuntu-form-group.ubuntu-warn .ubuntu-success::after,
+.ubuntu-form-group.ubuntu-warn .ubuntu-warning::after,
+.ubuntu-form-group.ubuntu-warn .ubuntu-error::after,
+.ubuntu-form-group.ubuntu-errored .ubuntu-success::after,
+.ubuntu-form-group.ubuntu-errored .ubuntu-warning::after,
+.ubuntu-form-group.ubuntu-errored .ubuntu-error::after{
+	border-width: 5px;
+}
+
+
+.form-group.successed .success::before,
+.form-group.successed .warning::before,
+.form-group.successed .error::before,
+.form-group.warn .success::before,
+.form-group.warn .warning::before,
+.form-group.warn .error::before,
+.form-group.errored .success::before,
+.form-group.errored .warning::before,
+.form-group.errored .error::before,
+.ubuntu-form-group.ubuntu-successed .ubuntu-success::before,
+.ubuntu-form-group.ubuntu-successed .ubuntu-warning::before,
+.ubuntu-form-group.ubuntu-successed .ubuntu-error::before,
+.ubuntu-form-group.ubuntu-warn .ubuntu-success::before,
+.ubuntu-form-group.ubuntu-warn .ubuntu-warning::before,
+.ubuntu-form-group.ubuntu-warn .ubuntu-error::before,
+.ubuntu-form-group.ubuntu-errored .ubuntu-success::before,
+.ubuntu-form-group.ubuntu-errored .ubuntu-warning::before,
+.ubuntu-form-group.ubuntu-errored .ubuntu-error::before{
+	margin-left: -1px;
+  border-width: 6px;
+}
+
+
+.form-group.successed .success,
+.ubuntu-form-group.ubuntu-successed .ubuntu-success{
+	color: var(--fgColor-default, var(--color-fg-default));
+  background-color: var(--bgColor-default, var(--color-canvas-default));
+  background-image: linear-gradient(var(--bgColor-success-muted, var(--bgColor-success-muted, var(--color-success-subtle))), var(--color-success-subtle));
+  border-color: var(--borderColor-success-muted, var(--color-success-muted));
+}
+
+
+.form-group.successed .success::after,
+.ubuntu-form-group.ubuntu-successed .ubuntu-success::after{
+	border-bottom-color: var(--borderColor-success-muted, var(--color-success-muted));
+}
+
+
+.form-group.successed .success::before,
+.ubuntu-form-group.ubuntu-successed .ubuntu-success::before{
+	border-bottom-color: var(--borderColor-success-muted, var(--color-success-muted));
+}
+
+
+.form-group.warn .form-control:not(:focus,
+:focus-visible),
+.ubuntu-form-group.ubuntu-warn .ubuntu-form-control:not(:focus,
+:focus-visible){
+	border-color: var(--borderColor-attention-emphasis, var(--color-attention-emphasis));
+}
+
+
+.form-group.warn .warning,
+.ubuntu-form-group.ubuntu-warn .ubuntu-warning{
+	color: var(--fgColor-default, var(--color-fg-default));
+  background-color: var(--bgColor-default, var(--color-canvas-default));
+  background-image: linear-gradient(var(--bgColor-attention-muted, var(--bgColor-attention-muted, var(--color-attention-subtle))), var(--color-attention-subtle));
+  border-color: var(--borderColor-attention-muted, var(--color-attention-muted));
+}
+
+
+.form-group.warn .warning::after,
+.ubuntu-form-group.ubuntu-warn .ubuntu-warning::after{
+	border-bottom-color: var(--borderColor-attention-muted, var(--color-attention-muted));
+}
+
+
+.form-group.warn .warning::before,
+.ubuntu-form-group.ubuntu-warn .ubuntu-warning::before{
+	border-bottom-color: var(--borderColor-attention-muted, var(--color-attention-muted));
+}
+
+
+.form-group.errored .form-control:not(:focus,
+:focus-visible),
+.ubuntu-form-group.ubuntu-errored .ubuntu-form-control:not(:focus,
+:focus-visible){
+	border-color: var(--borderColor-danger-emphasis, var(--color-danger-emphasis));
+}
+
+
+.form-group.errored label,
+.ubuntu-form-group.ubuntu-errored label{
+	color: var(--fgColor-danger, var(--color-danger-fg));
+}
+
+
+.form-group.errored .error,
+.ubuntu-form-group.ubuntu-errored .ubuntu-error{
+	color: var(--fgColor-default, var(--color-fg-default));
+  background-color: var(--bgColor-default, var(--color-canvas-default));
+  background-image: linear-gradient(var(--bgColor-danger-muted, var(--bgColor-danger-muted, var(--color-danger-subtle))), var(--color-danger-subtle));
+  border-color: var(--borderColor-danger-muted, var(--color-danger-muted));
+}
+
+
+.form-group.errored .error::after,
+.ubuntu-form-group.ubuntu-errored .ubuntu-error::after{
+	border-bottom-color: var(--borderColor-danger-muted, var(--color-danger-muted));
+}
+
+
+.form-group.errored .error::before,
+.ubuntu-form-group.ubuntu-errored .ubuntu-error::before{
+	border-bottom-color: var(--borderColor-danger-muted, var(--color-danger-muted));
+}
+
+
+
+.note,
+.ubuntu-note{
+	min-height: 17px;
+  margin: var(--base-size-4) 0 2px;
+  font-size: 12px;
+  color: var(--fgColor-muted, var(--color-fg-muted));
+}
+
+
+.note .spinner,
+.ubuntu-note .ubuntu-spinner{
+	margin-right: 3px;
+  vertical-align: middle;
+}
+
+
+
+/* Icon overlaid inside input — flex + absolute untuk vertical centering presisi */
+.form-nexa-icon,
+.ubuntu-form-nexa-icon{
+	position: relative;
+  display: flex;
+  align-items: center;
+}
+
+
+.form-nexa-icon > i,
+.form-nexa-icon > span.material-symbols-outlined,
+.form-nexa-icon > span.material-icons,
+.form-nexa-icon > span.octicon,
+.ubuntu-form-nexa-icon > i,
+.ubuntu-form-nexa-icon > span.ubuntu-material-symbols-outlined,
+.ubuntu-form-nexa-icon > span.ubuntu-material-icons,
+.ubuntu-form-nexa-icon > span.ubuntu-octicon{
+	position: absolute;
+  left: 0.5rem;
+  z-index: 2;
+  pointer-events: none;
+  color: currentColor;
+  font-size: 1rem;
+  line-height: 1;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+
+.form-nexa-icon > input,
+.form-nexa-icon > textarea,
+.ubuntu-form-nexa-icon > input,
+.ubuntu-form-nexa-icon > textarea{
+	padding-left: 2rem !important;
+  width: 100%;
+}
+
+
+.form-nexa-icon--right > i,
+.form-nexa-icon--right > span.material-symbols-outlined,
+.form-nexa-icon--right > span.material-icons,
+.form-nexa-icon--right > span.octicon,
+.ubuntu-form-nexa-icon--right > i,
+.ubuntu-form-nexa-icon--right > span.ubuntu-material-symbols-outlined,
+.ubuntu-form-nexa-icon--right > span.ubuntu-material-icons,
+.ubuntu-form-nexa-icon--right > span.ubuntu-octicon{
+	left: auto;
+  right: 0.5rem;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+
+.form-nexa-icon--right > input,
+.form-nexa-icon--right > textarea,
+.ubuntu-form-nexa-icon--right > input,
+.ubuntu-form-nexa-icon--right > textarea{
+	padding-left: var(--control-medium-paddingInline-normal, 0.75rem) !important;
+  padding-right: 2rem !important;
+}
+
+
+
+/* Slider — selaras token aksen */
+input[type="range"].form-range,
+input[type="range"].ubuntu-form-range{
+	display: block;
+  width: 100%;
+  max-width: 100%;
+  height: 1.5rem;
+  margin: 4px 0;
+  accent-color: var(--focus-outlineColor, var(--color-accent-fg));
+  cursor: pointer;
+}
+
+
+
+.input-group,
+.ubuntu-input-group{
+	display: table;
+}
+
+
+.input-group .form-control,
+.ubuntu-input-group .ubuntu-form-control{
+	position: relative;
+  width: 100%;
+}
+
+
+.input-group .form-control:focus,
+.ubuntu-input-group .ubuntu-form-control:focus{
+	z-index: 2;
+}
+
+
+.input-group .form-control + .btn,
+.ubuntu-input-group .ubuntu-form-control + .ubuntu-btn{
+	margin-left: 0;
+}
+
+
+.input-group.inline,
+.ubuntu-input-group.ubuntu-inline{
+	display: inline-table;
+}
+
+
+.input-group:focus-within button,
+.ubuntu-input-group:focus-within button{
+	outline-offset: 0;
+}
+
+
+.input-group .form-control.autocomplete-embedded-icon-wrap,
+.ubuntu-input-group .ubuntu-form-control.ubuntu-autocomplete-embedded-icon-wrap{
+	display: inline-flex;
+  padding: calc(var(--base-size-4) * 1.25) var(--base-size-8);
+}
+
+
+
+.input-group .form-control,
+.input-group-button,
+.ubuntu-input-group .ubuntu-form-control,
+.ubuntu-input-group-button{
+	display: table-cell;
+}
+
+
+
+.input-group-button,
+.ubuntu-input-group-button{
+	width: 1%;
+  vertical-align: middle;
+}
+
+
+
+.input-group-button--autocomplete-embedded-icon,
+.ubuntu-input-group-button--autocomplete-embedded-icon{
+	vertical-align: bottom;
+}
+
+
+
+.input-group .form-control:first-child,
+.input-group-button:first-child .btn,
+.ubuntu-input-group .ubuntu-form-control:first-child,
+.ubuntu-input-group-button:first-child .ubuntu-btn{
+	border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+
+
+.input-group .form-control:first-child,
+.input-group-button:first-child .btn:not(.btn-primary),
+.ubuntu-input-group .ubuntu-form-control:first-child,
+.ubuntu-input-group-button:first-child .ubuntu-btn:not(.ubuntu-btn-primary){
+	border-color: var(--control-borderColor-rest, var(--color-border-default));
+}
+
+
+
+.input-group-button:first-child .btn,
+.ubuntu-input-group-button:first-child .ubuntu-btn{
+	margin-right: -1px;
+}
+
+
+
+.input-group .form-control:last-child,
+.input-group-button:last-child .btn,
+.ubuntu-input-group .ubuntu-form-control:last-child,
+.ubuntu-input-group-button:last-child .ubuntu-btn{
+	border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+
+
+.input-group .form-control:last-child,
+.input-group-button:last-child .btn:not(.btn-primary),
+.ubuntu-input-group .ubuntu-form-control:last-child,
+.ubuntu-input-group-button:last-child .ubuntu-btn:not(.ubuntu-btn-primary){
+	border-color: var(--control-borderColor-rest, var(--color-border-default));
+}
+
+
+
+.input-group-button:last-child .btn,
+.ubuntu-input-group-button:last-child .ubuntu-btn{
+	margin-left: -1px;
+}
+
+
+
+/* Multi button-group berturutan (2+ .input-group-button dalam satu
+   .input-group, mis. showcase "Input + Multi-Icon Button": input lalu
+   tombol Branch lalu tombol Settings) — rule :first-child/:last-child di
+   atas HANYA pernah match kalau .input-group-button itu sendiri jadi anak
+   pertama/terakhir dari .input-group. Begitu ada 2+ .input-group-button,
+   button "tengah" (mis. Branch — bukan first-child karena <input> duluan,
+   bukan last-child karena masih ada Settings sesudahnya) tidak dapat
+   radius-nol atau margin overlap dari rule manapun di atas, sehingga
+   tampak sebagai tombol terpisah dengan celah, bukan menyatu dengan
+   input & tombol lain. Rule generik :not(:first-child)/:not(:last-child)
+   ini melengkapi SEMUA .input-group-button (termasuk yang sudah dicover
+   :first-child/:last-child di atas — properti yang sama, tidak konflik)
+   berdasar posisinya, bukan berdasar tipe sibling sebelumnya. */
+.input-group-button:not(:first-child) .btn,
+.ubuntu-input-group-button:not(:first-child) .ubuntu-btn{
+	margin-left: -1px;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+.input-group-button:not(:last-child) .btn,
+.ubuntu-input-group-button:not(:last-child) .ubuntu-btn{
+	border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+
+
+/* Icon di tombol input-group: jangan ikut spacing ikon label */
+.input-group-button .btn .form-label-icon,
+.input-group-button .btn .octicon,
+.input-group-button .btn [class*="icon-ic_fluent_"],
+.input-group-button .btn .fa,
+.input-group-button .btn .fas,
+.input-group-button .btn .far,
+.input-group-button .btn .fab,
+.input-group-button .btn .material-icons,
+.input-group-button .btn .material-icons-outlined,
+.input-group-button .btn .material-icons-round,
+.input-group-button .btn .material-symbols-outlined,
+.input-group-button .btn .material-symbols-rounded,
+.ubuntu-input-group-button .ubuntu-btn .ubuntu-form-label-icon,
+.ubuntu-input-group-button .ubuntu-btn .ubuntu-octicon,
+.ubuntu-input-group-button .ubuntu-btn [class*="icon-ic_fluent_"],
+.ubuntu-input-group-button .ubuntu-btn .ubuntu-fa,
+.ubuntu-input-group-button .ubuntu-btn .ubuntu-fas,
+.ubuntu-input-group-button .ubuntu-btn .ubuntu-far,
+.ubuntu-input-group-button .ubuntu-btn .ubuntu-fab,
+.ubuntu-input-group-button .ubuntu-btn .ubuntu-material-icons,
+.ubuntu-input-group-button .ubuntu-btn .ubuntu-material-icons-outlined,
+.ubuntu-input-group-button .ubuntu-btn .ubuntu-material-icons-round,
+.ubuntu-input-group-button .ubuntu-btn .ubuntu-material-symbols-outlined,
+.ubuntu-input-group-button .ubuntu-btn .ubuntu-material-symbols-rounded{
+	margin-right: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  line-height: 1;
+}
+
+
+
+.input-group-button .btn .fa,
+.input-group-button .btn .fas,
+.input-group-button .btn .far,
+.input-group-button .btn .fab,
+.ubuntu-input-group-button .ubuntu-btn .ubuntu-fa,
+.ubuntu-input-group-button .ubuntu-btn .ubuntu-fas,
+.ubuntu-input-group-button .ubuntu-btn .ubuntu-far,
+.ubuntu-input-group-button .ubuntu-btn .ubuntu-fab{
+	font-size: 14px;
+  width: 14px;
+  height: 14px;
+}
+
+
+
+.input-group-button .btn .material-icons,
+.input-group-button .btn .material-icons-outlined,
+.input-group-button .btn .material-icons-round,
+.input-group-button .btn .material-symbols-outlined,
+.input-group-button .btn .material-symbols-rounded,
+.ubuntu-input-group-button .ubuntu-btn .ubuntu-material-icons,
+.ubuntu-input-group-button .ubuntu-btn .ubuntu-material-icons-outlined,
+.ubuntu-input-group-button .ubuntu-btn .ubuntu-material-icons-round,
+.ubuntu-input-group-button .ubuntu-btn .ubuntu-material-symbols-outlined,
+.ubuntu-input-group-button .ubuntu-btn .ubuntu-material-symbols-rounded{
+	font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+
+
+.input-group-button .btn .material-symbols-outlined,
+.input-group-button .btn .material-symbols-rounded,
+.ubuntu-input-group-button .ubuntu-btn .ubuntu-material-symbols-outlined,
+.ubuntu-input-group-button .ubuntu-btn .ubuntu-material-symbols-rounded{
+	font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 20;
+}
+
+
+
+.radio-group::before,
+.ubuntu-radio-group::before{
+	display: table;
+  content: "";
+}
+
+
+.radio-group::after,
+.ubuntu-radio-group::after{
+	display: table;
+  clear: both;
+  content: "";
+}
+
+
+
+.radio-label,
+.ubuntu-radio-label{
+	float: left;
+  padding: 6px var(--base-size-16) 6px calc(var(--base-size-16) + 12px + var(--base-size-8));
+  margin-left: -1px;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--fgColor-default, var(--color-fg-default));
+  cursor: pointer;
+  border: 1px solid var(--borderColor-default, var(--color-border-default));
+}
+
+
+:checked + .radio-label,
+:checked + .ubuntu-radio-label{
+	position: relative;
+  z-index: 1;
+  border-color: var(--borderColor-accent-emphasis, var(--color-accent-emphasis));
+}
+
+
+.radio-label:first-of-type,
+.ubuntu-radio-label:first-of-type{
+	margin-left: 0;
+  border-top-left-radius: 6px;
+  border-bottom-left-radius: 6px;
+}
+
+
+.radio-label:last-of-type,
+.ubuntu-radio-label:last-of-type{
+	border-top-right-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
+
+
+.radio-label .octicon,
+.ubuntu-radio-label .ubuntu-octicon{
+	margin-left: var(--base-size-4);
+  color: var(--fgColor-muted, var(--color-fg-subtle));
+}
+
+
+
+.radio-input,
+.ubuntu-radio-input{
+	z-index: 3;
+  float: left;
+  margin: 10px calc(var(--base-size-32) * -1) 0 var(--base-size-16);
+}
+
+
+.radio-input:disabled,
+.ubuntu-radio-input:disabled{
+	position: relative;
+}
+
+
+.radio-input:disabled + .radio-label,
+.ubuntu-radio-input:disabled + .ubuntu-radio-label{
+	color: var(--fgColor-disabled, var(--color-primer-fg-disabled));
+  cursor: default;
+  background-color: var(--bgColor-neutral-muted, var(--color-neutral-subtle));
+}
+
+
+.radio-input:disabled + .radio-label .octicon,
+.ubuntu-radio-input:disabled + .ubuntu-radio-label .ubuntu-octicon{
+	color: inherit;
+}
+
+
+
+  .file-upload-area,
+.ubuntu-file-upload-area{
+	display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      padding: 24px 16px;
+      border: 2px dashed var(--borderColor-default, #d0d7de);
+      border-radius: 6px;
+      background-color: var(--bgColor-subtle, #f6f8fa);
+      color: var(--fgColor-muted, #57606a);
+      cursor: pointer;
+      text-align: center;
+      transition: border-color 0.15s, background-color 0.15s;
+      box-sizing: border-box;
+}
+
+
+    .file-upload-area:hover,
+.ubuntu-file-upload-area:hover{
+	border-color: var(--fgColor-accent, #0969da);
+      background-color: var(--bgColor-accent-muted, #ddf4ff);
+}
+
+
+    .file-upload-area.is-dragover,
+.ubuntu-file-upload-area.ubuntu-is-dragover{
+	border-color: var(--fgColor-accent, #0969da);
+      background-color: var(--bgColor-accent-muted, #ddf4ff);
+}
+
+
+    .file-upload-area.has-file,
+.ubuntu-file-upload-area.ubuntu-has-file{
+	border-style: solid;
+      border-color: var(--fgColor-success, #1a7f37);
+      background-color: var(--bgColor-success-muted, #dafbe1);
+}
+
+
+    .file-upload-area--disabled,
+.ubuntu-file-upload-area--disabled{
+	cursor: not-allowed;
+      opacity: 0.6;
+      pointer-events: none;
+}
+
+
+    .file-upload-icon,
+.ubuntu-file-upload-icon{
+	color: var(--fgColor-muted, #57606a);
+      line-height: 1;
+}
+
+
+    .file-upload-text,
+.ubuntu-file-upload-text{
+	font-size: 13px;
+      color: var(--fgColor-default, #24292f);
+}
+
+
+    .file-upload-hint,
+.ubuntu-file-upload-hint{
+	font-size: 12px;
+      color: var(--fgColor-muted, #57606a);
+}
+
+
+
+    /* Grid variant — tinggi tetap agar kartu sejajar */
+    .file-upload-area--grid,
+.ubuntu-file-upload-area--grid{
+	min-height: 140px;
+      justify-content: center;
+      border-radius: 8px;
+      margin-bottom: 12px;
+}
+
+
+    .file-upload-area--wide,
+.ubuntu-file-upload-area--wide{
+	min-height: 90px;
+      flex-direction: row;
+      gap: 12px;
+      justify-content: flex-start;
+      padding: 18px 24px;
+      text-align: left;
+}
+
+
+    .file-upload-area--wide .file-upload-text,
+.file-upload-area--wide .file-upload-hint,
+.ubuntu-file-upload-area--wide .ubuntu-file-upload-text,
+.ubuntu-file-upload-area--wide .ubuntu-file-upload-hint{
+	text-align: left;
+      display: block;
+}
+
+
+    .file-upload-area--wide .file-upload-icon,
+.ubuntu-file-upload-area--wide .ubuntu-file-upload-icon{
+	flex-shrink: 0;
+}
+
+
+    .file-upload-area--wide > span:not(.file-upload-icon),
+.ubuntu-file-upload-area--wide > span:not(.ubuntu-file-upload-icon){
+	display: flex;
+      flex-direction: column;
+      gap: 2px;
+}
+
+/* ─── .btn (Primer-style) — dipakai .input-group-button ───
+   index.css hanya mengatur radius/margin join; tanpa rule dasar ini
+   tombol tampil kotak kosong (lihat showcase "Input dengan Icon"). */
+.btn,
+.ubuntu-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 5px 12px;
+  font-size: 14px;
+  font-family: var(--nx-font-sans, system-ui, sans-serif);
+  font-weight: 500;
+  line-height: 20px;
+  color: var(--fgColor-default, #241f31);
+  background: linear-gradient(to bottom, #faf9f8, #f6f5f4);
+  background-color: #f6f5f4;
+  border: 1px solid var(--control-borderColor-rest, #d0d7de);
+  border-radius: 6px;
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  white-space: nowrap;
+  text-decoration: none;
+  box-sizing: border-box;
+  vertical-align: middle;
+}
+.btn:hover,
+.ubuntu-btn:hover {
+  background: linear-gradient(to bottom, #f6f5f4, #eeedec);
+  border-color: #b8b5b0;
+}
+.btn:focus-visible,
+.ubuntu-btn:focus-visible {
+  outline: 2px solid var(--focus-outlineColor, #3584e4);
+  outline-offset: -2px;
+}
+.btn:disabled,
+.ubuntu-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-sm,
+.ubuntu-btn-sm {
+  min-height: 28px;
+  padding: 3px 8px;
+  font-size: 12px;
+}
+.btn-lg,
+.ubuntu-btn-lg {
+  min-height: 40px;
+  padding: 8px 16px;
+  font-size: 16px;
+}
+
+.btn-primary,
+.ubuntu-btn-primary {
+  color: #fff;
+  background: linear-gradient(to bottom, #4a90e8, #3584e4);
+  background-color: #3584e4;
+  border-color: #2d73c7;
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+}
+.btn-primary:hover,
+.ubuntu-btn-primary:hover {
+  background: linear-gradient(to bottom, #3584e4, #2d73c7);
+  border-color: #2463ad;
+}
+
+.btn-danger,
+.ubuntu-btn-danger {
+  color: #fff;
+  background: linear-gradient(to bottom, #e35d6a, #cf222e);
+  background-color: #cf222e;
+  border-color: #a40e26;
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.15);
+}
+.btn-danger:hover,
+.ubuntu-btn-danger:hover {
+  background: linear-gradient(to bottom, #cf222e, #a40e26);
+  border-color: #8c0d20;
+}
+
+/* Fluent System Icons — ukuran default di form/button (font monokrom) */
+.octicon,
+.ubuntu-octicon,
+[class*="icon-ic_fluent_"] {
+  display: inline-block;
+  vertical-align: text-bottom;
+  line-height: 1;
+  speak: never;
+}
+[class*="icon-ic_fluent_"] {
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+
+

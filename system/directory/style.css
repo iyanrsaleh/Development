@@ -1,0 +1,375 @@
+/* Layout struktural tree direktori (system/directory/index.js) — BUKAN
+   definisi icon (itu global, lihat assets/modules/icons/file/index.css,
+   sudah ter-@import lewat nexa.css → assets/css/style.css). File ini
+   HANYA menata indentasi nesting/summary, dimuat otomatis lewat
+   templates/workspace.css saat instalasi distro (lihat README.md,
+   bagian "templates/workspace.css auto-import"). */
+
+/* Layout flexbox tree+viewer (package/directory/index.js) — GANTI dari
+   grid persentase tetap (row/col-2/col-10, assets/modules/grid/index.css)
+   karena lebar tree HARUS bisa ditarik user (window.NxResize, lihat
+   assets/modules/resize/NexaResize.js) — grid kolom % tidak punya cara
+   menyimpan/menerapkan lebar custom per elemen, flexbox dengan width
+   eksplisit di tree (di-atur NxResize) jauh lebih pas untuk ini.
+   nx-directory-layout__tree TIDAK diberi flex-basis dari CSS — lebar
+   awalnya 260px (fallback) atau hasil restore localStorage (di-set
+   NxResize() lewat JS, lihat package/directory/index.js).
+
+   Tinggi TIDAK di-set di sini (dulu min-height:60vh, angka statis yang
+   bisa memotong konten) — dihitung DINAMIS di package/directory/index.js
+   (window.NXUI.Window.height() dikurangi posisi top elemen), pola sama
+   dengan .nx-scroll di index.js NXHOME.
+
+   Overflow scroll: HANYA .nx-directory-layout__tree yang diberi class
+   .nx-scroll langsung di markup (daftar file murni, aman). Kolom viewer
+   (.nx-directory-layout__viewer, id="editor") TIDAK diberi .nx-scroll di
+   level ini — isinya berganti-ganti (placeholder/gambar/editor CM6/
+   preview markdown), scroll internal CM6 (.cm-scroller) ditempel class
+   nx-scroll lewat JS di editor.js sendiri (lihat komentar lengkap +
+   .nx-file-viewer di bawah). Lihat README.md "Aturan pemakaian scroll". */
+.nx-directory-layout {
+  display: flex;
+  align-items: stretch;
+}
+
+.nx-directory-layout__tree {
+  width: 260px;
+  flex: 0 0 auto;
+  /* Nama file panjang TIDAK dipotong diam-diam — scroll horizontal muncul
+     kalau lebar tree (walau sudah ditarik user) masih kurang, daripada
+     teks terpotong tanpa indikasi apa pun. */
+  white-space: nowrap;
+}
+
+.nx-directory-layout__resize-handle {
+  flex: 0 0 auto;
+  width: 6px;
+  cursor: col-resize;
+  background: transparent;
+  position: relative;
+}
+
+.nx-directory-layout__resize-handle::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: rgba(128, 128, 128, 0.25);
+  transition: background-color 0.1s ease;
+}
+
+.nx-directory-layout__resize-handle:hover::before {
+  background: rgba(64, 128, 255, 0.6);
+}
+
+.nx-directory-layout__viewer {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  min-width: 0;
+  /* min-height:0 WAJIB — flex item default min-height:auto (mengikuti
+     tinggi konten) mencegah elemen ini menyusut ke tinggi parent
+     (.nx-directory-layout, sudah dihitung dinamis JS) kalau kontennya
+     lebih tinggi — tanpa ini, .nx-file-viewer { height:100% } di dalamnya
+     tidak pernah benar-benar terbatas, scroll internal CM6 tidak
+     terpicu (bug flexbox klasik, root cause scroll editor tidak bekerja
+     meski class nx-scroll sudah ada di markup .cm-scroller). */
+  min-height: 0;
+}
+
+/* #nx-file-viewer-mount (viewerContainer di editor.js — package/directory/
+   index.js) adalah CHILD LANGSUNG #editor (.nx-directory-layout__viewer),
+   berisi .nx-file-viewer (height:100%). Rantai `height:100%` PUTUS di sini
+   sebelum rule ini ada — #nx-file-viewer-mount TIDAK PERNAH diberi tinggi
+   eksplisit apa pun (cuma height:auto default), jadi .nx-file-viewer di
+   dalamnya height:100% mengacu ke elemen yang TIDAK punya tinggi pasti —
+   inilah ROOT CAUSE scroll editor tidak pernah bekerja meski semua flex
+   rule di bawahnya (.nx-file-viewer, .nexacmirror6-wrap) sudah benar:
+   rantai height:100% harus UTUH dari akar (#nx-directory-layout, tinggi
+   JS) sampai daun (.cm-scroller) — SATU mata rantai putus membatalkan
+   semuanya di bawahnya. display:flex + flex-direction:column + flex:1 1
+   auto + min-height:0 di sini menyambung rantai itu — #nx-file-viewer-mount
+   ikut jadi flex COLUMN yang mengisi penuh #editor, .nx-file-viewer di
+   dalamnya (juga flex column, height:100%) akhirnya benar-benar dapat
+   tinggi pasti untuk diwariskan turun ke .nexacmirror6-wrap/.cm-scroller.
+
+   PENTING — id elemen ini BERUBAH dinamis: editor.js (openFileEditor())
+   mengganti id dari "nx-file-viewer-mount" jadi "nx-file-viewer-editor"
+   TEPAT saat file dibuka (disposeActiveEditor() mengembalikannya ke
+   "nx-file-viewer-mount" saat editor ditutup, lihat komentar di editor.js
+   dekat activeEditorContainerOriginalId). Rule ini WAJIB menyasar KEDUA id
+   itu — kalau cuma #nx-file-viewer-mount, rule ini batal berlaku persis
+   saat editor CM6 aktif (yaitu satu-satunya saat scroll benar-benar
+   dibutuhkan), karena id sudah bukan itu lagi. */
+#nx-file-viewer-mount,
+#nx-file-viewer-editor {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.nx-directory-tree__folder {
+  margin-left: 4px;
+}
+
+.nx-directory-tree__folder > summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 2px 0;
+  user-select: none;
+}
+
+.nx-directory-tree__folder > summary::-webkit-details-marker {
+  display: none;
+}
+
+.nx-directory-tree__folder > summary::before {
+  content: '▸';
+  display: inline-block;
+  width: 1em;
+  margin-right: 2px;
+  transition: transform 0.1s ease;
+}
+
+.nx-directory-tree__folder[open] > summary::before {
+  transform: rotate(90deg);
+}
+
+.nx-directory-tree__children {
+  margin-left: 18px;
+  border-left: 1px dashed rgba(128, 128, 128, 0.3);
+  padding-left: 8px;
+}
+
+.nx-directory-tree__file {
+  padding: 2px 0;
+}
+
+.nx-directory-tree__truncated,
+.nx-directory-tree__empty {
+  opacity: 0.6;
+  font-size: 0.9em;
+}
+
+.nx-directory-tree__file {
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+.nx-directory-tree__file:hover {
+  background: rgba(128, 128, 128, 0.12);
+}
+
+.nx-directory-tree__file--active {
+  background: rgba(64, 128, 255, 0.18);
+}
+
+/* File sistem/pemakai fitur ini sendiri (system/, package/directory/) —
+   TIDAK bisa diklik-edit, lihat isProtectedPath() di index.js. */
+.nx-directory-tree__file--protected {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.nx-directory-tree__file--protected:hover {
+  background: none;
+}
+
+.nx-directory-tree__lock {
+  width: 12px;
+  height: 12px;
+  opacity: 0.7;
+}
+
+/* Viewer isi file (system/directory/editor.js) — flex COLUMN dengan tinggi
+   penuh dari parent (.nx-directory-layout__viewer, sudah dihitung dinamis
+   di package/directory/index.js). Header (.nx-file-viewer__header)
+   flex:0 0 auto — ukuran TETAP mengikuti kontennya sendiri, TIDAK ikut
+   menyusut/di-scroll.
+
+   PENTING — struktur DOM NexaCmirror6 (assets/modules/codemirror6/
+   NexaCmirror6.js, _init()): elemen `.nx-file-viewer__editor`
+   (#nx-file-viewer-editor-mount, diberikan ke `new NXUI.Codemirror(editorEl,
+   ...)`) DISEMBUNYIKAN (display:none) oleh CM6 sendiri setelah _init() —
+   CM6 membuat `.nexacmirror6-wrap` BARU sebagai SIBLING elemen itu lewat
+   `this._element.parentNode.insertBefore(container, this._element.nextSibling)`
+   — BUKAN child dari `.nx-file-viewer__editor`. Selector CSS descendant
+   (`.nx-file-viewer__editor .nexacmirror6-wrap`) TIDAK PERNAH match karena
+   itu (bug yang SEMPAT terjadi — flex:1 1 auto/overflow:hidden dipasang
+   di elemen yang sudah display:none, TIDAK berpengaruh apa pun ke
+   .nexacmirror6-wrap yang sungguhan terlihat). Aturan scroll/flex yang
+   BENAR harus ditarget ke `.nexacmirror6-wrap` LANGSUNG sebagai flex
+   child SIBLING dari `.nx-file-viewer__editor` (lihat rule di bawah),
+   supaya CM6 (dan `.cm-scroller` di dalamnya, sudah diberi class
+   nx-scroll lewat JS di editor.js) benar-benar dibatasi tingginya dan
+   men-scroll kontennya sendiri — BUKAN seluruh .nx-file-viewer termasuk
+   header ikut tergeser saat konten panjang. */
+.nx-file-viewer {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+}
+
+.nx-file-viewer__header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border-bottom: 1px solid rgba(128, 128, 128, 0.25);
+  font-weight: 600;
+  flex: 0 0 auto;
+}
+
+.nx-file-viewer__meta {
+  margin-left: auto;
+  font-weight: normal;
+  opacity: 0.6;
+  font-size: 0.85em;
+}
+
+.nx-file-viewer__status {
+  font-weight: normal;
+  font-size: 0.85em;
+  padding: 1px 8px;
+  border-radius: 3px;
+}
+
+.nx-file-viewer__status--dirty {
+  color: #d0a030;
+}
+
+.nx-file-viewer__status--saving {
+  color: #808080;
+}
+
+.nx-file-viewer__status--saved {
+  color: #4caf50;
+}
+
+.nx-file-viewer__status--error {
+  color: #e05555;
+}
+
+.nx-file-viewer__editor {
+  /* Elemen ini SENDIRI di-display:none oleh CM6 setelah _init() (lihat
+     komentar besar di atas .nx-file-viewer) — flex:1 1 auto DI SINI tidak
+     berpengaruh ke tinggi apa pun yang terlihat. Dipertahankan hanya
+     untuk jaga-jaga sebelum CM6 selesai _init() (placeholder kosong
+     sesaat). Aturan yang BENAR-BENAR menentukan tinggi editor terlihat
+     ada di `.nx-file-viewer > .nexacmirror6-wrap` di bawah. */
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* .nexacmirror6-wrap adalah SIBLING `.nx-file-viewer__editor` (disisipkan
+   this._element.parentNode.insertBefore(...) oleh NexaCmirror6._init()),
+   BUKAN child-nya — selector descendant (.nx-file-viewer__editor
+   .nexacmirror6-wrap) tidak pernah match, ini bug yang SEMPAT terjadi.
+   Sudah punya height:100% dari INLINE STYLE CM6 sendiri
+   (container.style.cssText, lihat NexaCmirror6.js) — tapi height:100%
+   butuh flex:1 1 auto EKSPLISIT di sini supaya benar-benar mengambil sisa
+   ruang parent flex (.nx-file-viewer) alih-alih ukuran default flex-basis
+   auto (mengikuti tinggi konten CM6 yang sangat panjang), DAN
+   overflow:hidden supaya `.cm-scroller` (scroll internal CM6, sudah
+   diberi class nx-scroll lewat JS di editor.js) yang benar-benar
+   membatasi & men-scroll — bukan `.nexacmirror6-wrap` ikut melebar tanpa
+   batas mengikuti konten. */
+.nx-file-viewer > .nexacmirror6-wrap {
+  flex: 1 1 auto;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.nx-file-viewer__body {
+  margin: 0;
+  padding: 8px;
+  overflow: auto;
+  max-height: 70vh;
+  font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
+  font-size: 0.85em;
+  white-space: pre;
+}
+
+.nx-file-viewer--error .nx-file-viewer__header {
+  color: #e05555;
+}
+
+.nx-file-viewer__error-message {
+  padding: 8px;
+  opacity: 0.85;
+}
+
+.nx-file-viewer__placeholder,
+.nx-file-viewer__loading {
+  padding: 12px;
+  opacity: 0.6;
+}
+
+/* Pratinjau gambar (editor.js, openImagePreview()) — read-only, tidak ada CodeMirror. */
+.nx-file-viewer__image-stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  max-height: 80vh;
+  overflow: auto;
+  padding: 12px;
+  background:
+    linear-gradient(45deg, rgba(128, 128, 128, 0.08) 25%, transparent 25%) 0 0 / 20px 20px,
+    linear-gradient(-45deg, rgba(128, 128, 128, 0.08) 25%, transparent 25%) 0 0 / 20px 20px,
+    linear-gradient(45deg, transparent 75%, rgba(128, 128, 128, 0.08) 75%) 0 0 / 20px 20px,
+    linear-gradient(-45deg, transparent 75%, rgba(128, 128, 128, 0.08) 75%) 0 0 / 20px 20px;
+}
+
+.nx-file-viewer__image {
+  max-width: 100%;
+  max-height: 76vh;
+  object-fit: contain;
+}
+
+/* Toggle [Markdown | Preview] (editor.js, wireMarkdownPreviewToggle()). */
+.nx-file-viewer__md-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 4px 8px;
+  border-bottom: 1px solid rgba(128, 128, 128, 0.25);
+}
+
+.nx-file-viewer__md-tab {
+  padding: 3px 10px;
+  border: none;
+  border-radius: 3px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.85em;
+  opacity: 0.7;
+}
+
+.nx-file-viewer__md-tab:hover {
+  opacity: 1;
+  background: rgba(128, 128, 128, 0.12);
+}
+
+.nx-file-viewer__md-tab.is-active {
+  opacity: 1;
+  background: rgba(64, 128, 255, 0.18);
+  font-weight: 600;
+}
+
+/* previewEl (editor.js, wireMarkdownPreviewToggle()) disisipkan sebagai
+   SIBLING #nx-file-viewer-editor-mount (jadi child langsung .nx-file-viewer,
+   level sama dengan .nexacmirror6-wrap) — butuh flex:1 1 auto + min-height:0
+   yang sama supaya benar-benar dibatasi tinggi kolom viewer (bukan max-height
+   vh statis yang lepas dari tinggi dinamis #nx-directory-layout), dan
+   overflow di sini sendiri yang men-scroll (bukan scroll bawaan halaman). */
+.nx-file-viewer__md-preview {
+  padding: 12px 16px;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+}

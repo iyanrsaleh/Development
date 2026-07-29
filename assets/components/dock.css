@@ -1,0 +1,10 @@
+/* ============================================================
+   DOCK — Workbench dock
+   ============================================================ */
+.ubuntu-workbench #dock-container { position:absolute; left:10px; top:50%; transform:translateY(-50%); z-index:1000; }
+
+.ubuntu-workbench .ubuntu-dock-item { width:48px; height:48px; display:flex; justify-content:center; align-items:center; border-radius:9px; cursor:pointer; color:var(--panel-fg, #fff); transition:transform 0.2s cubic-bezier(0.34,1.56,0.64,1); }
+.ubuntu-workbench .ubuntu-dock-item:hover { transform:scale(1.15); background:rgba(255,255,255,0.17); }
+.ubuntu-workbench .ubuntu-dock-item.active::before { content:''; position:absolute; left:-4px; top:50%; transform:translateY(-50%); width:4px; height:4px; background:#E95420; border-radius:50%; box-shadow:0 0 5px #E95420; }
+.ubuntu-workbench .ubuntu-dock-item::after { content:attr(data-title); position:absolute; left:60px; top:50%; transform:translateY(-50%) scale(0.8); background:#222; padding:6px 12px; border-radius:5px; font-size:12px; color:#fff; white-space:nowrap; opacity:0; pointer-events:none; transition:0.2s; box-shadow:0 2px 8px rgba(0,0,0,0.5); }
+.ubuntu-workbench .ubuntu-dock-item:hover::after { opacity:1; transform:translateY(-50%) scale(1); left:65px; }

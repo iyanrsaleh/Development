@@ -1,0 +1,228 @@
+/* App window floating — work area di #nxhome / #nx-home-scroll. Lihat README.md */
+
+/* Scroll area work area: jangan biarkan window absolute memanjangkan page scroll */
+#nx-home-scroll.nx-scroll {
+  position: relative;
+  overflow: auto;
+}
+
+#nxhome.nx-work-area {
+  position: relative;
+  min-height: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* Saat buka dari launcher: sembunyikan konten mentah sampai masuk bingkai */
+#nx-home-scroll.nx-app-opening #nxhome > :not(.nx-app-window),
+#nxhome.nx-app-opening > :not(.nx-app-window) {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.nx-app-window {
+  position: absolute;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  min-width: 320px;
+  min-height: 200px;
+  box-sizing: border-box;
+  background: var(--window-bg-color, #f6f5f4);
+  color: var(--window-fg-color, #241f31);
+  border: 1px solid rgba(0, 0, 0, 0.18);
+  border-radius: 8px;
+  box-shadow:
+    0 8px 28px rgba(0, 0, 0, 0.28),
+    0 1px 0 rgba(255, 255, 255, 0.4) inset;
+  overflow: hidden;
+  font-family: var(--nx-font-sans, system-ui, sans-serif);
+  opacity: 1;
+  transform: none;
+  will-change: opacity, transform;
+}
+
+/* Enter: fade + slight lift — hanya opacity/transform, bukan left/top/size */
+.nx-app-window--enter {
+  opacity: 0;
+  transform: translateY(12px) scale(0.985);
+  transition: none;
+}
+
+.nx-app-window--entered {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transition:
+    opacity 0.2s ease,
+    transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.nx-app-window--no-motion,
+.nx-app-window.is-dragging {
+  transition: none !important;
+}
+
+.nx-app-window--maximized {
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.nx-app-window--minimized {
+  height: 36px !important;
+  min-height: 36px;
+}
+
+.nx-app-window--minimized .nx-app-window__body,
+.nx-app-window--minimized .nx-app-window__resize {
+  display: none !important;
+}
+
+.nx-app-window__header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 6px 0 12px;
+  background: linear-gradient(to bottom, #faf9f8, #ebe9e6);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  cursor: grab;
+  user-select: none;
+  -webkit-app-region: no-drag;
+  position: relative;
+  z-index: 3;
+}
+
+.nx-app-window__header:active {
+  cursor: grabbing;
+}
+
+.nx-app-window__title {
+  flex: 1 1 auto;
+  font-size: 13px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nx-app-window__controls {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: 0 0 auto;
+}
+
+.nx-app-window__btn {
+  width: 28px;
+  height: 24px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: #241f31;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nx-app-window__btn [class*="icon-ic_fluent_"] {
+  font-size: 16px;
+  line-height: 1;
+  color: inherit;
+  pointer-events: none;
+}
+
+.nx-app-window__btn:hover {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.nx-app-window__btn--close:hover {
+  background: #e01b24;
+  color: #fff;
+}
+
+.nx-app-window__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  padding: 12px 14px 16px;
+  box-sizing: border-box;
+  background: var(--window-bg-color, #f6f5f4);
+  position: relative;
+  z-index: 3;
+}
+
+.nx-app-window__body > .nx-app-shell__nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  align-items: center;
+  margin: 0 0 12px;
+  padding: 0 0 10px;
+  border-bottom: 1px solid var(--border-color, #deddda);
+  font-size: 13px;
+}
+
+.nx-app-window__body > .nx-app-shell__nav a {
+  color: var(--accent-color, #3584e4);
+  text-decoration: none;
+}
+
+.nx-app-window__body > .nx-app-shell__nav a:hover {
+  text-decoration: underline;
+}
+
+.nx-app-window__body > .nx-app-shell__nav a.is-active {
+  font-weight: 600;
+  color: var(--ub-orange, #e95420);
+}
+
+/* Resize: strip di tepi DALAM jendela (z di atas body).
+   Jangan pakai offset negatif + overflow:hidden — handle ikut ter-clip.
+   Klik sengaja di handle = resize; isi form tidak membatalkan. */
+.nx-app-window__resize {
+  position: absolute;
+  z-index: 20;
+}
+
+.nx-app-window__resize--n,
+.nx-app-window__resize--s {
+  left: 8px;
+  right: 8px;
+  height: 6px;
+  cursor: ns-resize;
+}
+.nx-app-window__resize--n { top: 0; }
+.nx-app-window__resize--s { bottom: 0; }
+
+.nx-app-window__resize--e,
+.nx-app-window__resize--w {
+  top: 8px;
+  bottom: 8px;
+  width: 6px;
+  cursor: ew-resize;
+}
+.nx-app-window__resize--e { right: 0; }
+.nx-app-window__resize--w { left: 0; }
+
+.nx-app-window__resize--ne,
+.nx-app-window__resize--nw,
+.nx-app-window__resize--se,
+.nx-app-window__resize--sw {
+  width: 10px;
+  height: 10px;
+}
+.nx-app-window__resize--ne { top: 0; right: 0; cursor: nesw-resize; }
+.nx-app-window__resize--nw { top: 0; left: 0; cursor: nwse-resize; }
+.nx-app-window__resize--se { bottom: 0; right: 0; cursor: nwse-resize; }
+.nx-app-window__resize--sw { bottom: 0; left: 0; cursor: nesw-resize; }
+
+.nx-app-window--maximized .nx-app-window__resize {
+  display: none;
+}

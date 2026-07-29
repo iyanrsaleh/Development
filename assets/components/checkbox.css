@@ -1,0 +1,232 @@
+/* ============================================================
+   CHECKBOX / SWITCH / RADIO — Yaru / Libadwaita style (GNOME 46)
+   https://gnome.pages.gitlab.gnome.org/libadwaita/doc/main/style-classes.html
+   ════════════════════════════════════════════════════════════
+   Cocok untuk Ubuntu 24.04 — Yaru GTK theme (GNOME 46).
+   Konsisten dengan button.css & input.css.
+   ============================================================ */
+
+/* ────────── Checkbox ────────── */
+.ubuntu-workbench .checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-family: var(--nx-font-sans);
+  color: var(--window-fg-color);
+  user-select: none;
+}
+.ubuntu-workbench .checkbox input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--border-color);
+  border-radius: 4px;
+  background: linear-gradient(to bottom, #ffffff, #fafaf9);
+  background-color: #ffffff;
+  cursor: pointer;
+  flex-shrink: 0;
+  position: relative;
+  transition: all 80ms cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow:
+    inset 0 1px 1px 0 rgba(0, 0, 0, 0.04);
+}
+.ubuntu-workbench .checkbox input[type="checkbox"]:hover {
+  border-color: #bebebe;
+  background: linear-gradient(to bottom, #ffffff, #fcfcfc);
+  box-shadow:
+    inset 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+.ubuntu-workbench .checkbox input[type="checkbox"]:active {
+  border-color: #a0a0a0;
+  background: #f0efee;
+  box-shadow: none;
+}
+
+/* ── Checked state ── */
+.ubuntu-workbench .checkbox input[type="checkbox"]:checked {
+  background: var(--ub-orange);
+  border-color: var(--ub-orange);
+  box-shadow:
+    inset 0 1px 2px 0 rgba(0, 0, 0, 0.15);
+}
+.ubuntu-workbench .checkbox input[type="checkbox"]:checked::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 5px;
+  height: 9px;
+  border: solid var(--accent-fg-color);
+  border-width: 0 2.5px 2.5px 0;
+  transform: translate(-50%, -60%) rotate(45deg);
+}
+
+/* ── Indeterminate state ── */
+.ubuntu-workbench .checkbox input[type="checkbox"]:indeterminate {
+  background: var(--ub-orange);
+  border-color: var(--ub-orange);
+}
+.ubuntu-workbench .checkbox input[type="checkbox"]:indeterminate::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 2px;
+  background: var(--accent-fg-color);
+  border-radius: 1px;
+}
+
+.ubuntu-workbench .checkbox input[type="checkbox"]:focus-visible {
+  outline: 2px solid var(--ub-orange);
+  outline-offset: 2px;
+}
+.ubuntu-workbench .checkbox input[type="checkbox"]:disabled {
+  opacity: 0.5;
+  filter: grayscale(0.5);
+  pointer-events: none;
+}
+
+
+/* ════════════════════════════════════════════════════════════
+   SWITCH (Toggle) — Yaru style
+   ════════════════════════════════════════════════════════════ */
+.ubuntu-workbench .switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  font-family: var(--nx-font-sans);
+  color: var(--window-fg-color);
+  user-select: none;
+}
+.ubuntu-workbench .switch input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 44px;
+  height: 24px;
+  border-radius: 12px;
+  background: #cdccca;
+  border: 1px solid #c0bfbd;
+  cursor: pointer;
+  flex-shrink: 0;
+  position: relative;
+  transition: background 120ms cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 120ms cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow:
+    inset 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+.ubuntu-workbench .switch input[type="checkbox"]::after {
+  content: '';
+  position: absolute;
+  left: 1px;
+  top: 1px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  transition: transform 120ms cubic-bezier(0.4, 0, 0.2, 1),
+              background 120ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.ubuntu-workbench .switch input[type="checkbox"]:hover::after {
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+.ubuntu-workbench .switch input[type="checkbox"]:active::after {
+  width: 22px;
+}
+.ubuntu-workbench .switch input[type="checkbox"]:checked {
+  background: var(--ub-orange);
+  border-color: var(--ub-orange);
+}
+.ubuntu-workbench .switch input[type="checkbox"]:checked::after {
+  transform: translateX(20px);
+  background: #ffffff;
+}
+.ubuntu-workbench .switch input[type="checkbox"]:checked:active::after {
+  transform: translateX(18px);
+}
+.ubuntu-workbench .switch input[type="checkbox"]:focus-visible {
+  outline: 2px solid var(--ub-orange);
+  outline-offset: 2px;
+}
+.ubuntu-workbench .switch input[type="checkbox"]:disabled {
+  opacity: 0.5;
+  filter: grayscale(0.5);
+  pointer-events: none;
+}
+
+
+/* ════════════════════════════════════════════════════════════
+   RADIO — Yaru style
+   ════════════════════════════════════════════════════════════ */
+.ubuntu-workbench .radio {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-family: var(--nx-font-sans);
+  color: var(--window-fg-color);
+  user-select: none;
+}
+.ubuntu-workbench .radio input[type="radio"] {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--border-color);
+  border-radius: 50%;
+  background: linear-gradient(to bottom, #ffffff, #fafaf9);
+  background-color: #ffffff;
+  cursor: pointer;
+  flex-shrink: 0;
+  position: relative;
+  transition: all 80ms cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow:
+    inset 0 1px 1px 0 rgba(0, 0, 0, 0.04);
+}
+.ubuntu-workbench .radio input[type="radio"]:hover {
+  border-color: #bebebe;
+  background: linear-gradient(to bottom, #ffffff, #fcfcfc);
+}
+.ubuntu-workbench .radio input[type="radio"]:active {
+  border-color: #a0a0a0;
+  background: #f0efee;
+  box-shadow: none;
+}
+.ubuntu-workbench .radio input[type="radio"]:checked {
+  border-color: var(--ub-orange);
+  box-shadow:
+    inset 0 0 0 1px var(--ub-orange);
+}
+.ubuntu-workbench .radio input[type="radio"]:checked::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--ub-orange);
+  box-shadow:
+    inset 0 1px 2px 0 rgba(0, 0, 0, 0.1);
+}
+.ubuntu-workbench .radio input[type="radio"]:focus-visible {
+  outline: 2px solid var(--ub-orange);
+  outline-offset: 2px;
+}
+.ubuntu-workbench .radio input[type="radio"]:disabled {
+  opacity: 0.5;
+  filter: grayscale(0.5);
+  pointer-events: none;
+}

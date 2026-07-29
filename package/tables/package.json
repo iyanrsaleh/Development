@@ -1,0 +1,12 @@
+{
+  "id": "tables",
+  "title": "tables",
+  "description": "Package tables — lingkungan #package/",
+  "version": "1.0.0",
+  "author": "iyan",
+  "brend": {
+    "ico": "/distro/Development/assets/brend/favicon.ico",
+    "icon": "/distro/Development/assets/brend/icon.png"
+  },
+  "endpoint": "http://opendatapohuwatokab.local"
+}

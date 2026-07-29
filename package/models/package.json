@@ -1,0 +1,12 @@
+{
+  "id": "models",
+  "title": "models API Test",
+  "description": "Uji coba window.NxSSHTunnel — connect + query, hasil di console.log",
+  "version": "1.0.0",
+  "author": "iyan",
+  "brend": {
+    "ico": "/distro/Development/assets/brend/favicon.ico",
+    "icon": "/distro/Development/assets/brend/icon.png"
+  },
+  "endpoint": "http://opendatapohuwatokab.local"
+}

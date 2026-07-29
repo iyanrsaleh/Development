@@ -1,0 +1,127 @@
+/* ============================================================
+   SELECT — Yaru / Libadwaita style (GNOME 46)
+   https://gnome.pages.gitlab.gnome.org/libadwaita/doc/main/style-classes.html
+   ════════════════════════════════════════════════════════════
+   Cocok untuk Ubuntu 24.04 — Yaru GTK theme.
+   Konsisten dengan button.css & input.css.
+   ============================================================ */
+
+/* OPT-IN — style Yaru HANYA untuk <select> ber-class .select/.ubuntu-select,
+   BUKAN elemen <select> telanjang, supaya select milik fitur sinkronisasi
+   Discovery (mis. <select class="scm-settings-input"> Source Control) tidak
+   pernah tersentuh — rantai :not() per-app tidak diperlukan lagi.
+   CATATAN: selector base versi lama sempat rusak jadi `select .ubuntu-workbench`
+   (terbalik, tidak pernah match apa pun) — diperbaiki sekalian di sini. */
+.ubuntu-workbench select.select,
+.ubuntu-workbench select.ubuntu-select {
+  min-height: 32px;
+  padding: 4px 28px 4px 8px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%235e5c64' d='M6 8.5L1.5 4h9z'/%3E%3C/svg%3E")
+    no-repeat right 8px center,
+    linear-gradient(to bottom, #faf9f8, #f6f5f4);
+  background-color: #f6f5f4;
+  background-size: 12px, 100%;
+  color: var(--view-fg-color);
+  font-size: 14px;
+  font-family: var(--nx-font-sans);
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 100%;
+  box-sizing: border-box;
+  transition: all 80ms cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.6),
+    inset 0 -1px 0 0 rgba(0, 0, 0, 0.05);
+}
+
+/* ────────── Hover ────────── */
+.ubuntu-workbench select.select:hover,
+.ubuntu-workbench select.ubuntu-select:hover {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%235e5c64' d='M6 8.5L1.5 4h9z'/%3E%3C/svg%3E")
+    no-repeat right 8px center,
+    linear-gradient(to bottom, #ffffff, #fafaf9);
+  background-color: #fafaf9;
+  background-size: 12px, 100%;
+  border-color: #bebebe;
+}
+
+/* ────────── Focus ────────── */
+.ubuntu-workbench select.select:focus,
+.ubuntu-workbench select.ubuntu-select:focus {
+  border-color: var(--ub-orange);
+  box-shadow:
+    inset 0 0 0 1px var(--ub-orange),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.6);
+}
+
+/* ────────── Active / Open ────────── */
+.ubuntu-workbench select.select:active,
+.ubuntu-workbench select.ubuntu-select:active {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%235e5c64' d='M6 3.5L1.5 8h9z'/%3E%3C/svg%3E")
+    no-repeat right 8px center,
+    linear-gradient(to bottom, #e5e4e3, #e0dfde);
+  background-color: #e0dfde;
+  background-size: 12px, 100%;
+  border-color: #b0b0b0;
+}
+
+/* ────────── Disabled ────────── */
+.ubuntu-workbench select.select:disabled,
+.ubuntu-workbench select.ubuntu-select:disabled {
+  opacity: 0.5;
+  filter: grayscale(0.5);
+  pointer-events: none;
+  box-shadow: none;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239a9996' d='M6 8.5L1.5 4h9z'/%3E%3C/svg%3E")
+    no-repeat right 8px center,
+    #f0efee;
+  background-size: 12px, 100%;
+}
+
+/* ────────── Multiple ────────── */
+.ubuntu-workbench select.select[multiple],
+.ubuntu-workbench select.ubuntu-select[multiple] {
+  padding: 4px 8px;
+  background: linear-gradient(to bottom, #ffffff, #fafaf9);
+  background-color: #ffffff;
+  min-height: 80px;
+}
+.ubuntu-workbench select.select[multiple] option,
+.ubuntu-workbench select.ubuntu-select[multiple] option {
+  padding: 4px 8px;
+  border-radius: 3px;
+}
+.ubuntu-workbench select.select[multiple] option:hover,
+.ubuntu-workbench select.ubuntu-select[multiple] option:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+.ubuntu-workbench select.select[multiple] option:checked,
+.ubuntu-workbench select.ubuntu-select[multiple] option:checked {
+  background: var(--ub-orange);
+  color: var(--accent-fg-color);
+}
+
+/* ────────── Sizes ────────── */
+.ubuntu-workbench select.select.small,
+.ubuntu-workbench select.ubuntu-select.small {
+  min-height: 24px;
+  padding: 2px 24px 2px 6px;
+  font-size: 12px;
+  background-size: 10px, 100%;
+}
+.ubuntu-workbench select.select.large,
+.ubuntu-workbench select.ubuntu-select.large {
+  min-height: 40px;
+  padding: 6px 32px 6px 12px;
+  font-size: 16px;
+  background-size: 14px, 100%;
+}

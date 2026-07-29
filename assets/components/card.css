@@ -1,0 +1,14 @@
+/* ============================================================
+   CARD & BOXED LIST — Libadwaita style classes
+   ============================================================ */
+.ubuntu-workbench .card {
+  background: var(--view-bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 16px;
+}
+.ubuntu-workbench .card.activatable:hover { background: rgba(0,0,0,0.04); cursor: pointer; }
+.ubuntu-workbench .boxed-list { border: 1px solid var(--border-color); border-radius: var(--border-radius); background: var(--view-bg-color); }
+.ubuntu-workbench .boxed-list > * + * { border-top: 1px solid var(--border-color); }
+.ubuntu-workbench .boxed-list > *:first-child { border-radius: 6px 6px 0 0; }
+.ubuntu-workbench .boxed-list > *:last-child { border-radius: 0 0 6px 6px; }

@@ -1,0 +1,55 @@
+/* Fluent System Icons (Microsoft, style Regular — outline default Windows 11,
+   File Explorer/Settings/taskbar) — SATU-SATUNYA varian dipertahankan dari 4
+   yang tersedia (Filled/Light/Resizable dihapus, tidak dipakai). File font
+   sendiri ada di assets/fonts/, CSS ini cuma @import declarasi @font-face +
+   class .icon-ic_fluent_*:before bawaan generator, TIDAK ditulis ulang manual
+   di sini supaya tetap sinkron kalau font di-update lewat tool resmi. */
+@import url("./fonts/FluentSystemIcons-Regular.css");
+
+/* Font TEKS default distro ini — bergaya Windows 11 (Segoe UI Variable,
+   font sistem Windows 11 asli untuk teks UI, sudah terpasang di OS, BUKAN
+   file font terpisah). TERPISAH dari FluentSystemIcons-Regular di atas
+   (itu font ICON — glyph simbol, bukan huruf terbaca; kalau dipakai untuk
+   html/body, semua teks biasa akan tampil sebagai simbol aneh). Hanya di
+   sini (style.css distro Development), TIDAK menyentuh assets/css/style.css
+   (shell/kernel, dipakai SEMUA distro — font teks per-distro bukan urusan
+   kernel).
+
+   assets/components/* WAJIB pakai var(--nx-font-sans) / var(--nx-font-mono)
+   — JANGAN hardcode 'Ubuntu' / font lain di luar stack ini. */
+:root {
+  --nx-font-sans: "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+  --nx-font-mono: "Cascadia Mono", "Consolas", "Segoe UI Mono", ui-monospace, monospace;
+}
+
+html, body {
+    font-family: var(--nx-font-sans);
+}
+
+.ubuntu-workbench {
+  font-family: var(--nx-font-sans);
+}
+
+/* Splash screen — layar pembuka sebelum route/konten aplikasi dimuat
+   (index.html, <div id="main"><div class="main-splash">...</div></div>).
+   Icon distro (favicon.ico) ditampilkan di TENGAH layar (horizontal +
+   vertikal) dan MEMENUHI seluruh viewport selama splash aktif — begitu
+   route pertama selesai dimuat, App.js mengganti isi #main dengan konten
+   halaman (markup ini otomatis tergantikan, TIDAK perlu dihilangkan
+   manual dari sini). */
+.main-splash {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9999;
+}
+
+.main-splash__icon {
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+}

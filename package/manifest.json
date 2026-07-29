@@ -1,0 +1,10 @@
+{
+  "componen": [
+    "news",
+    "gallery",
+    "directory",
+    "models",
+    "settings",
+    "tables"
+  ]
+}

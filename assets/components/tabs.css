@@ -1,0 +1,259 @@
+/* ============================================================
+   TABS / ACCORDION / BREADCRUMB — Yaru / Libadwaita style (GNOME 46)
+   https://gnome.pages.gitlab.gnome.org/libadwaita/doc/main/style-classes.html
+   ════════════════════════════════════════════════════════════
+   Cocok untuk Ubuntu 24.04 — Yaru GTK theme.
+   ============================================================ */
+
+/* ════════════════════════════════════════════════════════════
+   TABS — Horizontal
+   ════════════════════════════════════════════════════════════ */
+.ubuntu-workbench .tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border-color);
+  gap: 0;
+  background: transparent;
+}
+
+.ubuntu-workbench .tab {
+  padding: 8px 16px;
+  font-size: 13px;
+  font-family: var(--nx-font-sans);
+  color: #5e5c64;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: all 80ms cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  user-select: none;
+  position: relative;
+  font-weight: 400;
+}
+.ubuntu-workbench .tab:hover {
+  color: var(--window-fg-color);
+  background: rgba(0, 0, 0, 0.04);
+}
+.ubuntu-workbench .tab:active {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+/* ── Selected tab ── */
+.ubuntu-workbench .tab.selected {
+  color: var(--accent-color);
+  border-bottom-color: var(--accent-color);
+  font-weight: 500;
+}
+
+/* ── Disabled tab ── */
+.ubuntu-workbench .tab.disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* ── Close button in tab ── */
+.ubuntu-workbench .tab .tab-close {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: #5e5c64;
+  font-size: 10px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 4px;
+  transition: all 80ms ease;
+  opacity: 0;
+  min-height: auto;
+  min-width: auto;
+}
+.ubuntu-workbench .tab:hover .tab-close,
+.ubuntu-workbench .tab.selected .tab-close {
+  opacity: 0.6;
+}
+.ubuntu-workbench .tab .tab-close:hover {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.1);
+  color: #e01b24;
+}
+
+/* ── Tab sizes ── */
+.ubuntu-workbench .tab.small {
+  padding: 4px 10px;
+  font-size: 11px;
+}
+.ubuntu-workbench .tab.large {
+  padding: 12px 24px;
+  font-size: 14px;
+}
+
+/* ── Tab with icon only ── */
+.ubuntu-workbench .tab.icon-only {
+  padding: 8px 12px;
+  justify-content: center;
+}
+
+/* ════════════════════════════════════════════════════════════
+   TABS — Vertical
+   ─── Gunakan .tabs.vertical atau .tabs-vertical
+   ════════════════════════════════════════════════════════════ */
+.ubuntu-workbench .tabs.vertical,
+.ubuntu-workbench .tabs-vertical {
+  flex-direction: column;
+  border-bottom: none;
+  border-right: 1px solid var(--border-color);
+  gap: 2px;
+  padding: 4px 0;
+}
+.ubuntu-workbench .tabs.vertical .tab,
+.ubuntu-workbench .tabs-vertical .tab {
+  border-bottom: none;
+  border-right: 2px solid transparent;
+  margin-bottom: 0;
+  margin-right: -1px;
+  border-radius: 0;
+  padding: 6px 12px;
+}
+.ubuntu-workbench .tabs.vertical .tab:hover,
+.ubuntu-workbench .tabs-vertical .tab:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+.ubuntu-workbench .tabs.vertical .tab.selected,
+.ubuntu-workbench .tabs-vertical .tab.selected {
+  border-right-color: var(--accent-color);
+  border-bottom-color: transparent;
+  background: rgba(0, 0, 0, 0.06);
+}
+
+/* ════════════════════════════════════════════════════════════
+   TAB BAR — Container with content area
+   ─── <div class="tab-bar"><div class="tabs">...</div><div class="tab-content">...</div>
+   ════════════════════════════════════════════════════════════ */
+.ubuntu-workbench .tab-bar {
+  display: flex;
+  flex-direction: column;
+}
+.ubuntu-workbench .tab-bar .tab-content {
+  padding: 12px;
+  font-size: 14px;
+  color: var(--view-fg-color);
+}
+
+
+/* ════════════════════════════════════════════════════════════
+   ACCORDION — Yaru style
+   ════════════════════════════════════════════════════════════ */
+.ubuntu-workbench .accordion {
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  background: var(--view-bg-color);
+}
+.ubuntu-workbench .accordion-section {
+  border-bottom: 1px solid var(--border-color);
+}
+.ubuntu-workbench .accordion-section:last-child {
+  border-bottom: none;
+}
+.ubuntu-workbench .accordion-header {
+  padding: 10px 15px;
+  font-size: 14px;
+  font-family: var(--nx-font-sans);
+  font-weight: 500;
+  color: var(--window-fg-color);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--window-bg-color);
+  transition: background 80ms ease;
+  user-select: none;
+}
+.ubuntu-workbench .accordion-header::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid #77767b;
+  border-bottom: 2px solid #77767b;
+  transform: rotate(-45deg);
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+  margin-top: -2px;
+}
+.ubuntu-workbench .accordion-header:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+.ubuntu-workbench .accordion-header:active {
+  background: rgba(0, 0, 0, 0.08);
+}
+.ubuntu-workbench .accordion-section.expanded .accordion-header::after {
+  transform: rotate(45deg);
+  margin-top: 2px;
+}
+.ubuntu-workbench .accordion-body {
+  display: none;
+  padding: 10px 15px;
+  font-size: 14px;
+  font-family: var(--nx-font-sans);
+  color: #5e5c64;
+  line-height: 1.5;
+  border-top: 1px solid var(--border-color);
+}
+.ubuntu-workbench .accordion-section.expanded .accordion-body {
+  display: block;
+  animation: accordionOpen 0.2s ease;
+}
+
+@keyframes accordionOpen {
+  from { opacity: 0; margin-top: -8px; }
+  to   { opacity: 1; margin-top: 0; }
+}
+
+
+/* ════════════════════════════════════════════════════════════
+   BREADCRUMB — Yaru style
+   ════════════════════════════════════════════════════════════ */
+.ubuntu-workbench .breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-family: var(--nx-font-sans);
+  color: #77767b;
+  flex-wrap: wrap;
+}
+.ubuntu-workbench .breadcrumb-item {
+  color: #5e5c64;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: all 80ms ease;
+}
+.ubuntu-workbench .breadcrumb-item:hover {
+  color: var(--accent-color);
+  background: rgba(0, 0, 0, 0.04);
+}
+.ubuntu-workbench .breadcrumb-item:active {
+  background: rgba(0, 0, 0, 0.08);
+}
+.ubuntu-workbench .breadcrumb-item.selected {
+  color: var(--window-fg-color);
+  font-weight: 500;
+  cursor: default;
+}
+.ubuntu-workbench .breadcrumb-item.selected:hover {
+  color: var(--window-fg-color);
+  background: transparent;
+}
+.ubuntu-workbench .breadcrumb-separator {
+  color: #77767b;
+  padding: 0 2px;
+  user-select: none;
+}

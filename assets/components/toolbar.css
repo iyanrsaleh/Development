@@ -1,0 +1,39 @@
+/* ============================================================
+   TOOLBAR — Yaru / Libadwaita style
+   ════════════════════════════════════════════════════════════
+   Tombol di dalam .toolbar otomatis flat & compact.
+   ============================================================ */
+.ubuntu-workbench .toolbar {
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  background: var(--window-bg-color);
+  gap: 1px;
+}
+.ubuntu-workbench .toolbar button {
+  background: transparent;
+  border-color: transparent;
+  color: var(--view-fg-color);
+  min-height: 24px;
+  padding: 2px 6px;
+  box-shadow: none;
+  font-size: 13px;
+}
+.ubuntu-workbench .toolbar button:hover {
+  background: rgba(0, 0, 0, 0.08);
+  border-color: transparent;
+  box-shadow: none;
+}
+.ubuntu-workbench .toolbar button:active {
+  background: rgba(0, 0, 0, 0.14);
+  border-color: transparent;
+  box-shadow: none;
+}
+.ubuntu-workbench .toolbar button:checked {
+  background: rgba(0, 0, 0, 0.10);
+  border-color: transparent;
+  box-shadow: none;
+}
+.ubuntu-workbench .toolbar .spacer {
+  min-width: 12px;
+}

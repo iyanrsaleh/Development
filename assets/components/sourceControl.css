@@ -1,0 +1,32 @@
+/* ============================================================
+   SOURCE CONTROL — wrapper Workbench
+   Layout window saja (sidebar kiri + content kanan). Styling detail
+   accordion (.beranda-sidebar-*) dan panel konten (.scm-settings-*,
+   .nx-scm-*) sudah global lewat assets/css/style.css — tidak diduplikasi.
+   Tambalan reset Yaru/GTK ada di templates/workbench/index.css (lihat
+   README.md section "CSS untuk Fitur Sinkronisasi").
+   ============================================================ */
+.ubuntu-workbench .ubuntu-scm-app {
+  display: flex;
+  height: 100%;
+  overflow: hidden;
+  background: var(--window-bg-color);
+  color: var(--window-fg-color);
+}
+.ubuntu-workbench .ubuntu-scm-sidebar {
+  width: 260px;
+  min-width: 200px;
+  max-width: 420px;
+  flex-shrink: 0;
+  overflow-y: auto;
+  border-right: 1px solid var(--border-color);
+  background: var(--view-bg-color);
+}
+.ubuntu-workbench .ubuntu-scm-sidebar [data-sidebar-view="scm"] {
+  display: block !important;
+}
+.ubuntu-workbench .ubuntu-scm-content {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--window-bg-color);
+}

@@ -1,0 +1,19 @@
+/* ============================================================
+   DIALOG / TOAST / TOOLTIP / PROGRESS / SPINNER — Adwaita style
+   ============================================================ */
+.ubuntu-workbench .dialog-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.4); display:flex; justify-content:center; align-items:center; z-index:5000; }
+.ubuntu-workbench .dialog { background: var(--window-bg-color); color: var(--window-fg-color); border-radius: 8px; min-width:360px; max-width:500px; box-shadow:0 10px 30px rgba(0,0,0,0.3); }
+
+.ubuntu-workbench .toast { background: rgba(0,0,0,0.8); color:#fff; padding:15px; border-radius:var(--border-radius); box-shadow:0 5px 15px rgba(0,0,0,0.3); display:flex; align-items:flex-start; gap:10px; min-width:280px; max-width:400px; }
+.ubuntu-workbench .toast-title { font-weight:500; margin-bottom:4px; }
+.ubuntu-workbench .toast-message { font-size:13px; opacity:0.8; }
+
+.ubuntu-workbench [data-tooltip] { position:relative; }
+.ubuntu-workbench [data-tooltip]::after { content:attr(data-tooltip); position:absolute; bottom:100%; left:50%; transform:translateX(-50%); margin-bottom:6px; padding:6px 10px; background:#222; color:#fff; font-size:12px; white-space:nowrap; border-radius:5px; pointer-events:none; opacity:0; transition:opacity 0.15s ease; box-shadow:0 2px 8px rgba(0,0,0,0.5); }
+.ubuntu-workbench [data-tooltip]:hover::after { opacity:1; }
+
+.ubuntu-workbench .progress { display:flex; width:100%; height:6px; background: var(--border-color); border-radius:3px; overflow:hidden; }
+.ubuntu-workbench .progress-bar { height:100%; background: var(--ub-orange); border-radius:3px; transition:width 0.3s ease; }
+
+.ubuntu-workbench .spinner { display:inline-block; width:24px; height:24px; border:4px solid rgba(0,0,0,0.1); border-left-color: var(--ub-orange); border-radius:50%; animation:spin 1s linear infinite; }
+@keyframes spin { 0% { transform:rotate(0deg); } 100% { transform:rotate(360deg); } }

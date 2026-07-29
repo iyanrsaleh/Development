@@ -1,0 +1,71 @@
+/* ============================================================
+   SCROLLBAR — Yaru / Libadwaita style (GNOME 46)
+   ════════════════════════════════════════════════════════════
+   Cocok untuk Ubuntu 24.04 — Yaru GTK theme.
+   Scrollbar tipis, rounded, muncul saat hover/konten overflow.
+   ============================================================ */
+
+/* ── Base: sembunyi default, muncul saat hover/scroll ── */
+.ubuntu-workbench ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+  background: transparent;
+}
+.ubuntu-workbench ::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 4px;
+}
+.ubuntu-workbench ::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+  min-height: 32px;
+  transition: background 80ms ease;
+}
+.ubuntu-workbench ::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
+  background-clip: content-box;
+}
+.ubuntu-workbench ::-webkit-scrollbar-thumb:active {
+  background: var(--ub-orange);
+  background-clip: content-box;
+}
+
+/* ── Corner ── */
+.ubuntu-workbench ::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* ── Overlay scrollbar — konten di belakang scrollbar kelihatan ── */
+.ubuntu-workbench {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
+}
+
+/* ── Dark variant (panel, menu, terminal) ── */
+.ubuntu-workbench .ubuntu-dark-scroll ::-webkit-scrollbar-thumb,
+.ubuntu-workbench .ubuntu-dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  background-clip: content-box;
+}
+.ubuntu-workbench .ubuntu-dark-scroll ::-webkit-scrollbar-thumb:hover,
+.ubuntu-workbench .ubuntu-dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+  background-clip: content-box;
+}
+.ubuntu-workbench .ubuntu-dark-scroll ::-webkit-scrollbar-thumb:active,
+.ubuntu-workbench .ubuntu-dark ::-webkit-scrollbar-thumb:active {
+  background: var(--ub-orange);
+  background-clip: content-box;
+}
+.ubuntu-workbench .ubuntu-dark-scroll,
+.ubuntu-workbench .ubuntu-dark {
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+
+/* ── Thin variant ── */
+.ubuntu-workbench .ubuntu-thin-scroll ::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}

@@ -1,0 +1,85 @@
+/* ============================================================
+   MENU — Popup Menu Yaru / Libadwaita style (GNOME 46)
+   ════════════════════════════════════════════════════════════
+   Cocok untuk Ubuntu 24.04 — Yaru GTK theme.
+   ============================================================ */
+
+.ubuntu-workbench .menu {
+  display: flex;
+  flex-direction: column;
+  background: rgba(40, 40, 40, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 5px 0;
+  min-width: 180px;
+  max-width: 320px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+}
+
+.ubuntu-workbench .menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 15px;
+  font-size: 14px;
+  font-family: var(--nx-font-sans);
+  color: #eeeeee;
+  cursor: pointer;
+  transition: background 80ms ease;
+  border: none;
+  background: transparent;
+  text-align: left;
+  width: 100%;
+  box-sizing: border-box;
+  white-space: nowrap;
+}
+.ubuntu-workbench .menu-item:hover {
+  background: var(--ub-orange);
+  color: #ffffff;
+}
+.ubuntu-workbench .menu-item:active {
+  filter: brightness(0.9);
+}
+.ubuntu-workbench .menu-item.disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.ubuntu-workbench .menu-separator {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 4px 0;
+}
+
+.ubuntu-workbench .menu-item .menu-icon {
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.ubuntu-workbench .menu-item .menu-label {
+  flex: 1;
+}
+.ubuntu-workbench .menu-item .menu-accelerator {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.4);
+  margin-left: auto;
+  padding-left: 16px;
+}
+.ubuntu-workbench .menu-item:hover .menu-accelerator {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* ── Submenu indicator ── */
+.ubuntu-workbench .menu-item.has-submenu::after {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-right: 2px solid rgba(255, 255, 255, 0.4);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.4);
+  transform: rotate(-45deg);
+  flex-shrink: 0;
+}
+.ubuntu-workbench .menu-item.has-submenu:hover::after {
+  border-color: rgba(255, 255, 255, 0.8);
+}

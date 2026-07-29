@@ -1,0 +1,14 @@
+/* ============================================================
+   TYPOGRAPHY — Libadwaita style classes
+   ============================================================ */
+.ubuntu-workbench .title-1 { font-weight: 300; font-size: 32px; }
+.ubuntu-workbench .title-2 { font-weight: 550; font-size: 27px; }
+.ubuntu-workbench .title-3 { font-weight: 550; font-size: 20px; }
+.ubuntu-workbench .title-4 { font-weight: 500; font-size: 17px; }
+.ubuntu-workbench .heading { font-weight: 500; font-size: 15px; }
+.ubuntu-workbench .body { font-size: 14px; line-height: 1.5; }
+.ubuntu-workbench .caption-heading { font-weight: 500; font-size: 12px; }
+.ubuntu-workbench .caption { font-weight: 400; font-size: 12px; }
+.ubuntu-workbench .monospace { font-family: var(--nx-font-mono); }
+.ubuntu-workbench .document { font-size: 15px; line-height: 1.6; }
+.ubuntu-workbench .numeric { font-variant-numeric: tabular-nums; }

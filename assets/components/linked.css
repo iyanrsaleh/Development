@@ -1,0 +1,11 @@
+/* ============================================================
+   LINKED — Grup input/button menyatu
+   ════════════════════════════════════════════════════════════
+   Style utama ada di button.css (.linked).
+   File ini hanya untuk backward compatibility & fallback.
+   ============================================================ */
+
+.ubuntu-workbench .linked {
+  display: inline-flex;
+  align-items: center;
+}

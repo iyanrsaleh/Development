@@ -1,0 +1,396 @@
+/* Host title bar (index.html #nx-titlebar) SAJA.
+   Tinggi host TETAP (32px) di semua variant supaya #main / jendela app
+   tidak ikut reflow saat user ganti gaya di settings. */
+
+#nx-titlebar {
+  position: sticky;
+  top: 0;
+  z-index: 2000;
+  flex: 0 0 auto;
+  height: 32px;
+  min-height: 32px;
+  max-height: 32px;
+  box-sizing: border-box;
+  overflow: visible;
+  background: #1e1e1e;
+}
+
+#nx-titlebar.nx-titlebar-host--hidden,
+#nx-titlebar[hidden] {
+  display: none !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  border: 0 !important;
+}
+
+/* ——— Display: Hover — strip tipis di atas; bar muncul saat kursor di area ——— */
+#nx-titlebar.nx-titlebar-host--display-hover {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 8px;
+  min-height: 8px;
+  max-height: none;
+  z-index: 4000;
+  background: transparent !important;
+  overflow: visible;
+  /* Sticky flow tidak makan tinggi #main */
+}
+
+#nx-titlebar.nx-titlebar-host--display-hover:hover,
+#nx-titlebar.nx-titlebar-host--display-hover.is-reveal {
+  height: 32px;
+  min-height: 32px;
+}
+
+#nx-titlebar.nx-titlebar-host--display-hover > .nx-titlebar {
+  transform: translateY(calc(-100% - 2px));
+  opacity: 0;
+  pointer-events: none;
+  -webkit-app-region: no-drag;
+  transition:
+    transform 0.16s ease,
+    opacity 0.16s ease;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+
+#nx-titlebar.nx-titlebar-host--display-hover:hover > .nx-titlebar,
+#nx-titlebar.nx-titlebar-host--display-hover.is-reveal > .nx-titlebar {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+  -webkit-app-region: drag;
+}
+
+/* Petunjuk tipis di tepi atas saat collapsed (opsional, sangat soft) */
+#nx-titlebar.nx-titlebar-host--display-hover::after {
+  content: '';
+  position: absolute;
+  left: 40%;
+  right: 40%;
+  top: 2px;
+  height: 2px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.2);
+  pointer-events: none;
+  opacity: 0.6;
+  transition: opacity 0.15s ease;
+}
+
+#nx-titlebar.nx-titlebar-host--display-hover:hover::after,
+#nx-titlebar.nx-titlebar-host--display-hover.is-reveal::after {
+  opacity: 0;
+}
+
+/* Bar asli — hanya anak #nx-titlebar */
+#nx-titlebar > .nx-titlebar {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 32px;
+  box-sizing: border-box;
+  user-select: none;
+  -webkit-app-region: drag;
+}
+
+#nx-titlebar > .nx-titlebar .nx-titlebar__brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  overflow: hidden;
+  min-width: 0;
+}
+
+#nx-titlebar > .nx-titlebar .nx-titlebar__icon {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+}
+
+#nx-titlebar > .nx-titlebar .nx-titlebar__title {
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#nx-titlebar > .nx-titlebar .nx-titlebar__controls {
+  display: flex;
+  flex: 0 0 auto;
+  -webkit-app-region: no-drag;
+}
+
+#nx-titlebar > .nx-titlebar .nx-titlebar__btn {
+  width: 46px;
+  height: 32px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-app-region: no-drag;
+}
+
+#nx-titlebar > .nx-titlebar .nx-titlebar__btn [class*="icon-ic_fluent_"] {
+  font-size: 16px;
+  line-height: 1;
+  color: inherit;
+  pointer-events: none;
+}
+
+#nx-titlebar > .nx-titlebar .nx-titlebar__btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+#nx-titlebar > .nx-titlebar .nx-titlebar__btn--close:hover {
+  background: #e81123;
+  color: #fff;
+}
+
+/* ——— 1 Classic Dark ——— */
+#nx-titlebar.nx-titlebar-host--classic {
+  background: #1e1e1e;
+}
+#nx-titlebar > .nx-titlebar.nx-titlebar--classic {
+  background: #1e1e1e;
+  color: #ddd;
+}
+
+/* ——— 2 Light ——— */
+#nx-titlebar.nx-titlebar-host--light {
+  background: #f6f5f4;
+}
+#nx-titlebar > .nx-titlebar.nx-titlebar--light {
+  background: #f6f5f4;
+  color: #241f31;
+  border-bottom: 1px solid #deddda;
+}
+#nx-titlebar > .nx-titlebar.nx-titlebar--light .nx-titlebar__btn:hover {
+  background: rgba(0, 0, 0, 0.08);
+}
+#nx-titlebar > .nx-titlebar.nx-titlebar--light .nx-titlebar__btn--close:hover {
+  background: #e01b24;
+  color: #fff;
+}
+
+/* ——— 3 Ubuntu Accent ——— */
+#nx-titlebar.nx-titlebar-host--ubuntu {
+  background: #2c001e;
+}
+#nx-titlebar > .nx-titlebar.nx-titlebar--ubuntu {
+  background: linear-gradient(90deg, #2c001e 0%, #3d0a2a 40%, #241f31 100%);
+  color: #f6f5f4;
+  box-shadow: inset 3px 0 0 0 #e95420;
+}
+#nx-titlebar > .nx-titlebar.nx-titlebar--ubuntu .nx-titlebar__btn:hover {
+  background: rgba(233, 84, 32, 0.25);
+}
+#nx-titlebar > .nx-titlebar.nx-titlebar--ubuntu .nx-titlebar__btn--close:hover {
+  background: #e95420;
+  color: #fff;
+}
+
+/* ——— 4 Compact (visual lebih rapat, host tetap 32px) ——— */
+#nx-titlebar.nx-titlebar-host--compact {
+  background: #161616;
+}
+#nx-titlebar > .nx-titlebar.nx-titlebar--compact {
+  height: 32px;
+  background: #161616;
+  color: #c0bfbc;
+}
+#nx-titlebar > .nx-titlebar.nx-titlebar--compact .nx-titlebar__brand {
+  padding: 0 8px;
+  gap: 6px;
+}
+#nx-titlebar > .nx-titlebar.nx-titlebar--compact .nx-titlebar__icon {
+  width: 12px;
+  height: 12px;
+}
+#nx-titlebar > .nx-titlebar.nx-titlebar--compact .nx-titlebar__title {
+  font-size: 11px;
+}
+#nx-titlebar > .nx-titlebar.nx-titlebar--compact .nx-titlebar__btn {
+  width: 40px;
+  height: 28px;
+  margin: 2px 0;
+  border-radius: 4px;
+}
+#nx-titlebar > .nx-titlebar.nx-titlebar--compact .nx-titlebar__btn [class*="icon-ic_fluent_"] {
+  font-size: 12px;
+}
+
+/* ——— 5 Floating Glass (inset di dalam host 32px — tanpa padding host) ——— */
+#nx-titlebar.nx-titlebar-host--floating {
+  background: transparent;
+  /* JANGAN padding di host — itu yang menggeser #main / rusak jendela settings */
+}
+#nx-titlebar > .nx-titlebar.nx-titlebar--floating {
+  height: 28px;
+  margin: 2px 8px;
+  padding: 0 4px 0 8px;
+  border-radius: 8px;
+  background: rgba(36, 31, 49, 0.85);
+  color: #f6f5f4;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 2px 10px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+#nx-titlebar > .nx-titlebar.nx-titlebar--floating .nx-titlebar__btn {
+  height: 24px;
+  width: 36px;
+  border-radius: 5px;
+  margin: 2px 1px;
+}
+#nx-titlebar > .nx-titlebar.nx-titlebar--floating .nx-titlebar__btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+#nx-titlebar > .nx-titlebar.nx-titlebar--floating .nx-titlebar__btn--close:hover {
+  background: #e01b24;
+  color: #fff;
+}
+
+/* ——— Preview mock (settings) ——— */
+.nx-titlebar-preview {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.nx-titlebar-preview__option {
+  display: block;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--border-color, #deddda);
+  border-radius: 8px;
+  background: var(--view-bg-color, #fff);
+  cursor: pointer;
+  overflow: hidden;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  -webkit-app-region: no-drag !important;
+}
+
+.nx-titlebar-preview__option * {
+  -webkit-app-region: no-drag !important;
+}
+
+.nx-titlebar-preview__option:hover {
+  border-color: var(--ub-orange, #e95420);
+}
+
+.nx-titlebar-preview__option.is-selected {
+  border-color: var(--ub-orange, #e95420);
+  box-shadow: 0 0 0 1px var(--ub-orange, #e95420);
+}
+
+.nx-titlebar-preview__option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.nx-titlebar-mock {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 32px;
+  box-sizing: border-box;
+  user-select: none;
+  pointer-events: none;
+  -webkit-app-region: no-drag !important;
+}
+
+.nx-titlebar-mock__brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.nx-titlebar-mock__title {
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nx-titlebar-mock__controls {
+  display: flex;
+  flex: 0 0 auto;
+}
+
+.nx-titlebar-mock__btn {
+  width: 40px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+.nx-titlebar-mock--classic {
+  background: #1e1e1e;
+  color: #ddd;
+}
+
+.nx-titlebar-mock--light {
+  background: #f6f5f4;
+  color: #241f31;
+  border-bottom: 1px solid #deddda;
+}
+
+.nx-titlebar-mock--ubuntu {
+  background: linear-gradient(90deg, #2c001e 0%, #3d0a2a 40%, #241f31 100%);
+  color: #f6f5f4;
+  box-shadow: inset 3px 0 0 0 #e95420;
+}
+
+.nx-titlebar-mock--compact {
+  background: #161616;
+  color: #c0bfbc;
+}
+
+.nx-titlebar-mock--compact .nx-titlebar-mock__btn {
+  width: 32px;
+  height: 22px;
+  font-size: 12px;
+}
+
+.nx-titlebar-mock--floating {
+  height: 28px;
+  margin: 2px 8px;
+  padding: 0 4px 0 8px;
+  border-radius: 8px;
+  background: rgba(36, 31, 49, 0.85);
+  color: #f6f5f4;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.nx-titlebar-preview__meta {
+  padding: 0.5rem 0.75rem 0.65rem;
+}
+
+.nx-titlebar-preview__meta .heading {
+  margin: 0;
+}
+
+.nx-titlebar-preview__meta .caption {
+  margin: 0.2rem 0 0;
+}

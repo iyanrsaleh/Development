@@ -1,0 +1,462 @@
+/* ============================================================
+   BUTTON — Libadwaita / Yaru style classes
+   https://gnome.pages.gitlab.gnome.org/libadwaita/doc/main/style-classes.html
+   ════════════════════════════════════════════════════════════
+   Cocok untuk Ubuntu 24.04 — Yaru GTK theme (GNOME 46).
+   Semua style discope dalam .ubuntu-workbench agar tidak
+   bentrok dengan CSS global.
+   ============================================================ */
+
+/* ────────── Base button — OPT-IN, bukan elemen telanjang ──────────
+   Reset dasar TIDAK menyasar elemen <button> telanjang. Selector lama
+   `.ubuntu-workbench button` menimpa SEMUA button di dalam workbench,
+   termasuk fitur sinkronisasi Discovery (Office/Source Control/Chat) —
+   sumber bug berulang yang memaksa rantai :not() terus bertambah (lihat
+   README "CSS untuk Fitur Sinkronisasi"). Sekarang tombol internal HARUS
+   membawa salah satu class di bawah; konten sinkron (class berprefiks
+   nx-/nexa-/scm-/dgm-/…) tidak pernah memakai class ini, jadi tidak
+   tersentuh sama sekali tanpa perlu exclusion apa pun. */
+.ubuntu-workbench .button,
+.ubuntu-workbench .ubuntu-button,
+.ubuntu-workbench .ubuntu-btn,
+.ubuntu-workbench button.suggested-action,
+.ubuntu-workbench button.destructive-action,
+.ubuntu-workbench button.orange-action,
+.ubuntu-workbench button.flat,
+.ubuntu-workbench button.raised,
+.ubuntu-workbench button.pill,
+.ubuntu-workbench button.circular,
+.ubuntu-workbench button.icon-button,
+.ubuntu-workbench button.small,
+.ubuntu-workbench button.large,
+.ubuntu-workbench label.button,
+.ubuntu-workbench label.suggested-action,
+.ubuntu-workbench label.destructive-action,
+.ubuntu-workbench label.orange-action {
+  min-height: 32px;
+  padding: 4px 11px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  background: linear-gradient(to bottom, #faf9f8, #f6f5f4);
+  background-color: #f6f5f4;
+  color: var(--view-fg-color);
+  font-size: 13px;
+  font-family: var(--nx-font-sans);
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 80ms cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.6),
+    inset 0 -1px 0 0 rgba(0, 0, 0, 0.05);
+  outline: none;
+  user-select: none;
+  white-space: nowrap;
+  text-decoration: none;
+  line-height: 1.2;
+  box-sizing: border-box;
+}
+.ubuntu-workbench .button:focus-visible,
+.ubuntu-workbench .ubuntu-button:focus-visible,
+.ubuntu-workbench .ubuntu-btn:focus-visible,
+.ubuntu-workbench button.suggested-action:focus-visible,
+.ubuntu-workbench button.destructive-action:focus-visible,
+.ubuntu-workbench button.orange-action:focus-visible,
+.ubuntu-workbench button.flat:focus-visible,
+.ubuntu-workbench button.raised:focus-visible,
+.ubuntu-workbench button.pill:focus-visible,
+.ubuntu-workbench button.circular:focus-visible,
+.ubuntu-workbench button.icon-button:focus-visible,
+.ubuntu-workbench button.small:focus-visible,
+.ubuntu-workbench button.large:focus-visible {
+  box-shadow:
+    inset 0 0 0 2px var(--ub-orange),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.6);
+  border-color: var(--ub-orange);
+}
+
+/* ────────── Hover ────────── */
+.ubuntu-workbench .button:hover,
+.ubuntu-workbench .ubuntu-button:hover,
+.ubuntu-workbench .ubuntu-btn:hover,
+.ubuntu-workbench button.suggested-action:hover,
+.ubuntu-workbench button.destructive-action:hover,
+.ubuntu-workbench button.orange-action:hover,
+.ubuntu-workbench button.flat:hover,
+.ubuntu-workbench button.raised:hover,
+.ubuntu-workbench button.pill:hover,
+.ubuntu-workbench button.circular:hover,
+.ubuntu-workbench button.icon-button:hover,
+.ubuntu-workbench button.small:hover,
+.ubuntu-workbench button.large:hover {
+  background: linear-gradient(to bottom, #ffffff, #fafaf9);
+  background-color: #fafaf9;
+  border-color: #bebebe;
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.7),
+    inset 0 -1px 0 0 rgba(0, 0, 0, 0.06);
+}
+
+/* ────────── Active / Pressed ────────── */
+.ubuntu-workbench .button:active,
+.ubuntu-workbench .ubuntu-button:active,
+.ubuntu-workbench .ubuntu-btn:active,
+.ubuntu-workbench button.suggested-action:active,
+.ubuntu-workbench button.destructive-action:active,
+.ubuntu-workbench button.orange-action:active,
+.ubuntu-workbench button.flat:active,
+.ubuntu-workbench button.raised:active,
+.ubuntu-workbench button.pill:active,
+.ubuntu-workbench button.circular:active,
+.ubuntu-workbench button.icon-button:active,
+.ubuntu-workbench button.small:active,
+.ubuntu-workbench button.large:active {
+  background: linear-gradient(to bottom, #e5e4e3, #e0dfde);
+  background-color: #e0dfde;
+  border-color: #b0b0b0;
+  box-shadow:
+    inset 0 2px 3px 0 rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 0 rgba(0, 0, 0, 0.04);
+  transition-duration: 40ms;
+}
+
+/* ────────── Checked / Toggle state ────────── */
+.ubuntu-workbench .button:checked,
+.ubuntu-workbench .ubuntu-button:checked,
+.ubuntu-workbench .ubuntu-btn:checked {
+  background: linear-gradient(to bottom, #d5d4d3, #d0cfce);
+  background-color: #d0cfce;
+  border-color: #a0a0a0;
+  box-shadow:
+    inset 0 2px 3px 0 rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 0 rgba(0, 0, 0, 0.06);
+  color: var(--view-fg-color);
+}
+
+/* ────────── Disabled ────────── */
+.ubuntu-workbench .button:disabled,
+.ubuntu-workbench .ubuntu-button:disabled,
+.ubuntu-workbench .ubuntu-btn:disabled,
+.ubuntu-workbench button.suggested-action:disabled,
+.ubuntu-workbench button.destructive-action:disabled,
+.ubuntu-workbench button.orange-action:disabled,
+.ubuntu-workbench button.flat:disabled,
+.ubuntu-workbench button.raised:disabled,
+.ubuntu-workbench button.pill:disabled,
+.ubuntu-workbench button.circular:disabled,
+.ubuntu-workbench button.icon-button:disabled,
+.ubuntu-workbench button.small:disabled,
+.ubuntu-workbench button.large:disabled {
+  opacity: 0.5;
+  filter: grayscale(0.5);
+  pointer-events: none;
+  box-shadow: none;
+}
+
+/* ────────── Label sebagai button — hover/active via brightness ────────── */
+.ubuntu-workbench label.button:hover,
+.ubuntu-workbench label.suggested-action:hover,
+.ubuntu-workbench label.destructive-action:hover,
+.ubuntu-workbench label.orange-action:hover {
+  filter: brightness(1.06);
+  cursor: pointer;
+}
+.ubuntu-workbench label.button:active,
+.ubuntu-workbench label.suggested-action:active,
+.ubuntu-workbench label.destructive-action:active,
+.ubuntu-workbench label.orange-action:active {
+  filter: brightness(0.92);
+  cursor: pointer;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   STYLE VARIANTS — Yaru / Libadwaita
+   ═══════════════════════════════════════════════════════════ */
+
+/* ─── Opaque (default filled, alias .opaque dari Libadwaita) ─── */
+/* Sama dengan base button — sudah default, class ini hanya sebagai alias */
+
+/* ─── Suggested Action (biru aksen Yaru/GNOME) ─── */
+.ubuntu-workbench .suggested-action,
+.ubuntu-workbench button.suggested-action {
+  background: linear-gradient(to bottom, #4a90d9, #3584e4);
+  background-color: #3584e4;
+  border-color: #2a76c6;
+  color: #ffffff;
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.2),
+    inset 0 -1px 0 0 rgba(0, 0, 0, 0.1);
+}
+.ubuntu-workbench .suggested-action:hover,
+.ubuntu-workbench button.suggested-action:hover {
+  background: linear-gradient(to bottom, #5b9ee3, #4690df);
+  background-color: #4690df;
+  border-color: #2a76c6;
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.25),
+    inset 0 -1px 0 0 rgba(0, 0, 0, 0.1);
+}
+.ubuntu-workbench .suggested-action:active,
+.ubuntu-workbench button.suggested-action:active {
+  background: linear-gradient(to bottom, #2a76c6, #2569b3);
+  background-color: #2569b3;
+  border-color: #1f5c9e;
+  box-shadow:
+    inset 0 2px 3px 0 rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 0 rgba(0, 0, 0, 0.1);
+}
+.ubuntu-workbench .suggested-action:focus-visible,
+.ubuntu-workbench button.suggested-action:focus-visible {
+  box-shadow:
+    inset 0 0 0 2px #ffffff,
+    inset 0 0 0 4px var(--accent-bg-color);
+}
+
+/* ─── Destructive Action (merah Yaru) ─── */
+.ubuntu-workbench .destructive-action,
+.ubuntu-workbench button.destructive-action {
+  background: linear-gradient(to bottom, #e8454b, #e01b24);
+  background-color: #e01b24;
+  border-color: #c41820;
+  color: #ffffff;
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.15),
+    inset 0 -1px 0 0 rgba(0, 0, 0, 0.1);
+}
+.ubuntu-workbench .destructive-action:hover,
+.ubuntu-workbench button.destructive-action:hover {
+  background: linear-gradient(to bottom, #ed5e63, #e5333a);
+  background-color: #e5333a;
+  border-color: #c41820;
+}
+.ubuntu-workbench .destructive-action:active,
+.ubuntu-workbench button.destructive-action:active {
+  background: linear-gradient(to bottom, #c41820, #ab151c);
+  border-color: #931218;
+  box-shadow:
+    inset 0 2px 3px 0 rgba(0, 0, 0, 0.2);
+}
+.ubuntu-workbench .destructive-action:focus-visible,
+.ubuntu-workbench button.destructive-action:focus-visible {
+  box-shadow:
+    inset 0 0 0 2px #ffffff,
+    inset 0 0 0 4px var(--error-bg-color);
+}
+
+/* ─── Orange Action (Ubuntu orange #E95420 — aksen khas Ubuntu) ─── */
+.ubuntu-workbench .orange-action,
+.ubuntu-workbench button.orange-action {
+  background: linear-gradient(to bottom, #ed6b3d, #e95420);
+  background-color: #e95420;
+  border-color: #d44a1a;
+  color: #ffffff;
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.2),
+    inset 0 -1px 0 0 rgba(0, 0, 0, 0.1);
+}
+.ubuntu-workbench .orange-action:hover,
+.ubuntu-workbench button.orange-action:hover {
+  background: linear-gradient(to bottom, #f27d55, #eb6130);
+  background-color: #eb6130;
+  border-color: #d44a1a;
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.25),
+    inset 0 -1px 0 0 rgba(0, 0, 0, 0.1);
+}
+.ubuntu-workbench .orange-action:active,
+.ubuntu-workbench button.orange-action:active {
+  background: linear-gradient(to bottom, #d44a1a, #c24115);
+  background-color: #c24115;
+  border-color: #a83812;
+  box-shadow:
+    inset 0 2px 3px 0 rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 0 rgba(0, 0, 0, 0.1);
+}
+.ubuntu-workbench .orange-action:focus-visible,
+.ubuntu-workbench button.orange-action:focus-visible {
+  box-shadow:
+    inset 0 0 0 2px #ffffff,
+    inset 0 0 0 4px var(--ub-orange);
+}
+
+/* ─── Flat (transparan, seperti link/toolbar button) ─── */
+.ubuntu-workbench .flat,
+.ubuntu-workbench button.flat {
+  background: transparent;
+  border-color: transparent;
+  color: var(--view-fg-color);
+  box-shadow: none;
+}
+.ubuntu-workbench .flat:hover,
+.ubuntu-workbench button.flat:hover {
+  background: rgba(0, 0, 0, 0.06);
+  border-color: transparent;
+  box-shadow: none;
+}
+.ubuntu-workbench .flat:active,
+.ubuntu-workbench button.flat:active {
+  background: rgba(0, 0, 0, 0.12);
+  border-color: transparent;
+  box-shadow: none;
+}
+.ubuntu-workbench .flat:checked,
+.ubuntu-workbench button.flat:checked {
+  background: rgba(0, 0, 0, 0.10);
+  border-color: transparent;
+  box-shadow: none;
+}
+.ubuntu-workbench .flat:focus-visible,
+.ubuntu-workbench button.flat:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--ub-orange);
+}
+
+/* ─── Raised (kartu/panel, dengan bayangan) ─── */
+.ubuntu-workbench .raised,
+.ubuntu-workbench button.raised {
+  background: linear-gradient(to bottom, #faf9f8, #f6f5f4);
+  background-color: #f6f5f4;
+  border: 1px solid var(--border-color);
+  box-shadow:
+    0 1px 3px 0 rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.6);
+}
+.ubuntu-workbench .raised:hover,
+.ubuntu-workbench button.raised:hover {
+  box-shadow:
+    0 2px 6px 0 rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.7);
+}
+.ubuntu-workbench .raised:active,
+.ubuntu-workbench button.raised:active {
+  box-shadow:
+    0 1px 2px 0 rgba(0, 0, 0, 0.1),
+    inset 0 2px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+/* ─── Pill / Rounded (tombol rounded penuh) ─── */
+.ubuntu-workbench .pill,
+.ubuntu-workbench button.pill {
+  border-radius: 999px;
+  padding: 4px 20px;
+}
+
+/* ─── Circular (icon melingkar) ─── */
+.ubuntu-workbench .circular,
+.ubuntu-workbench button.circular {
+  border-radius: 50%;
+  padding: 6px;
+  min-width: 32px;
+  min-height: 32px;
+}
+
+/* ─── Icon Button (tombol khusus icon) ─── */
+.ubuntu-workbench .icon-button,
+.ubuntu-workbench button.icon-button {
+  min-width: 32px;
+  min-height: 32px;
+  padding: 4px;
+  border-radius: var(--border-radius);
+  font-size: 16px;
+}
+.ubuntu-workbench .icon-button.circular,
+.ubuntu-workbench button.icon-button.circular {
+  border-radius: 50%;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BUTTON SIZES
+   ═══════════════════════════════════════════════════════════ */
+.ubuntu-workbench .small,
+.ubuntu-workbench button.small {
+  min-height: 24px;
+  padding: 2px 7px;
+  font-size: 11px;
+}
+.ubuntu-workbench .large,
+.ubuntu-workbench button.large {
+  min-height: 40px;
+  padding: 6px 16px;
+  font-size: 15px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   LINKED — Grup input/button menyatu (seperti segmented)
+   ─── Gunakan di container <div class="linked">
+   ─── Bisa campur: input + button, button + button, dll
+   ═══════════════════════════════════════════════════════════ */
+.ubuntu-workbench .linked {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+}
+/* !important pada properti krusial — sebelumnya mengandalkan specificity
+   murni terhadap base opt-in (.button/.ubuntu-button/button.<varian>), yang
+   ternyata tidak cukup andal untuk menyatukan segmented group (tombol
+   tampak terpisah, bukan menyatu). Properti non-krusial (position, z-index)
+   tetap tanpa !important karena tidak berpotensi ditimpa. */
+.ubuntu-workbench .linked > * {
+  border-radius: 0 !important;
+  margin: 0 !important;
+  position: relative;
+  z-index: 0;
+}
+.ubuntu-workbench .linked > *:first-child {
+  border-radius: var(--border-radius) 0 0 var(--border-radius) !important;
+}
+.ubuntu-workbench .linked > *:last-child {
+  border-radius: 0 var(--border-radius) var(--border-radius) 0 !important;
+}
+.ubuntu-workbench .linked > *:only-child {
+  border-radius: var(--border-radius) !important;
+}
+.ubuntu-workbench .linked > * + * {
+  border-left-width: 0 !important;
+  margin-left: 0 !important;
+}
+/* Saat input + button di linked, pastikan tinggi sama */
+.ubuntu-workbench .linked input,
+.ubuntu-workbench .linked select,
+.ubuntu-workbench .linked textarea {
+  box-sizing: border-box;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   COLOR VARIANTS — Untuk .flat & kasus spesifik
+   ═══════════════════════════════════════════════════════════ */
+.ubuntu-workbench .success {
+  color: var(--success-bg-color);
+}
+.ubuntu-workbench .warning {
+  color: var(--warning-bg-color);
+}
+.ubuntu-workbench .error {
+  color: var(--error-bg-color);
+}
+.ubuntu-workbench .orange {
+  color: var(--ub-orange);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SPINNER DALAM BUTTON (loading state)
+   ═══════════════════════════════════════════════════════════ */
+.ubuntu-workbench .button .spinner,
+.ubuntu-workbench .ubuntu-button .spinner,
+.ubuntu-workbench .ubuntu-btn .spinner {
+  width: 14px;
+  height: 14px;
+  border-width: 2px;
+  border-color: currentColor;
+  border-right-color: transparent;
+}
+.ubuntu-workbench .suggested-action .spinner,
+.ubuntu-workbench button.suggested-action .spinner,
+.ubuntu-workbench .destructive-action .spinner,
+.ubuntu-workbench button.destructive-action .spinner,
+.ubuntu-workbench .orange-action .spinner,
+.ubuntu-workbench button.orange-action .spinner {
+  border-color: rgba(255, 255, 255, 0.5);
+  border-right-color: transparent;
+}

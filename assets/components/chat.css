@@ -1,0 +1,17 @@
+/* ============================================================
+   CHAT — wrapper Workbench
+   Layout window saja. Styling detail panel chat (.beranda-chat-panel-*)
+   sudah global lewat assets/css/style.css + chat/style.css (di-inject
+   dinamis via NX.Css() saat mountBerandaChatPanel() dipanggil) — tidak
+   diduplikasi.
+   ============================================================ */
+.ubuntu-workbench .ubuntu-chat-app {
+  display: flex;
+  height: 100%;
+  overflow: hidden;
+  background: var(--window-bg-color);
+}
+.ubuntu-workbench .ubuntu-chat-app .beranda-chat-panel-host {
+  flex: 1;
+  min-height: 0;
+}

@@ -1,0 +1,10 @@
+/* ============================================================
+   TOP BAR (Panel) — Workbench
+   ============================================================ */
+.ubuntu-workbench #top-bar { height:30px; background:var(--panel-bg, #151515); display:flex; justify-content:space-between; align-items:center; padding:0 15px; font-size:14px; color:var(--panel-fg, #fff); position:relative; z-index:2000; }
+.ubuntu-workbench .ubuntu-bar-section { display:flex; align-items:center; gap:15px; height:100%; }
+.ubuntu-workbench #activities-btn { padding:0 10px; height:100%; display:flex; align-items:center; cursor:pointer; }
+.ubuntu-workbench #activities-btn:hover { background:rgba(255,255,255,0.1); }
+.ubuntu-workbench #clock { position:absolute; left:50%; transform:translateX(-50%); cursor:default; }
+.ubuntu-workbench .ubuntu-tray-icon { padding:0 8px; height:100%; display:flex; align-items:center; cursor:pointer; gap:8px; }
+.ubuntu-workbench .ubuntu-tray-icon:hover { background:rgba(255,255,255,0.1); }
