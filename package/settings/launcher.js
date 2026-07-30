@@ -6,13 +6,13 @@
 export async function launcher(page, route) {
   route.register(page, async (routeName, container, routeMeta = {
     title: "Launcher | Settings",
-    description: "Pengaturan posisi, ukuran ikon, dan item tersembunyi launcher.",
+    description: "Pengaturan posisi, ukuran ikon, label/tooltip, dan item tersembunyi launcher.",
   }, style, nav = {}) => {
     route.routeMetaByRoute.set(page, routeMeta);
 
     const native = window.NATIVE_LAUNCHER_DEFAULTS || {
       disabled: ['directory'],
-      settings: { position: 'left', iconSize: '35px' },
+      settings: { position: 'left', iconSize: '35px', labelStyle: 'auto', labelMode: 'both' },
     };
     const prefs = typeof window.loadLauncherPrefs === 'function'
       ? await window.loadLauncherPrefs()
@@ -24,6 +24,7 @@ export async function launcher(page, route) {
     const position = (merged.settings && merged.settings.position) || 'left';
     const iconSize = (merged.settings && merged.settings.iconSize) || '35px';
     const labelStyle = (merged.settings && merged.settings.labelStyle) || 'auto';
+    const labelMode = (merged.settings && merged.settings.labelMode) || 'both';
     const disabledSet = new Set(
       Array.isArray(merged.disabled) ? merged.disabled.map(String) : [],
     );
@@ -54,6 +55,12 @@ export async function launcher(page, route) {
       { value: 'dark', label: 'Gelap (+ bayangan)' },
     ];
 
+    const modeOptions = [
+      { value: 'both', label: 'Label + Tooltip' },
+      { value: 'tooltip', label: 'Tooltip saja' },
+      { value: 'hidden', label: 'Sembunyikan nama' },
+    ];
+
     const disabledRows = catalog.length
       ? catalog.map((s) => {
         const id = String(s.id || '');
@@ -76,12 +83,13 @@ export async function launcher(page, route) {
             Default native: posisi <span class="monospace">left</span>,
             ikon <span class="monospace">35px</span>,
             label <span class="monospace">auto</span>,
+            mode <span class="monospace">both</span>,
             sembunyikan <span class="monospace">directory</span>.
             Perubahan langsung diterapkan ke dock di NXHOME.
           </p>
 
           <form id="nx-launcher-prefs-form">
-            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-top:1rem">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1rem">
               <div class="card">
                 <p class="heading">Posisi dock</p>
                 <select name="position" id="nx-launcher-pos" class="select" style="width:100%">
@@ -99,13 +107,24 @@ export async function launcher(page, route) {
                 </select>
               </div>
               <div class="card">
+                <p class="heading">Mode nama</p>
+                <select name="labelMode" id="nx-launcher-label-mode" class="select" style="width:100%">
+                  ${modeOptions.map((o) => (
+                    `<option value="${o.value}"${o.value === labelMode ? ' selected' : ''}>${o.label}</option>`
+                  )).join('')}
+                </select>
+                <p class="caption" style="margin-top:0.35rem">
+                  Tooltip memakai gaya components (<span class="monospace">data-tooltip</span>).
+                </p>
+              </div>
+              <div class="card">
                 <p class="heading">Warna label</p>
                 <select name="labelStyle" id="nx-launcher-label" class="select" style="width:100%">
                   ${labelOptions.map((o) => (
                     `<option value="${o.value}"${o.value === labelStyle ? ' selected' : ''}>${o.label}</option>`
                   )).join('')}
                 </select>
-                <p class="caption" style="margin-top:0.35rem">Agar teks tidak tenggelam di wallpaper.</p>
+                <p class="caption" style="margin-top:0.35rem">Untuk mode tampilkan label di atas wallpaper.</p>
               </div>
             </div>
 
@@ -139,6 +158,16 @@ export async function launcher(page, route) {
       statusEl.style.color = ok ? 'var(--success-bg-color)' : 'var(--error-bg-color)';
     };
 
+    const readSettingsFromForm = () => {
+      const fd = new FormData(form);
+      return {
+        position: String(fd.get('position') || 'left'),
+        iconSize: String(fd.get('iconSize') || '35px'),
+        labelStyle: String(fd.get('labelStyle') || 'auto'),
+        labelMode: String(fd.get('labelMode') || 'both'),
+      };
+    };
+
     const applyAndRefresh = async (prefsPayload) => {
       if (typeof window.saveLauncherPrefs !== 'function') {
         throw new Error('saveLauncherPrefs belum terdaftar (system/index.js)');
@@ -151,17 +180,33 @@ export async function launcher(page, route) {
 
     form?.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const fd = new FormData(form);
-      const pos = String(fd.get('position') || 'left');
-      const size = String(fd.get('iconSize') || '35px');
-      const label = String(fd.get('labelStyle') || 'auto');
-      const disabled = fd.getAll('disabled').map((v) => String(v));
+      const settings = readSettingsFromForm();
+      const disabled = new FormData(form).getAll('disabled').map((v) => String(v));
       try {
-        await applyAndRefresh({
-          disabled,
-          settings: { position: pos, iconSize: size, labelStyle: label },
-        });
-        showStatus('Tersimpan — dock diperbarui.');
+        await applyAndRefresh({ disabled, settings });
+        showStatus(
+          settings.labelMode === 'tooltip'
+            ? 'Tersimpan — nama item lewat tooltip.'
+            : settings.labelMode === 'both'
+              ? 'Tersimpan — label + tooltip.'
+              : settings.labelMode === 'hidden'
+                ? 'Tersimpan — nama disembunyikan.'
+                : 'Tersimpan — dock diperbarui.',
+        );
+      } catch (err) {
+        showStatus(err && err.message ? err.message : String(err), false);
+      }
+    });
+
+    // Langsung terapkan saat ganti mode/posisi (UX mirip title bar)
+    form?.addEventListener('change', async (e) => {
+      const t = e.target;
+      if (!t || !['position', 'iconSize', 'labelStyle', 'labelMode'].includes(t.name)) return;
+      const settings = readSettingsFromForm();
+      const disabled = new FormData(form).getAll('disabled').map((v) => String(v));
+      try {
+        await applyAndRefresh({ disabled, settings });
+        showStatus('Diterapkan.');
       } catch (err) {
         showStatus(err && err.message ? err.message : String(err), false);
       }
@@ -170,20 +215,24 @@ export async function launcher(page, route) {
     resetBtn?.addEventListener('click', async () => {
       try {
         const d = window.NATIVE_LAUNCHER_DEFAULTS || native;
+        const settings = {
+          position: (d.settings && d.settings.position) || 'left',
+          iconSize: (d.settings && d.settings.iconSize) || '35px',
+          labelStyle: (d.settings && d.settings.labelStyle) || 'auto',
+          labelMode: (d.settings && d.settings.labelMode) || 'both',
+        };
         await applyAndRefresh({
           disabled: (d.disabled || ['directory']).slice(),
-          settings: {
-            position: (d.settings && d.settings.position) || 'left',
-            iconSize: (d.settings && d.settings.iconSize) || '35px',
-            labelStyle: (d.settings && d.settings.labelStyle) || 'auto',
-          },
+          settings,
         });
         const posSel = form.querySelector('[name="position"]');
         const sizeSel = form.querySelector('[name="iconSize"]');
         const labelSel = form.querySelector('[name="labelStyle"]');
-        if (posSel) posSel.value = (d.settings && d.settings.position) || 'left';
-        if (sizeSel) sizeSel.value = (d.settings && d.settings.iconSize) || '35px';
-        if (labelSel) labelSel.value = (d.settings && d.settings.labelStyle) || 'auto';
+        const modeSel = form.querySelector('[name="labelMode"]');
+        if (posSel) posSel.value = settings.position;
+        if (sizeSel) sizeSel.value = settings.iconSize;
+        if (labelSel) labelSel.value = settings.labelStyle;
+        if (modeSel) modeSel.value = settings.labelMode;
         const nativeDisabled = new Set(d.disabled || ['directory']);
         form.querySelectorAll('input[name="disabled"]').forEach((el) => {
           el.checked = nativeDisabled.has(el.value);

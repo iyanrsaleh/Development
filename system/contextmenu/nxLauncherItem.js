@@ -88,7 +88,13 @@ export async function runRenameLauncherShortcut({ id } = {}) {
 
       el.classList.remove('nx-launcher__item--renaming');
       if (input.parentNode) input.replaceWith(restoreTitleSpan(keep));
-      if (keep !== oldTitle) el.setAttribute('title', keep);
+      if (keep !== oldTitle) {
+        el.setAttribute('title', keep);
+        if (el.hasAttribute('data-tooltip')) {
+          el.setAttribute('data-tooltip', keep);
+        }
+        el.setAttribute('aria-label', keep);
+      }
 
       if (!commit || !next || next === oldTitle) {
         resolve({ success: true, cancelled: !commit, unchanged: commit && next === oldTitle });

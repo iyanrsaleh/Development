@@ -14,13 +14,13 @@ export async function components(page, route) {
     // Jangan bungkus dengan <template> — isi <template> tidak tampil di DOM
     // sampai di-clone; pakai innerHTML langsung seperti launcher.js.
     container.innerHTML = `
-    <div class="ubuntu-workbench ubuntu-components-app components-app" style="height:100%; display:flex; overflow:hidden; background:var(--window-bg-color); font-family:var(--nx-font-sans),sans-serif; color:var(--window-fg-color);">
+    <div class="ubuntu-workbench ubuntu-components-app components-app" style="display:flex; background:var(--window-bg-color); font-family:var(--nx-font-sans),sans-serif; color:var(--window-fg-color);">
 
         <!-- Sidebar navigasi — pola sama persis .ubuntu-icon-sidebar di
              template/icon.js (lihat index.css: width tetap, border-right,
-             scroll sendiri, flex-shrink:0). Klik item scroll ke section
-             terkait di kolom kanan lewat id #cs-<slug>. -->
-        <div class="ubuntu-components-sidebar" style="width:200px; flex-shrink:0; background:#fff; border-right:1px solid #ddd; overflow-y:auto; padding:8px 0;" id="components-nav">
+             flex-shrink:0). Sticky mengikuti scroll body.nx-scroll.
+             Klik item scroll ke section #cs-<slug>. -->
+        <div class="ubuntu-components-sidebar" style="width:200px; flex-shrink:0; background:#fff; border-right:1px solid #ddd; padding:8px 0; position:sticky; top:0; align-self:flex-start; max-height:100%; overflow:visible;" id="components-nav">
             <div class="ubuntu-si-item" data-target="cs-typography">Typography</div>
             <div class="ubuntu-si-item" data-target="cs-buttons-style-variants">Buttons — Style Variants</div>
             <div class="ubuntu-si-item" data-target="cs-buttons-sizes">Buttons — Sizes</div>
@@ -63,7 +63,7 @@ export async function components(page, route) {
             <div class="ubuntu-si-item" data-target="cs-grid-form-layouts">Grid Form Layouts</div>
         </div>
 
-        <div class="ubuntu-components-main" style="flex:1; overflow-y:auto; padding:20px; min-width:0;">
+        <div class="ubuntu-components-main" style="flex:1; padding:20px; min-width:0;">
 
         <h2 class="ubuntu-title-2 title-2" style="margin:0 0 20px; color:var(--accent-bg-color);">
             <i class="icon-ic_fluent_grid_28_regular" style="font-size:28px; vertical-align:middle; color:#241f31;"></i>
@@ -375,7 +375,7 @@ export async function components(page, route) {
         <!-- ============================================================ -->
         <div class="card ubuntu-card" id="cs-list" style="margin-bottom:20px;">
             <div class="heading ubuntu-heading" style="margin-bottom:12px;">List</div>
-            <div class="list ubuntu-list" style="max-height:180px; overflow-y:auto;">
+            <div class="list ubuntu-list nx-scroll" style="max-height:180px;">
                 <div class="list-item selected ubuntu-list-item ubuntu-selected">Item selected</div>
                 <div class="list-item ubuntu-list-item">Item 2</div>
                 <div class="list-item ubuntu-list-item">Item 3</div>
@@ -510,7 +510,7 @@ export async function components(page, route) {
             <p class="caption ubuntu-caption" style="margin-bottom:8px; color:#5e5c64;">
                 Scrollbar tipis, rounded, orange saat aktif. Arahkan mouse atau scroll untuk melihat.
             </p>
-            <div style="max-height:160px; overflow-y:auto; border:1px solid var(--border-color); border-radius:var(--border-radius); padding:8px;">
+            <div class="nx-scroll" style="max-height:160px; border:1px solid var(--border-color); border-radius:var(--border-radius); padding:8px;">
                 <div style="min-height:400px; display:flex; flex-direction:column; gap:6px;">
                     <div style="padding:8px 12px; background:var(--view-bg-color); border-radius:4px; border:1px solid var(--border-color);">Item 1 — scroll untuk lihat scrollbar</div>
                     <div style="padding:8px 12px; background:var(--view-bg-color); border-radius:4px; border:1px solid var(--border-color);">Item 2</div>
@@ -523,7 +523,7 @@ export async function components(page, route) {
                 Dark variant: tambah class <code>.ubuntu-dark</code> ke container. 
                 Thin variant: tambah class <code>.ubuntu-thin-scroll</code> (4px).
             </p>
-            <div class="ubuntu-dark dark" style="max-height:120px; overflow-y:auto; border:1px solid rgba(255,255,255,0.1); border-radius:var(--border-radius); padding:8px; margin-top:8px; background:#2a2a2a;">
+            <div class="ubuntu-dark dark nx-scroll" style="max-height:120px; border:1px solid rgba(255,255,255,0.1); border-radius:var(--border-radius); padding:8px; margin-top:8px; background:#2a2a2a;">
                 <div style="min-height:300px; display:flex; flex-direction:column; gap:6px;">
                     <div style="padding:8px 12px; background:rgba(255,255,255,0.08); border-radius:4px; color:#ccc;">Dark scrollbar — juga orange saat aktif</div>
                     <div style="padding:8px 12px; background:rgba(255,255,255,0.08); border-radius:4px; color:#ccc;">Item 2</div>

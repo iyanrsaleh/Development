@@ -7,6 +7,11 @@
 // diakses) — logic traverse + render HTML + persistensi expand/collapse +
 // viewer isi file ada di system/directory/index.js dan
 // system/directory/editor.js, bukan di sini. File ini murni PEMAKAI hasil jadi.
+//
+// Scroll (Development/README §4a + system/window/README):
+// - Tree: .nx-scroll di #nx-directory-tree-mount
+// - Editor CM6: scroll sendiri (.cm-scroller + nx-scroll di editor.js)
+// - .nx-app-window__body: JANGAN .nx-scroll / JANGAN overflow scroll — double-scroll
 export async function index(page, route) {
   route.register(page, async (routeName, container, routeMeta = {
     title: "Contact Data | App",
@@ -18,16 +23,13 @@ export async function index(page, route) {
 
     console.log("📍 NxStorage to:", data);
     container.innerHTML = `
-        <article class="nx-page">
- 
 <div class="nx-directory-layout" id="nx-directory-layout">
-    <div class="nx-directory-layout__tree nx-scroll" id="nx-directory-tree-mount">${treeHtml}</div>
-    <div class="nx-directory-layout__resize-handle" id="nx-directory-resize-handle"></div>
-    <div class="nx-directory-layout__viewer" id="editor">
-      <div id="nx-file-viewer-mount"><p class="nx-file-viewer__placeholder">Klik salah satu file di daftar untuk melihat isinya.</p></div>
-    </div>
+  <div class="nx-directory-layout__tree nx-scroll" id="nx-directory-tree-mount">${treeHtml}</div>
+  <div class="nx-directory-layout__resize-handle" id="nx-directory-resize-handle"></div>
+  <div class="nx-directory-layout__viewer" id="editor">
+    <div id="nx-file-viewer-mount"><p class="nx-file-viewer__placeholder">Klik salah satu file di daftar untuk melihat isinya.</p></div>
+  </div>
 </div>
-        </article>
       `;
 
     // Pasang SETELAH innerHTML terpasang di DOM — attachDirectoryTreePersistence/
@@ -40,13 +42,7 @@ export async function index(page, route) {
     window.attachFileClickViewer(treeMount, document.getElementById('nx-file-viewer-mount'));
 
     // Kolom tree bisa ditarik lebarnya (drag handle di antara tree dan
-    // viewer) — beberapa nama file panjang terpotong di lebar tetap
-    // col-2 (grid persentase) lama, TIDAK ada cara memperlebar sebelum ini.
-    // window.NxResize (assets/modules/resize/NexaResize.js) — modul kernel
-    // GENERIK (bukan spesifik distro ini), lebar tersimpan localStorage
-    // (key di-scope per-distro) supaya bertahan lintas refresh, sama
-    // prinsip persistensi dengan expand/collapse tree & file terakhir
-    // dibuka (lihat system/directory/README.md).
+    // viewer) — window.NxResize (assets/modules/resize/README.md).
     window.NxResize(document.getElementById('nx-directory-resize-handle'), {
       target: treeMount,
       axis: 'x',
@@ -55,49 +51,38 @@ export async function index(page, route) {
       key: 'nx-resize::Development::directory-tree-width',
     });
 
-    // Tinggi kolom tree/viewer dihitung DINAMIS (sisa viewport setelah
-    // dikurangi posisi top elemen ini) — pola SAMA dengan
-    // templates/distro/Development/index.js (NXHOME) — BUKAN angka vh
-    // statis (min-height:60vh sebelumnya bisa memotong konten kalau judul
-    // halaman di atasnya lebih tinggi dari perkiraan).
-    //
-    // Class .nx-scroll (assets/modules/scroll/) HANYA dipasang di
-    // #nx-directory-tree-mount (daftar file murni, tidak ada sub-scroll
-    // internal apa pun) — lihat templates/distro/Development/README.md
-    // untuk aturan pemakaian scroll: boleh custom, TAPI utamakan
-    // .nx-scroll bawaan.
-    //
-    // #editor (.nx-directory-layout__viewer) SENGAJA TIDAK diberi class
-    // .nx-scroll LANGSUNG — isinya berganti-ganti (placeholder statis /
-    // pratinjau gambar / editor CodeMirror / preview markdown, lihat
-    // editor.js) dan saat editor CM6 terbuka, CM6 MEMBUAT scroll
-    // internalnya SENDIRI (.nexacmirror6-wrap/.cm-scroller, lihat
-    // NexaCmirror6.js) — memaksa .nx-scroll (overflow-y:auto) di container
-    // LUAR akan membungkus SELURUH .nx-file-viewer termasuk headernya
-    // (nama file + status simpan), menghasilkan DUA scrollbar bertumpuk
-    // dan header ikut ter-scroll keluar pandangan alih-alih tetap terlihat.
-    //
-    // Scrollbar CM6 (.cm-scroller) diselaraskan tampilannya dengan tema
-    // .nx-scroll — class ditempel LANGSUNG ke elemen via JS di editor.js
-    // (editorEl.parentElement.querySelector('.nexacmirror6-wrap
-    // .cm-scroller').classList.add('nx-scroll')), BUKAN CSS descendant
-    // selector (.nexacmirror6-wrap adalah SIBLING dari
-    // .nx-file-viewer__editor, bukan child-nya — selector CSS descendant
-    // sempat salah ditulis dan tidak pernah match, lihat histori bug di
-    // system/directory/style.css). Tinggi editor sendiri diatur lewat
-    // `.nx-file-viewer > .nexacmirror6-wrap { flex:1 1 auto; ... }` di
-    // style.css yang sama (menargetkan .nexacmirror6-wrap sebagai flex
-    // SIBLING, bukan descendant). Kernel (NexaCmirror6.js) TIDAK disentuh
-    // sama sekali — .nexacmirror6-wrap dibuat modul itu sendiri saat _init().
+    // Tinggi layout = sisa tinggi BODY jendela (bukan viewport desktop).
+    // Body dikunci: tanpa .nx-scroll — scroll editor/tree masing-masing.
     const layoutEl = document.getElementById('nx-directory-layout');
-    if (layoutEl && window.NXUI?.Window) {
-      const applyHeight = () => {
+    const winBody = layoutEl?.closest('.nx-app-window__body')
+      || (container.classList.contains('nx-app-window__body') ? container : null);
+
+    if (winBody) {
+      winBody.classList.add('has-nx-directory-layout');
+      winBody.classList.remove('nx-scroll');
+      winBody.style.setProperty('overflow', 'hidden', 'important');
+    }
+
+    const applyHeight = () => {
+      if (!layoutEl) return;
+      if (winBody) {
+        const bodyRect = winBody.getBoundingClientRect();
+        const top = layoutEl.getBoundingClientRect().top;
+        layoutEl.style.height = Math.max(0, Math.floor(bodyRect.bottom - top)) + 'px';
+        return;
+      }
+      if (window.NXUI?.Window) {
         const top = layoutEl.getBoundingClientRect().top;
         const viewportHeight = window.NXUI.Window.height();
         layoutEl.style.height = Math.max(0, viewportHeight - top) + 'px';
-      };
-      applyHeight();
-      window.addEventListener('resize', applyHeight);
+      }
+    };
+
+    applyHeight();
+    window.addEventListener('resize', applyHeight);
+    if (winBody && typeof ResizeObserver !== 'undefined') {
+      const ro = new ResizeObserver(() => applyHeight());
+      ro.observe(winBody);
     }
   });
 }

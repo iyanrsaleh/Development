@@ -60,18 +60,12 @@ export async function NXHOME(container, routeMeta) {
     window.addEventListener('resize', applyPageHeight);
   }
 
-  // Scroll area = 100% dari .nx-page__body (sisa ruang setelah Launcher flex)
+  // Scroll area = full body (Launcher overlay di atas, tidak mengurangi ruang)
   const scrollEl = container.querySelector('#nx-home-scroll');
-  if (scrollEl) {
+  if (scrollEl && window.NXUI?.Window) {
     const applyHeight = () => {
-      const body = scrollEl.parentElement;
-      const h = body ? body.clientHeight : 0;
-      if (h > 0) {
-        scrollEl.style.height = h + 'px';
-      } else if (window.NXUI?.Window) {
-        const top = scrollEl.getBoundingClientRect().top;
-        scrollEl.style.height = Math.max(0, window.NXUI.Window.height() - top) + 'px';
-      }
+      const top = scrollEl.getBoundingClientRect().top;
+      scrollEl.style.height = Math.max(0, window.NXUI.Window.height() - top) + 'px';
     };
     applyHeight();
     window.addEventListener('resize', applyHeight);

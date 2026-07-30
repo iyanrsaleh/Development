@@ -165,8 +165,10 @@ function escapeHtml(str) {
  *   (package/directory/index.js memanggil window.attachFileClickViewer
  *   dkk) — kalau file ini sendiri ditimpa lewat editornya sendiri, halaman
  *   yang menampilkan editor bisa rusak SAAT SEDANG DIBUKA. Folder
- *   package/ LAIN (mis. package/gallery/) TETAP bisa diedit — hanya
- *   package/directory/ yang dikecualikan.
+ *   package/ LAIN (mis. package/gallery/) TETAP bisa diedit — kecuali
+ *   package/directory/ dan package/settings/.
+ * - "package/settings/" — UI settings yang sudah dibangun; jangan diubah
+ *   lewat editor Directory.
  */
 function isProtectedPath(filePathSoFar) {
   if (!filePathSoFar) return false;
@@ -174,7 +176,9 @@ function isProtectedPath(filePathSoFar) {
     filePathSoFar === 'system' ||
     filePathSoFar.startsWith('system/') ||
     filePathSoFar === 'package/directory' ||
-    filePathSoFar.startsWith('package/directory/')
+    filePathSoFar.startsWith('package/directory/') ||
+    filePathSoFar === 'package/settings' ||
+    filePathSoFar.startsWith('package/settings/')
   );
 }
 
@@ -247,3 +251,4 @@ function renderNode(node, pathSoFar, filePathSoFar, isRoot, openState) {
     <div class="nx-directory-tree__children">${childrenHtml || '<em class="nx-directory-tree__empty">(kosong)</em>'}</div>
   </details>`;
 }
+

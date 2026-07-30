@@ -51,10 +51,15 @@ export async function wallpaper(page, route) {
         const short = src.length > 42 ? `…${src.slice(-40)}` : src;
         const safeUrl = String(src).replace(/\\/g, '/').replace(/'/g, '%27').replace(/"/g, '%22');
         return (
+          `<div class="nx-wallpaper-history__item" data-image="${escapeAttr(src)}">` +
           `<button type="button" class="nx-wallpaper-history__btn" data-image="${escapeAttr(src)}" title="${escapeAttr(src)}">` +
           `<span class="nx-wallpaper-history__thumb" style="background-image:url('${safeUrl}')"></span>` +
           `<span class="nx-wallpaper-history__label">${escapeHtml(short)}</span>` +
-          `</button>`
+          `</button>` +
+          `<button type="button" class="nx-wallpaper-history__remove" data-image="${escapeAttr(src)}" aria-label="Hapus dari riwayat" title="Hapus dari riwayat">` +
+          `<i class="icon-ic_fluent_dismiss_16_regular" aria-hidden="true"></i>` +
+          `</button>` +
+          `</div>`
         );
       }).join('');
     };
@@ -85,7 +90,7 @@ export async function wallpaper(page, route) {
               </p>
 
               <p class="heading" style="margin-top:1rem">Riwayat</p>
-              <p class="caption">Klik thumbnail untuk memakai ulang path/URL yang pernah dipakai.</p>
+              <p class="caption">Klik thumbnail untuk memakai ulang. Tombol × menghapus dari riwayat.</p>
               <div id="nx-wallpaper-history" class="nx-wallpaper-history">
                 ${historyHtml(history)}
               </div>
@@ -189,11 +194,11 @@ export async function wallpaper(page, route) {
       };
     };
 
-    const applyAndRefresh = async (prefsPayload) => {
+    const applyAndRefresh = async (prefsPayload, saveOpts = {}) => {
       if (typeof window.saveWallpaperPrefs !== 'function') {
         throw new Error('saveWallpaperPrefs belum terdaftar (system/index.js)');
       }
-      const row = await window.saveWallpaperPrefs(prefsPayload);
+      const row = await window.saveWallpaperPrefs(prefsPayload, saveOpts);
       if (typeof window.refreshWallpaper === 'function') {
         await window.refreshWallpaper();
       }
@@ -202,6 +207,25 @@ export async function wallpaper(page, route) {
     };
 
     historyEl?.addEventListener('click', async (e) => {
+      const removeBtn = e.target.closest('.nx-wallpaper-history__remove');
+      if (removeBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        const src = removeBtn.getAttribute('data-image') || '';
+        if (!src) return;
+        const nextHistory = history.filter((h) => h !== src);
+        try {
+          await applyAndRefresh(
+            { ...readForm(), history: nextHistory },
+            { replaceHistory: true },
+          );
+          showStatus('Dihapus dari riwayat.');
+        } catch (err) {
+          showStatus(err && err.message ? err.message : String(err), false);
+        }
+        return;
+      }
+
       const btn = e.target.closest('.nx-wallpaper-history__btn');
       if (!btn) return;
       const src = btn.getAttribute('data-image') || '';

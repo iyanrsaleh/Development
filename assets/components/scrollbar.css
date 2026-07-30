@@ -5,17 +5,18 @@
    Scrollbar tipis, rounded, muncul saat hover/konten overflow.
    ============================================================ */
 
-/* ── Base: sembunyi default, muncul saat hover/scroll ── */
-.ubuntu-workbench ::-webkit-scrollbar {
+/* ── Base: sembunyi default, muncul saat hover/scroll ──
+   Kecuali .nx-scroll — gaya dari assets/modules/scroll/index.css (kernel). */
+.ubuntu-workbench *:not(.nx-scroll)::-webkit-scrollbar {
   width: 8px;
   height: 8px;
   background: transparent;
 }
-.ubuntu-workbench ::-webkit-scrollbar-track {
+.ubuntu-workbench *:not(.nx-scroll)::-webkit-scrollbar-track {
   background: transparent;
   border-radius: 4px;
 }
-.ubuntu-workbench ::-webkit-scrollbar-thumb {
+.ubuntu-workbench *:not(.nx-scroll)::-webkit-scrollbar-thumb {
   background: rgba(0, 0, 0, 0.15);
   border-radius: 4px;
   border: 2px solid transparent;
@@ -23,11 +24,11 @@
   min-height: 32px;
   transition: background 80ms ease;
 }
-.ubuntu-workbench ::-webkit-scrollbar-thumb:hover {
+.ubuntu-workbench *:not(.nx-scroll)::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 0, 0, 0.25);
   background-clip: content-box;
 }
-.ubuntu-workbench ::-webkit-scrollbar-thumb:active {
+.ubuntu-workbench *:not(.nx-scroll)::-webkit-scrollbar-thumb:active {
   background: var(--ub-orange);
   background-clip: content-box;
 }
@@ -41,6 +42,18 @@
 .ubuntu-workbench {
   scrollbar-width: thin;
   scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
+}
+
+/*
+ * Chromium: kalau scrollbar-width/color di-set (termasuk via inherit dari
+ * .ubuntu-workbench), ::-webkit-scrollbar DIABAIKAN → scrollbar native OS
+ * (panah + track lebar) muncul. .nx-scroll kernel mengandalkan webkit
+ * pseudos (assets/modules/scroll/index.css) — WAJIB reset di sini.
+ */
+.ubuntu-workbench .nx-scroll,
+.ubuntu-workbench .nx-scroll-x {
+  scrollbar-width: auto;
+  scrollbar-color: auto;
 }
 
 /* ── Dark variant (panel, menu, terminal) ── */

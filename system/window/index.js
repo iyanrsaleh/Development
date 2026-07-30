@@ -11,11 +11,16 @@ export const MIN_H = 200;
 let activeWindowEl = null;
 /** @type {string|null} */
 let activeAppId = null;
-/** @type {{ left: number, top: number, width: number, height: number }|null} */
-let savedNormalGeom = null;
+/** Geom normal terakhir per elemen jendela (multi-window). */
+const savedGeomByEl = new WeakMap();
+/**
+ * State visual sebelum minimize — 'normal' | 'maximized'.
+ * Tanpa ini, restore dari maximize+minimize selalu jatuh ke normal (tampil “flat”).
+ */
+const restoreTargetByEl = new WeakMap();
+/** Z-index stack fokus */
+let windowZTop = 20;
 
-let dragBound = false;
-/** @type {AbortController|null} */
 let dragAbort = null;
 
 /** @type {Map<string, { left: number, top: number, width: number, height: number, state?: string }>} */
@@ -26,6 +31,165 @@ const OPENING_CLASS = 'nx-app-opening';
 function openingHost() {
   return document.getElementById('nx-home-scroll')
     || document.getElementById('nxhome');
+}
+
+function escapeAppIdSelector(id) {
+  return String(id || '').replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+}
+
+/**
+ * @param {ParentNode|null|undefined} root
+ * @returns {HTMLElement[]}
+ */
+export function listAppWindows(root) {
+  const scope = root
+    || document.getElementById('nxhome')
+    || document;
+  return [...scope.querySelectorAll('.' + WINDOW_EL_CLASS)];
+}
+
+/**
+ * @param {string} id
+ * @param {ParentNode|null|undefined} root
+ * @returns {HTMLElement|null}
+ */
+export function findAppWindow(id, root) {
+  const appId = String(id || '').trim();
+  if (!appId) return null;
+  // Bandingkan dataset (bukan querySelector) — aman untuk id apa pun.
+  const wins = listAppWindows(root);
+  const hit = wins.find((w) => String(w.dataset.app || '') === appId);
+  if (hit) return hit;
+  if (root) return null;
+  // Fallback: scan seluruh dokumen (mount non-#nxhome).
+  return listAppWindows(document).find((w) => String(w.dataset.app || '') === appId) || null;
+}
+
+/**
+ * Pastikan jendela terlihat (override sisa animasi / CSS minimize).
+ * @param {HTMLElement} el
+ */
+function showAppWindowChrome(el) {
+  el.classList.remove(
+    'nx-app-window--minimized',
+    'nx-app-window--enter',
+    'nx-app-window--entered',
+    'nx-app-window--no-motion',
+  );
+  el.dataset.enterPlayed = '1';
+  el.style.visibility = 'visible';
+  el.style.opacity = '1';
+  el.style.pointerEvents = 'auto';
+  el.style.display = 'flex';
+  const body = el.querySelector('.nx-app-window__body');
+  if (body) body.style.removeProperty('display');
+}
+
+/**
+ * Baca target restore setelah minimize (dataset / WeakMap / default normal).
+ * @param {HTMLElement} el
+ * @returns {'normal'|'maximized'}
+ */
+function peekRestoreTarget(el) {
+  const raw = el.dataset.restoreTo || restoreTargetByEl.get(el) || 'normal';
+  return raw === 'maximized' ? 'maximized' : 'normal';
+}
+
+/**
+ * @param {HTMLElement} el
+ * @param {'normal'|'maximized'} target
+ */
+function rememberRestoreTarget(el, target) {
+  const t = target === 'maximized' ? 'maximized' : 'normal';
+  el.dataset.restoreTo = t;
+  restoreTargetByEl.set(el, t);
+}
+
+/**
+ * @param {HTMLElement} el
+ */
+function clearRestoreTarget(el) {
+  delete el.dataset.restoreTo;
+  restoreTargetByEl.delete(el);
+}
+
+/**
+ * Terapkan layout maximized penuh work area (sync).
+ * @param {HTMLElement} el
+ */
+function applyMaximizedLayout(el) {
+  const mount = workHost();
+  if (mount) ensureWorkAreaHost(mount);
+  showAppWindowChrome(el);
+  el.dataset.state = 'maximized';
+  el.classList.add('nx-app-window--maximized');
+  const b = workAreaSize();
+  applyGeom(el, { left: 0, top: 0, width: b.width, height: b.height });
+  syncWindowChromeButtons(el, 'maximized');
+  bringAppWindowToFront(el);
+  setLauncherAutoHidden(true);
+}
+
+/**
+ * Terapkan layout normal + geom tersimpan.
+ * @param {HTMLElement} el
+ */
+function applyNormalLayout(el) {
+  showAppWindowChrome(el);
+  el.dataset.state = 'normal';
+  el.classList.remove('nx-app-window--maximized');
+  const g = savedGeomByEl.get(el) || readGeom(el);
+  const usable =
+    g
+    && Number.isFinite(g.width)
+    && g.width >= MIN_W
+    && Number.isFinite(g.height)
+    && g.height >= Math.max(MIN_H / 2, 120);
+  applyGeom(el, usable ? g : defaultGeometry());
+  savedGeomByEl.set(el, readGeom(el));
+  syncWindowChromeButtons(el, 'normal');
+  bringAppWindowToFront(el);
+  scheduleLauncherAutoHide(el);
+}
+
+/**
+ * Pulihkan jendela yang diminimize / tersembunyi — paksa terlihat + fokus.
+ * Jika sebelumnya maximized, kembali ke maximize penuh (bukan normal “flat”).
+ * Dipakai History FM, klik launcher, dll. (jangan andalkan class saja).
+ * @param {HTMLElement} el
+ * @returns {HTMLElement|null}
+ */
+export function restoreAppWindow(el) {
+  if (!el || !el.classList.contains(WINDOW_EL_CLASS)) return null;
+
+  const target = peekRestoreTarget(el);
+  clearRestoreTarget(el);
+
+  if (target === 'maximized') {
+    applyMaximizedLayout(el);
+  } else {
+    applyNormalLayout(el);
+  }
+
+  syncLauncherWindowBadge();
+  return el;
+}
+
+/**
+ * Fokus + naikkan z-index (multi-window).
+ * @param {HTMLElement} el
+ */
+export function bringAppWindowToFront(el) {
+  if (!el || !el.classList.contains(WINDOW_EL_CLASS)) return;
+  windowZTop += 1;
+  el.style.zIndex = String(windowZTop);
+  activeWindowEl = el;
+  activeAppId = el.dataset.app || null;
+  listAppWindows().forEach((w) => {
+    w.classList.toggle('is-focused', w === el);
+  });
+  syncLauncherWindowBadge();
+  scheduleLauncherAutoHide(el);
 }
 
 /** Sembunyikan flash konten penuh sebelum wrap (survive clear #nxhome). */
@@ -152,7 +316,7 @@ function ensureWindowStyles() {
 .nx-app-window__btn{width:28px;height:24px;border:0;border-radius:4px;background:transparent;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;color:inherit}
 .nx-app-window__btn [class*="icon-ic_fluent_"]{font-size:16px;line-height:1;color:inherit}
 .nx-app-window__btn--close:hover{background:#e95420;color:#fff}
-.nx-app-window__body{flex:1 1 auto;min-height:0;overflow:auto;padding:12px;position:relative;z-index:3}
+.nx-app-window__body{flex:1 1 auto;min-height:0;overflow:auto;padding:0;position:relative;z-index:3}
 .nx-app-window__resize{position:absolute;z-index:20}
 .nx-app-window__resize--n,.nx-app-window__resize--s{left:8px;right:8px;height:6px;cursor:ns-resize}
 .nx-app-window__resize--n{top:0}.nx-app-window__resize--s{bottom:0}
@@ -163,11 +327,11 @@ function ensureWindowStyles() {
 .nx-app-window__resize--nw{top:0;left:0;cursor:nwse-resize}
 .nx-app-window__resize--se{bottom:0;right:0;cursor:nwse-resize}
 .nx-app-window__resize--sw{bottom:0;left:0;cursor:nesw-resize}
-.nx-app-window--minimized{height:36px!important;min-height:36px}
+.nx-app-window--minimized{visibility:hidden!important;opacity:0!important;pointer-events:none!important}
 .nx-app-window--minimized .nx-app-window__body,.nx-app-window--minimized .nx-app-window__resize{display:none!important}
 .nx-app-window--maximized{border-radius:0;box-shadow:none}
 .nx-app-window--maximized .nx-app-window__resize{display:none!important}
-#nx-launcher-host.is-auto-hidden{flex-basis:0!important;width:0!important;max-width:0!important;height:0!important;max-height:0!important;min-width:0!important;min-height:0!important;overflow:hidden!important;opacity:0;pointer-events:none!important;margin:0!important;padding:0!important}
+#nx-launcher-host.is-auto-hidden{opacity:0!important;visibility:hidden!important;pointer-events:none!important}
 `;
   let s = document.getElementById('nx-app-window-critical-css');
   if (!s) {
@@ -265,7 +429,7 @@ function readGeom(el) {
   };
 }
 
-/** Posisi dock aktif (host class / dock class / page layout). */
+/** Posisi dock aktif (class host / dock / overlay marker). */
 function launcherLayoutEdge() {
   if (typeof document === 'undefined') return null;
   const host = document.getElementById('nx-launcher-host');
@@ -281,85 +445,130 @@ function launcherLayoutEdge() {
       if (dock.classList.contains(`nx-launcher--${pos}`)) return pos;
     }
   }
-  // Jangan pakai querySelector('.nx-page') mentah — isi app window sering punya .nx-page sendiri
   const page = host && host.closest ? host.closest('.nx-page') : null;
   if (page) {
     for (const pos of ['left', 'right', 'top', 'bottom']) {
-      if (page.classList.contains(`nx-launcher-layout-${pos}`)) return pos;
+      if (page.classList.contains(`nx-launcher-overlay-${pos}`)) return pos;
     }
   }
   return null;
 }
 
 /**
- * Sembunyikan/tampilkan dock sementara (paksa lewat class + inline).
+ * Overlay: hide/show visual saja (tanpa reflow layout).
  * @param {boolean} hidden
- * @param {{ quiet?: boolean }} [opts] quiet = tanpa reflow work area (aman saat drag)
  */
-export function setLauncherAutoHidden(hidden, opts = {}) {
+export function setLauncherAutoHidden(hidden) {
   if (typeof document === 'undefined') return;
   const host = document.getElementById('nx-launcher-host');
   if (!host) return;
-  const page = (host.closest && host.closest('.nx-page')) || null;
   const next = !!hidden;
-  const was = host.classList.contains('is-auto-hidden');
+  if (host.classList.contains('is-auto-hidden') === next) return;
 
   host.classList.toggle('is-auto-hidden', next);
   host.setAttribute('aria-hidden', next ? 'true' : 'false');
-  if (page) page.classList.toggle('nx-launcher-auto-hide', next);
 
   if (next) {
-    host.style.setProperty('flex', '0 0 0px', 'important');
-    host.style.setProperty('flex-basis', '0', 'important');
-    host.style.setProperty('width', '0', 'important');
-    host.style.setProperty('max-width', '0', 'important');
-    host.style.setProperty('min-width', '0', 'important');
-    host.style.setProperty('height', '0', 'important');
-    host.style.setProperty('max-height', '0', 'important');
-    host.style.setProperty('min-height', '0', 'important');
-    host.style.setProperty('overflow', 'hidden', 'important');
     host.style.setProperty('opacity', '0', 'important');
-    host.style.setProperty('margin', '0', 'important');
-    host.style.setProperty('padding', '0', 'important');
-    host.style.setProperty('pointer-events', 'none', 'important');
     host.style.setProperty('visibility', 'hidden', 'important');
+    host.style.setProperty('pointer-events', 'none', 'important');
   } else {
-    [
-      'flex', 'flex-basis', 'width', 'max-width', 'min-width',
-      'height', 'max-height', 'min-height', 'overflow', 'opacity',
-      'margin', 'padding', 'pointer-events', 'visibility',
-    ].forEach((p) => host.style.removeProperty(p));
+    host.style.removeProperty('opacity');
+    host.style.removeProperty('visibility');
+    host.style.removeProperty('pointer-events');
   }
-
-  // Saat drag: jangan reflow (bikin jendela loncat / tidak stabil)
-  if (opts.quiet || was === next) return;
-
-  ensureWorkAreaHost(document.getElementById('nxhome') || undefined);
-  try {
-    window.dispatchEvent(new Event('resize'));
-  } catch (_) { /* ignore */ }
 }
 
 /**
- * Hanya UNTUK drag: dekat tepi → hide sekali (quiet).
- * Tidak show lagi sampai pointerup — hindari flicker layout.
- * @param {{ left: number, top: number, width: number, height: number }} g
+ * Zona “dekat dock”: strip penuh di tepi work area (bukan cuma bbox ikon
+ * yang pendek di tengah layar — itu menyebabkan jendela overlap kiri
+ * tapi miss host max-content → launcher tetap di atas window).
+ * @returns {{ left: number, top: number, right: number, bottom: number }|null}
  */
-function updateLauncherAutoHideFromGeom(g) {
+function dockNearZoneRect() {
   const host = document.getElementById('nx-launcher-host');
-  if (!host || host.classList.contains('is-auto-hidden')) return;
-
+  if (!host) return null;
   const edge = launcherLayoutEdge() || 'left';
-  const b = workAreaSize();
-  const NEAR = Math.max(80, Math.floor(Math.min(b.width, b.height) * 0.14));
+  const home = document.getElementById('nxhome')
+    || host.closest('#nx-home-scroll')
+    || host.closest('.nx-page__body')
+    || host.parentElement;
+  if (!home) return null;
 
+  const pr = home.getBoundingClientRect();
+  const hr = host.getBoundingClientRect();
+  const pad = 16;
+  const thickX = Math.max(hr.width > 4 ? hr.width : 0, 56) + pad;
+  const thickY = Math.max(hr.height > 4 ? hr.height : 0, 56) + pad;
+
+  if (edge === 'left') {
+    return { left: pr.left, top: pr.top, right: pr.left + thickX, bottom: pr.bottom };
+  }
+  if (edge === 'right') {
+    return { left: pr.right - thickX, top: pr.top, right: pr.right, bottom: pr.bottom };
+  }
+  if (edge === 'top') {
+    return { left: pr.left, top: pr.top, right: pr.right, bottom: pr.top + thickY };
+  }
+  if (edge === 'bottom') {
+    return { left: pr.left, top: pr.bottom - thickY, right: pr.right, bottom: pr.bottom };
+  }
+  return null;
+}
+
+/**
+ * Sembunyikan Launcher jika ADA jendela overlap / dekat area dock.
+ * @param {HTMLElement} [winEl] — diabaikan; cek semua jendela visible
+ */
+function updateLauncherAutoHideForWindow(winEl) {
+  void winEl;
+  const host = document.getElementById('nx-launcher-host');
+  if (!host) {
+    setLauncherAutoHidden(false);
+    return;
+  }
+  const wins = listAppWindows().filter((w) => w.dataset.state !== 'minimized');
+  if (!wins.length) {
+    setLauncherAutoHidden(false);
+    return;
+  }
+  if (wins.some((w) => w.dataset.state === 'maximized')) {
+    setLauncherAutoHidden(true);
+    return;
+  }
+
+  const zone = dockNearZoneRect();
   let near = false;
-  if (edge === 'left') near = g.left <= NEAR;
-  else if (edge === 'right') near = (g.left + g.width) >= (b.width - NEAR);
-  else if (edge === 'top') near = g.top <= NEAR;
-  else if (edge === 'bottom') near = (g.top + g.height) >= (b.height - NEAR);
+  for (const win of wins) {
+    const wr = win.getBoundingClientRect();
+    if (zone) {
+      near = !(
+        wr.right < zone.left
+        || wr.left > zone.right
+        || wr.bottom < zone.top
+        || wr.top > zone.bottom
+      );
+    } else {
+      const hr = host.getBoundingClientRect();
+      const pad = 12;
+      near = !(
+        wr.right < hr.left - pad
+        || wr.left > hr.right + pad
+        || wr.bottom < hr.top - pad
+        || wr.top > hr.bottom + pad
+      );
+    }
+    if (near) break;
+  }
+  setLauncherAutoHidden(near);
+}
 
-  if (near) setLauncherAutoHidden(true, { quiet: true });
+/** Panggil setelah layout window stabil (buka / restore geom). */
+function scheduleLauncherAutoHide(winEl) {
+  const el = winEl || activeWindowEl;
+  if (!el) return;
+  updateLauncherAutoHideForWindow(el);
+  requestAnimationFrame(() => updateLauncherAutoHideForWindow(el));
 }
 
 async function loadWindowGeom(appId) {
@@ -413,7 +622,6 @@ function ensureDragResizeHandlers() {
   }
   dragAbort = new AbortController();
   const { signal } = dragAbort;
-  dragBound = true;
 
   let mode = null;
   let startX = 0;
@@ -423,6 +631,8 @@ function ensureDragResizeHandlers() {
   document.addEventListener('pointerdown', (e) => {
     const win = e.target.closest && e.target.closest('.' + WINDOW_EL_CLASS);
     if (!win || win.dataset.state === 'maximized') return;
+    // Strip minimize: jangan drag — klik title/Minimize = restore
+    if (win.dataset.state === 'minimized') return;
     if (e.target.closest && e.target.closest('[data-nx-app]')) return;
 
     const handle = e.target.closest && e.target.closest('[data-nx-resize]');
@@ -449,7 +659,6 @@ function ensureDragResizeHandlers() {
     try {
       win.setPointerCapture(e.pointerId);
     } catch (_) { /* ignore */ }
-    updateLauncherAutoHideFromGeom(startG);
   }, { signal });
 
   document.addEventListener('pointermove', (e) => {
@@ -477,13 +686,9 @@ function ensureDragResizeHandlers() {
         g.height = startG.height - dy;
       }
     }
+    // Clamp di work area penuh; Launcher overlay hide/show visual saja
     applyGeom(activeWindowEl, g);
-    updateLauncherAutoHideFromGeom({
-      left: g.left,
-      top: g.top,
-      width: Math.max(MIN_W, g.width),
-      height: Math.max(MIN_H, g.height),
-    });
+    updateLauncherAutoHideForWindow(activeWindowEl);
   }, { signal });
 
   document.addEventListener('pointerup', () => {
@@ -492,27 +697,15 @@ function ensureDragResizeHandlers() {
     }
     if (!mode || !activeWindowEl) {
       mode = null;
-      if (!activeWindowEl || activeWindowEl.dataset.state !== 'maximized') {
-        setLauncherAutoHidden(false);
-      }
       return;
     }
     const id = activeWindowEl.dataset.app;
-    const isMax = activeWindowEl.dataset.state === 'maximized';
-    // Lepas mouse → Launcher tampil lagi (+ reflow), jendela di-clamp
-    if (!isMax) {
-      setLauncherAutoHidden(false);
-      requestAnimationFrame(() => {
-        if (!activeWindowEl) return;
-        const clamped = applyGeom(activeWindowEl, readGeom(activeWindowEl));
-        if (id && activeWindowEl.dataset.state === 'normal') {
-          savedNormalGeom = clamped;
-          void saveWindowGeom(id, clamped, 'normal');
-        }
-      });
-    } else if (id) {
-      void saveWindowGeom(id, readGeom(activeWindowEl), 'maximized');
+    if (id && activeWindowEl.dataset.state === 'normal') {
+      const clamped = applyGeom(activeWindowEl, readGeom(activeWindowEl));
+      savedGeomByEl.set(activeWindowEl, clamped);
+      void saveWindowGeom(id, clamped, 'normal');
     }
+    updateLauncherAutoHideForWindow(activeWindowEl);
     mode = null;
     startG = null;
   }, { signal });
@@ -540,9 +733,20 @@ function buildWindowChrome(title) {
 }
 
 function bindWindowControls(el) {
-  // Delegasi document-level (sekali) — lebih andal daripada listener per chrome reuse
   ensureWindowControlDelegation();
+  ensureWindowFocusDelegation();
   void el;
+}
+
+let focusDelegated = false;
+function ensureWindowFocusDelegation() {
+  if (focusDelegated || typeof document === 'undefined') return;
+  focusDelegated = true;
+  document.addEventListener('pointerdown', (e) => {
+    const win = e.target && e.target.closest && e.target.closest('.' + WINDOW_EL_CLASS);
+    if (!win || win.dataset.state === 'minimized') return;
+    if (activeWindowEl !== win) bringAppWindowToFront(win);
+  }, true);
 }
 
 let controlsDelegated = false;
@@ -556,13 +760,13 @@ function ensureWindowControlDelegation() {
     if (!win) return;
     e.stopPropagation();
     e.preventDefault();
-    activeWindowEl = win;
+    bringAppWindowToFront(win);
     const action = btn.getAttribute('data-nx-app');
     if (action === 'minimize') {
-      void setAppWindowState('minimized');
+      void setAppWindowState('minimized', win);
     } else if (action === 'maximize') {
       const cur = win.dataset.state || 'normal';
-      void setAppWindowState(cur === 'maximized' ? 'normal' : 'maximized');
+      void setAppWindowState(cur === 'maximized' ? 'normal' : 'maximized', win);
     } else if (action === 'close') {
       closeAppWindow();
     }
@@ -576,9 +780,10 @@ function ensureWindowControlDelegation() {
 export async function openAppWindow(opts = {}) {
   ensureWindowStyles();
   ensureDragResizeHandlers();
+  ensureWindowFocusDelegation();
   const id = String(opts.id || 'app').trim() || 'app';
   const title = String(opts.title || id);
-  const animate = opts.animate === true; // default OFF — hindari kedip tiap navigasi
+  const animate = opts.animate === true;
   const reuse = opts.reuse !== false;
   const mount = opts.mount
     || document.getElementById('nxhome')
@@ -589,20 +794,16 @@ export async function openAppWindow(opts = {}) {
 
   ensureWorkAreaHost(mount);
 
-  let el = mount.querySelector(':scope > .' + WINDOW_EL_CLASS)
-    || mount.querySelector('.' + WINDOW_EL_CLASS);
+  // Multi-window: cari by data-app — jangan hapus jendela app lain
+  let el = findAppWindow(id, mount);
   let isNew = false;
 
-  if (el && reuse) {
-    // Reuse chrome yang sama di #nxhome — ganti app id/title saja (jangan rebuild)
-    el.dataset.app = id;
-  } else if (el && el.dataset.app && el.dataset.app !== id) {
+  if (el && !reuse) {
     el.remove();
     el = null;
   }
 
   if (!el) {
-    // Hanya buang anak non-window; jangan flash kosong penuh kalau bisa
     [...mount.children].forEach((ch) => {
       if (!ch.classList || !ch.classList.contains(WINDOW_EL_CLASS)) ch.remove();
     });
@@ -638,13 +839,21 @@ export async function openAppWindow(opts = {}) {
       height: cached.height,
     };
     state = cached.state === 'maximized' ? 'maximized' : 'normal';
+  } else if (isNew) {
+    const stack = Math.max(0, listAppWindows(mount).length - 1);
+    if (stack > 0) {
+      const b = workAreaSize();
+      geom.left = Math.min(geom.left + stack * 28, Math.max(0, b.width - geom.width));
+      geom.top = Math.min(geom.top + stack * 28, Math.max(0, b.height - geom.height));
+    }
   }
 
-  savedNormalGeom = { ...geom };
+  savedGeomByEl.set(el, { ...geom });
   el.classList.add('nx-app-window--no-motion');
-  applyGeom(el, geom);
-  activeWindowEl = el;
-  activeAppId = id;
+  if (isNew || el.dataset.state !== 'minimized') {
+    applyGeom(el, geom);
+  }
+  bringAppWindowToFront(el);
 
   void loadWindowGeom(id).then((saved) => {
     if (!el.isConnected) return;
@@ -657,44 +866,73 @@ export async function openAppWindow(opts = {}) {
       && saved.width >= MIN_W
       && saved.height >= Math.max(MIN_H, 280)
     )) {
-      // Geom rusak (sering karena resize tak sengaja saat klik form) — abaikan
       if (saved) geomCache.delete(id);
+      scheduleLauncherAutoHide(el);
       return;
     }
     const nextState = saved.state === 'maximized' ? 'maximized' : 'normal';
     const cur = readGeom(el);
     const dx = Math.abs(cur.left - saved.left) + Math.abs(cur.top - saved.top)
       + Math.abs(cur.width - saved.width) + Math.abs(cur.height - saved.height);
-    if (dx < 4 && el.dataset.state === nextState) return;
+    if (dx < 4 && el.dataset.state === nextState) {
+      scheduleLauncherAutoHide(el);
+      return;
+    }
 
-    savedNormalGeom = {
+    savedGeomByEl.set(el, {
       left: saved.left,
       top: saved.top,
       width: saved.width,
       height: saved.height,
-    };
+    });
     if (nextState === 'maximized') {
-      void setAppWindowState('maximized');
-    } else {
+      void setAppWindowState('maximized', el);
+    } else if (el.dataset.state !== 'minimized') {
       el.dataset.state = 'normal';
-      applyGeom(el, savedNormalGeom);
+      applyGeom(el, savedGeomByEl.get(el));
+      scheduleLauncherAutoHide(el);
     }
   });
 
   if (state === 'maximized') {
-    await setAppWindowState('maximized');
+    await setAppWindowState('maximized', el);
+  } else if (el.dataset.state === 'minimized') {
+    // Hormati data-restore-to / restoreTarget (bisa kembali ke maximized).
+    restoreAppWindow(el);
+    const persistId = el.dataset.app || id;
+    if (persistId) {
+      const g = savedGeomByEl.get(el) || readGeom(el);
+      void saveWindowGeom(persistId, g, el.dataset.state || 'normal');
+    }
   } else {
     el.dataset.state = 'normal';
     el.classList.remove('nx-app-window--maximized', 'nx-app-window--minimized');
-    setLauncherAutoHidden(false);
+    syncLauncherWindowBadge();
   }
 
   requestAnimationFrame(() => {
     el.classList.remove('nx-app-window--no-motion');
+    syncLauncherWindowBadge();
   });
 
   if (animate && isNew) playWindowEnter(el);
   clearAppWindowOpening();
+
+  try {
+    if (typeof window.applyWindowThemePrefs === 'function') {
+      if (typeof window.loadWindowThemePrefs === 'function') {
+        void window.loadWindowThemePrefs().then((saved) => {
+          const native = window.NATIVE_WINDOW_THEME_DEFAULTS || { theme: 'adwaita' };
+          const merged = typeof window.mergeWindowThemePrefs === 'function'
+            ? window.mergeWindowThemePrefs(native, saved)
+            : { ...native, ...(saved || {}) };
+          window.applyWindowThemePrefs(merged, { root: mount });
+        });
+      } else {
+        window.applyWindowThemePrefs(window.NATIVE_WINDOW_THEME_DEFAULTS || { theme: 'adwaita' }, { root: mount });
+      }
+    }
+  } catch (_) { /* ignore */ }
 
   return {
     el,
@@ -704,54 +942,109 @@ export async function openAppWindow(opts = {}) {
 }
 
 /**
- * @param {'normal'|'maximized'|'minimized'} state
+ * Titik indikator di tile launcher: semua jendela terbuka / diminimize.
  */
-export async function setAppWindowState(state) {
-  const el = activeWindowEl || document.querySelector('.' + WINDOW_EL_CLASS);
+export function syncLauncherWindowBadge() {
+  if (typeof document === 'undefined') return;
+  const byId = new Map();
+  listAppWindows().forEach((w) => {
+    const id = String(w.dataset.app || '');
+    if (id) byId.set(id, String(w.dataset.state || 'normal'));
+  });
+  document.querySelectorAll('.nx-launcher__item[data-launcher-id]').forEach((item) => {
+    const id = String(item.getAttribute('data-launcher-id') || '');
+    const state = byId.get(id);
+    item.classList.toggle('is-window-open', !!(state && state !== 'minimized'));
+    item.classList.toggle('is-window-minimized', state === 'minimized');
+  });
+}
+
+function syncWindowChromeButtons(el, state) {
+  const minBtn = el.querySelector('[data-nx-app="minimize"]');
+  if (minBtn) {
+    minBtn.title = 'Minimize';
+    minBtn.setAttribute('aria-label', 'Minimize');
+  }
+  const maxBtn = el.querySelector('[data-nx-app="maximize"]');
+  if (maxBtn) {
+    maxBtn.innerHTML = state === 'maximized'
+      ? fluentIcon('square_multiple', 16)
+      : fluentIcon('maximize', 16);
+    maxBtn.title = state === 'maximized' ? 'Restore' : 'Maximize';
+    maxBtn.setAttribute('aria-label', maxBtn.title);
+    maxBtn.disabled = false;
+    maxBtn.style.opacity = '';
+  }
+}
+
+/**
+ * @param {'normal'|'maximized'|'minimized'} state
+ * @param {HTMLElement} [targetEl] jendela spesifik (multi-window — jangan andalkan active saja)
+ */
+export async function setAppWindowState(state, targetEl) {
+  const el = (targetEl && targetEl.classList?.contains?.(WINDOW_EL_CLASS))
+    ? targetEl
+    : (activeWindowEl || document.querySelector('.' + WINDOW_EL_CLASS));
   if (!el) return null;
   const next = ['normal', 'maximized', 'minimized'].includes(state) ? state : 'normal';
   const prev = el.dataset.state || 'normal';
 
+  // Simpan geom normal sebelum tinggalkan normal (max / min).
   if (prev === 'normal' && next !== 'normal') {
-    savedNormalGeom = readGeom(el);
+    savedGeomByEl.set(el, readGeom(el));
+  }
+  // Maximize tanpa geom normal tersimpan (langsung max saat buka) — fallback.
+  if (prev === 'maximized' && next === 'minimized' && !savedGeomByEl.get(el)) {
+    savedGeomByEl.set(el, defaultGeometry());
   }
 
-  el.dataset.state = next;
-  el.classList.toggle('nx-app-window--maximized', next === 'maximized');
-  el.classList.toggle('nx-app-window--minimized', next === 'minimized');
+  let applied = next;
 
-  const maxBtn = el.querySelector('[data-nx-app="maximize"]');
-  if (maxBtn) {
-    maxBtn.innerHTML = next === 'maximized'
-      ? fluentIcon('square_multiple', 16)
-      : fluentIcon('maximize', 16);
-    maxBtn.title = next === 'maximized' ? 'Restore' : 'Maximize';
-    maxBtn.setAttribute('aria-label', maxBtn.title);
-  }
-
-  if (next === 'maximized') {
-    // Full tampilan → Launcher hilang sementara; work area penuh
-    setLauncherAutoHidden(true);
-    requestAnimationFrame(() => {
-      const b = workAreaSize();
-      applyGeom(el, { left: 0, top: 0, width: b.width, height: b.height });
-    });
+  if (next === 'minimized') {
+    const restoreTo = prev === 'maximized' ? 'maximized' : 'normal';
+    rememberRestoreTarget(el, restoreTo);
+    el.dataset.state = 'minimized';
+    el.classList.remove('nx-app-window--maximized');
+    el.classList.add('nx-app-window--minimized');
+    // Geom tetap ukuran normal tersimpan (jendela sudah hidden) — siap un-maximize.
+    const g = savedGeomByEl.get(el);
+    if (g) applyGeom(el, g);
+    syncWindowChromeButtons(el, 'minimized');
+    scheduleLauncherAutoHide(el);
+    applied = 'minimized';
+  } else if (next === 'maximized') {
+    clearRestoreTarget(el);
+    applyMaximizedLayout(el);
+    applied = 'maximized';
   } else {
-    // Diperkecil / restore → Launcher tampil lagi
-    setLauncherAutoHidden(false);
-    requestAnimationFrame(() => {
-      if (next === 'normal' && savedNormalGeom) {
-        applyGeom(el, savedNormalGeom);
-      }
-    });
+    // next === 'normal'
+    if (prev === 'minimized') {
+      // Dari minimize: hormati restoreTo (bisa kembali ke maximized).
+      restoreAppWindow(el);
+      applied = el.dataset.state || 'normal';
+    } else {
+      // Un-maximize dari tombol chrome — sengaja ke normal, buang restoreTo.
+      clearRestoreTarget(el);
+      applyNormalLayout(el);
+      applied = 'normal';
+    }
   }
+
+  syncLauncherWindowBadge();
 
   const id = el.dataset.app || activeAppId;
   if (id) {
-    const g = next === 'normal' ? readGeom(el) : (savedNormalGeom || readGeom(el));
-    await saveWindowGeom(id, g, next);
+    const g = applied === 'normal'
+      ? readGeom(el)
+      : (savedGeomByEl.get(el) || readGeom(el));
+    // minimized → persist target restore (maximized|normal), bukan literal 'minimized'.
+    const saveState =
+      applied === 'minimized'
+        ? (el.dataset.restoreTo === 'maximized' ? 'maximized' : 'normal')
+        : applied;
+    await saveWindowGeom(id, g, saveState);
   }
-  return next;
+  return applied;
 }
 
 /**
@@ -760,18 +1053,23 @@ export async function setAppWindowState(state) {
 export function closeAppWindow() {
   const el = activeWindowEl || document.querySelector('.' + WINDOW_EL_CLASS);
   if (el) el.remove();
-  activeWindowEl = null;
-  activeAppId = null;
-  savedNormalGeom = null;
-  // Tutup jendela → Launcher tampil lagi
-  setLauncherAutoHidden(false);
 
-  if (typeof window.nexaRoute?.navigate === 'function') {
-    window.nexaRoute.navigate('distro/home');
-    return;
-  }
-  if (typeof location !== 'undefined') {
-    location.hash = '#distro/home';
+  const rest = listAppWindows();
+  if (rest.length) {
+    const next = rest[rest.length - 1];
+    bringAppWindowToFront(next);
+  } else {
+    activeWindowEl = null;
+    activeAppId = null;
+    setLauncherAutoHidden(false);
+    syncLauncherWindowBadge();
+    if (typeof window.nexaRoute?.navigate === 'function') {
+      window.nexaRoute.navigate('distro/home');
+      return;
+    }
+    if (typeof location !== 'undefined') {
+      location.hash = '#distro/home';
+    }
   }
 }
 
@@ -860,13 +1158,12 @@ export async function prepareAppWindowContainer(ctx = {}) {
   // Home → biarkan NexaRoute clear #nxhome penuh (tanpa bingkai)
   if (isHomeWorkRoute(route)) {
     clearAppWindowOpening();
-    // Buang chrome lama sekarang supaya clear home bersih
-    const win = container.id === 'nxhome'
-      ? container.querySelector(':scope > .' + WINDOW_EL_CLASS)
-      : null;
-    if (win) win.remove();
+    if (container.id === 'nxhome') {
+      listAppWindows(container).forEach((w) => w.remove());
+    }
     activeWindowEl = null;
     activeAppId = null;
+    syncLauncherWindowBadge();
     return null;
   }
 
@@ -885,7 +1182,6 @@ export async function prepareAppWindowContainer(ctx = {}) {
       || null;
   } catch (_) { /* ignore */ }
 
-  // Reuse bingkai di #nxhome — tanpa animasi, tanpa rebuild
   const win = await openAppWindow({
     id: parsed.pkgId,
     title: titleFromRouteMeta(meta, parsed.pkgId),
@@ -895,9 +1191,10 @@ export async function prepareAppWindowContainer(ctx = {}) {
   });
   if (!win || !win.body) return null;
 
-  // Buang sisa konten di luar window (mis. home lama) — chrome tetap
+  // Buang sisa konten non-window (home lama) — jendela app lain tetap
   [...container.children].forEach((ch) => {
-    if (ch !== win.el) ch.remove();
+    if (ch.classList && ch.classList.contains(WINDOW_EL_CLASS)) return;
+    ch.remove();
   });
 
   return { container: win.body };
@@ -919,13 +1216,55 @@ export function attachAutoAppWindow() {
     clearAppWindowOpening();
     activeWindowEl = null;
     activeAppId = null;
+    syncLauncherWindowBadge();
   };
   window.addEventListener('nxui:routeChange', window.__nxAutoAppWindowHandler);
 
+  // Klik ulang tile launcher saat jendela app sudah ada:
+  // - minimized → restore saja (jangan navigasi ulang — cegah #nxpackage kosong)
+  // - normal/maximized → abaikan navigasi, fokuskan jendela
+  if (typeof window.__nxAutoAppWindowLauncherClick === 'function') {
+    window.removeEventListener('click', window.__nxAutoAppWindowLauncherClick, true);
+  }
+  window.__nxAutoAppWindowLauncherClick = (e) => {
+    if (e.button != null && e.button !== 0) return;
+    const item = e.target && e.target.closest && e.target.closest('a.nx-launcher__item');
+    if (!item || !item.closest('.nx-launcher')) return;
+    if (item.classList.contains('nx-launcher__item--renaming')) return;
+    if (e.target.closest && e.target.closest('.nx-launcher__rename')) return;
+
+    const id = String(item.getAttribute('data-launcher-id') || '').trim();
+    if (!id || isAppWindowExcludedId(id)) return;
+
+    const el = findAppWindow(id);
+    if (!(el && el.isConnected)) return;
+
+    const state = el.dataset.state || 'normal';
+    if (state === 'minimized') {
+      e.preventDefault();
+      e.stopPropagation();
+      // Hormati restoreTo (maximized vs normal) — jangan paksa normal.
+      restoreAppWindow(el);
+      const id = el.dataset.app;
+      if (id) {
+        const g = savedGeomByEl.get(el) || readGeom(el);
+        void saveWindowGeom(id, g, el.dataset.state || 'normal');
+      }
+      return;
+    }
+
+    // Sudah terbuka — fokus saja, jangan re-navigate
+    e.preventDefault();
+    e.stopPropagation();
+    bringAppWindowToFront(el);
+  };
+  window.addEventListener('click', window.__nxAutoAppWindowLauncherClick, true);
+
+  // Sinyal legacy pointerdown (minimize restore sudah di-handle click di atas)
   if (typeof window.__nxAutoAppWindowLauncherHandler === 'function') {
     window.removeEventListener('nx-launcher:open', window.__nxAutoAppWindowLauncherHandler);
-    window.__nxAutoAppWindowLauncherHandler = null;
   }
+  window.__nxAutoAppWindowLauncherHandler = null;
 
   window.__nxAutoAppWindowBound = true;
 }

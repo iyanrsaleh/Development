@@ -1,6 +1,6 @@
-/* Standar launcher — inline grid ATAU dock di area halaman index (.nx-page).
-   Dock: di aliran flex (bukan overlay absolute) supaya area kerja = sisa ruang
-   sampai tepi Launcher; jendela app tidak menutupi dock. */
+/* Standar launcher — inline grid ATAU dock overlay di .nx-page.
+   Mode dock: absolute di tepi, z di atas jendela app.
+   Area kerja = penuh; jendela boleh ke bawah Launcher; Launcher tetap di depan. */
 
 .nx-launcher {
   --nx-launcher-icon-size: 40px;
@@ -11,42 +11,18 @@
   padding: 0;
 }
 
-/* Halaman index = flex container: dock + body berbagi tinggi viewport. */
 .nx-page {
   position: relative;
-  display: flex;
   overflow: hidden;
   box-sizing: border-box;
 }
 
-.nx-page.nx-launcher-layout-left {
-  flex-direction: row;
-  align-items: stretch;
-}
-
-.nx-page.nx-launcher-layout-right {
-  flex-direction: row-reverse;
-  align-items: stretch;
-}
-
-.nx-page.nx-launcher-layout-top {
-  flex-direction: column;
-  align-items: stretch;
-}
-
-.nx-page.nx-launcher-layout-bottom {
-  flex-direction: column-reverse;
-  align-items: stretch;
-}
-
-/* Area kerja — mengisi sisa ruang setelah Launcher (flex). */
 .nx-page__body {
-  flex: 1 1 auto;
-  min-width: 0;
-  min-height: 0;
-  height: auto;
-  align-self: stretch;
-  /* Scroll HANYA di #nx-home-scroll.nx-scroll (global) */
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  width: 100%;
+  /* Scroll HANYA di #nx-home-scroll.nx-scroll */
   overflow: hidden;
   box-sizing: border-box;
 }
@@ -57,56 +33,54 @@
   box-sizing: border-box;
 }
 
-/* Host dock — ukuran alami ikon; ikut flex, tidak overlay body. */
+/* Host overlay — TIDAK makan ruang; selalu di atas app window.
+   .is-auto-hidden = jendela di area dock → hilang visual (tanpa reflow). */
 .nx-launcher-host {
-  position: relative;
-  z-index: 40;
-  flex: 0 0 auto;
+  position: absolute;
+  z-index: 50;
   width: max-content;
   height: max-content;
   max-width: 100%;
   max-height: 100%;
   pointer-events: none;
   box-sizing: border-box;
+  transition: opacity 0.14s ease;
+}
+
+.nx-launcher-host.is-auto-hidden {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
 
 .nx-launcher-host > .nx-launcher {
   pointer-events: auto;
 }
 
-.nx-launcher-host--top,
-.nx-launcher-host--bottom {
-  align-self: center;
-  width: max-content;
-  max-width: 100%;
+.nx-launcher-host--top {
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
-.nx-launcher-host--left,
-.nx-launcher-host--right {
-  align-self: center;
-  height: max-content;
+.nx-launcher-host--bottom {
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.nx-launcher-host--left {
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
   max-height: 100%;
 }
 
-/* Auto-hide sementara: jendela drag dekat tepi dock → host collapse,
-   area kerja penuh; jauh lagi → dock tampil. */
-.nx-launcher-host.is-auto-hidden {
-  flex-basis: 0 !important;
-  width: 0 !important;
-  max-width: 0 !important;
-  height: 0 !important;
-  max-height: 0 !important;
-  min-width: 0 !important;
-  min-height: 0 !important;
-  overflow: hidden !important;
-  opacity: 0;
-  pointer-events: none !important;
-  margin: 0 !important;
-  padding: 0 !important;
-}
-
-.nx-page.nx-launcher-auto-hide .nx-launcher-host.is-auto-hidden > .nx-launcher {
-  pointer-events: none !important;
+.nx-launcher-host--right {
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  max-height: 100%;
 }
 
 /* Dock di dalam host */
@@ -151,6 +125,41 @@
   cursor: grab;
   user-select: none;
   -webkit-user-drag: element;
+  position: relative;
+}
+
+/* Status pojok ikon — gaya avatar online */
+.nx-launcher--dock .nx-launcher__icon-wrap {
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 auto;
+  width: var(--nx-launcher-icon-size);
+  height: var(--nx-launcher-icon-size);
+}
+
+.nx-launcher--dock .nx-launcher__item.is-window-open .nx-launcher__icon-wrap::after,
+.nx-launcher--dock .nx-launcher__item.is-window-minimized .nx-launcher__icon-wrap::after {
+  content: '';
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  box-sizing: border-box;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.nx-launcher--dock .nx-launcher__item.is-window-open .nx-launcher__icon-wrap::after {
+  /* terbuka — solid Ubuntu orange */
+  background: var(--ub-orange, #e95420);
+}
+
+.nx-launcher--dock .nx-launcher__item.is-window-minimized .nx-launcher__icon-wrap::after {
+  /* minimize — hollow Ubuntu orange (tanpa ring luar) */
+  background: transparent;
+  box-shadow: inset 0 0 0 2px var(--ub-orange, #e95420);
 }
 
 .nx-launcher--dock .nx-launcher__item {
@@ -294,4 +303,100 @@
   margin: 4px 8px;
   color: inherit;
   opacity: 0.7;
+}
+
+/* ——— Label mode: text | both | tooltip | hidden ——— */
+.nx-launcher--dock.nx-launcher--label-mode-tooltip,
+.nx-launcher--dock.nx-launcher--label-mode-both {
+  overflow: visible !important;
+}
+
+.nx-launcher-host--tooltip,
+.nx-launcher-host:has(.nx-launcher--label-mode-tooltip),
+.nx-launcher-host:has(.nx-launcher--label-mode-both) {
+  overflow: visible;
+}
+
+.nx-launcher--label-mode-tooltip .nx-launcher__title,
+.nx-launcher--label-mode-hidden .nx-launcher__title {
+  display: none;
+}
+
+.nx-launcher--label-mode-tooltip .nx-launcher__item--renaming .nx-launcher__rename,
+.nx-launcher--label-mode-hidden .nx-launcher__item--renaming .nx-launcher__rename {
+  display: block;
+}
+
+.nx-launcher--label-mode-tooltip .nx-launcher__item[data-tooltip],
+.nx-launcher--label-mode-both .nx-launcher__item[data-tooltip] {
+  position: relative;
+  overflow: visible;
+}
+
+.nx-launcher--label-mode-tooltip .nx-launcher__item[data-tooltip]::after,
+.nx-launcher--label-mode-both .nx-launcher__item[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  z-index: 80;
+  padding: 6px 10px;
+  background: #222;
+  color: #fff;
+  font-size: 12px;
+  line-height: 1.2;
+  white-space: nowrap;
+  border-radius: 5px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.nx-launcher--label-mode-tooltip .nx-launcher__item[data-tooltip]:hover::after,
+.nx-launcher--label-mode-tooltip .nx-launcher__item[data-tooltip]:focus-visible::after,
+.nx-launcher--label-mode-both .nx-launcher__item[data-tooltip]:hover::after,
+.nx-launcher--label-mode-both .nx-launcher__item[data-tooltip]:focus-visible::after {
+  opacity: 1;
+}
+
+.nx-launcher--label-mode-tooltip .nx-launcher__item--dragging[data-tooltip]::after,
+.nx-launcher--label-mode-both .nx-launcher__item--dragging[data-tooltip]::after {
+  opacity: 0 !important;
+  content: none;
+}
+
+.nx-launcher--left.nx-launcher--label-mode-tooltip .nx-launcher__item[data-tooltip]::after,
+.nx-launcher--left.nx-launcher--label-mode-both .nx-launcher__item[data-tooltip]::after {
+  left: calc(100% + 8px);
+  top: 50%;
+  bottom: auto;
+  transform: translateY(-50%);
+  margin: 0;
+}
+
+.nx-launcher--right.nx-launcher--label-mode-tooltip .nx-launcher__item[data-tooltip]::after,
+.nx-launcher--right.nx-launcher--label-mode-both .nx-launcher__item[data-tooltip]::after {
+  right: calc(100% + 8px);
+  left: auto;
+  top: 50%;
+  bottom: auto;
+  transform: translateY(-50%);
+  margin: 0;
+}
+
+.nx-launcher--top.nx-launcher--label-mode-tooltip .nx-launcher__item[data-tooltip]::after,
+.nx-launcher--top.nx-launcher--label-mode-both .nx-launcher__item[data-tooltip]::after {
+  top: calc(100% + 6px);
+  bottom: auto;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+}
+
+.nx-launcher--bottom.nx-launcher--label-mode-tooltip .nx-launcher__item[data-tooltip]::after,
+.nx-launcher--bottom.nx-launcher--label-mode-both .nx-launcher__item[data-tooltip]::after {
+  bottom: calc(100% + 6px);
+  top: auto;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
 }

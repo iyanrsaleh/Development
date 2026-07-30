@@ -121,15 +121,18 @@ export async function loadWallpaperPrefs() {
 /**
  * Simpan prefs dari form settings + update history path/URL.
  * @param {object} prefs
+ * @param {{ replaceHistory?: boolean }} [opts] — true: pakai prefs.history apa adanya (hapus item riwayat)
  */
-export async function saveWallpaperPrefs(prefs = {}) {
+export async function saveWallpaperPrefs(prefs = {}, opts = {}) {
   const existing = await loadWallpaperPrefs();
   const n = normalizeWallpaperPrefs(prefs);
   const prevHistory = (existing && existing.history) || n.history || [];
-  const history = pushWallpaperHistory(
-    Array.isArray(prefs.history) ? prefs.history : prevHistory,
-    n.image,
-  );
+  const history = opts.replaceHistory
+    ? normalizeWallpaperHistory(Array.isArray(prefs.history) ? prefs.history : prevHistory)
+    : pushWallpaperHistory(
+      Array.isArray(prefs.history) ? prefs.history : prevHistory,
+      n.image,
+    );
   const row = {
     id: WALLPAPER_PREFS_ID,
     image: n.image,

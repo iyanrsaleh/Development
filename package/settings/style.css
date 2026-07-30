@@ -1,0 +1,264 @@
+/* Settings shell — flex + NxResize (bukan row/col-*).
+   Scroll: .nx-app-window__body.nx-scroll (kernel).
+   Body padding: 0 (default window) — inset di shell. */
+
+.nx-app-window__body.has-nx-settings-shell {
+  /* pastikan tetap 0 kalau ada override tema */
+  padding: 0 !important;
+}
+
+.nx-settings-shell {
+  display: flex;
+  /* flex-start: aside tinggi = isi nav saja — wajib agar position:sticky bekerja.
+     Kalau stretch, aside setinggi konten main → sticky “mati”, nav ikut scroll. */
+  align-items: flex-start;
+  box-sizing: border-box;
+  min-width: 0;
+  padding: 0;
+}
+
+.nx-settings-shell__aside {
+  width: 240px;
+  flex: 0 0 auto; /* wajib — supaya style.width dari NxResize menang */
+  box-sizing: border-box;
+  padding: 12px 8px 16px 14px;
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+  min-width: 0;
+  z-index: 1;
+  background: var(--window-bg-color, #f6f5f4);
+}
+
+.nx-settings-shell__resize-handle {
+  flex: 0 0 auto;
+  width: 6px;
+  cursor: col-resize;
+  position: relative;
+  align-self: stretch; /* penuh tinggi baris (= tinggi main) untuk area drag */
+  touch-action: none;
+}
+
+.nx-settings-shell__resize-handle::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 2px;
+  width: 1px;
+  background: var(--border-color, #deddda);
+}
+
+.nx-settings-shell__resize-handle:hover::before {
+  background: var(--accent-color, #3584e4);
+  width: 2px;
+  left: 2px;
+}
+
+.nx-settings-shell__main {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 12px 14px 16px 12px;
+  box-sizing: border-box;
+}
+
+.nx-settings-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.nx-settings-nav__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 10px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: var(--window-fg-color, #241f31);
+  border: 1px solid transparent;
+  transition:
+    background 0.12s ease,
+    border-color 0.12s ease;
+}
+
+.nx-settings-nav__item:hover {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: var(--border-color, #deddda);
+}
+
+.nx-settings-nav__item.is-active {
+  background: rgba(233, 84, 32, 0.08);
+  border-color: rgba(233, 84, 32, 0.35);
+}
+
+.nx-settings-nav__icon {
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-color, #3584e4);
+}
+
+.nx-settings-nav__item.is-active .nx-settings-nav__icon {
+  color: var(--ub-orange, #e95420);
+}
+
+.nx-settings-nav__icon [class*="icon-ic_fluent_"] {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.nx-settings-nav__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.nx-settings-nav__title {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.nx-settings-nav__desc {
+  font-size: 11px;
+  line-height: 1.35;
+  color: var(--fgColor-muted, #5e5c64);
+  opacity: 0.95;
+}
+
+/* About (home.js) — brand di tengah panel main, tanpa ubah layout shell/aside */
+.nx-settings-about {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: min(52vh, 420px);
+  box-sizing: border-box;
+  padding: 2rem 1rem;
+}
+
+.nx-settings-about__brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  text-align: center;
+}
+
+.nx-settings-about__logo {
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+  border-radius: 18px;
+}
+
+.nx-settings-about__name {
+  margin: 0;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.nx-settings-about__version {
+  margin: 0;
+  color: var(--fgColor-muted, #5e5c64);
+}
+
+[data-nx-components-theme="dark"] .nx-settings-nav__item:hover,
+.nx-app-window--theme-dark .nx-settings-nav__item:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+[data-nx-components-theme="dark"] .nx-settings-nav__item.is-active,
+.nx-app-window--theme-dark .nx-settings-nav__item.is-active {
+  background: rgba(233, 84, 32, 0.16);
+}
+
+[data-nx-components-theme="dark"] .nx-settings-nav__desc,
+.nx-app-window--theme-dark .nx-settings-nav__desc {
+  color: #c0bfbc;
+}
+
+@media (max-width: 720px) {
+  .nx-settings-shell {
+    flex-direction: column;
+  }
+
+  .nx-settings-shell__aside {
+    width: 100% !important;
+    position: static;
+    padding: 0 0 12px;
+  }
+
+  .nx-settings-shell__resize-handle {
+    display: none;
+  }
+
+  .nx-settings-shell__main {
+    padding: 12px 0 0;
+  }
+
+  .nx-settings-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .nx-settings-nav__item {
+    flex: 1 1 140px;
+  }
+}
+
+/* Settings → Files: warna folder */
+.nx-drives-color {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+  gap: 8px;
+  margin-top: 0.75rem;
+}
+
+.nx-drives-color__option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 6px 8px;
+  border: 1px solid var(--border-color, #c0bfbc);
+  border-radius: var(--border-radius, 8px);
+  background: var(--view-bg-color, #fff);
+  cursor: pointer;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.nx-drives-color__option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.nx-drives-color__option:hover {
+  border-color: var(--accent-bg-color, #3584e4);
+}
+
+.nx-drives-color__option.is-selected {
+  border-color: var(--ub-orange, #e95420);
+  box-shadow: inset 0 0 0 1px var(--ub-orange, #e95420);
+  background: rgba(233, 84, 32, 0.06);
+}
+
+.nx-drives-color__thumb {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+}
+
+.nx-drives-color__label {
+  font-size: 11px;
+  line-height: 1.2;
+  color: var(--window-fg-color, #241f31);
+}

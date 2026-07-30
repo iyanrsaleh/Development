@@ -29,6 +29,9 @@
 // container (nx-directory-tree-mount) SEMUA ditangani SATU modul ini, lewat
 // entry match() (bukan id persis) — lihat REGISTRY di bawah.
 import * as nxDirectoryEntryMod from './nxDirectoryEntry.js';
+// nxDriveEntry — File Manager OS (package/drives): id nxdrive::<path> +
+// container #nx-drives-app / #fm-view. Pakai window.* FS, bukan NxDirectory.
+import * as nxDriveEntryMod from './nxDriveEntry.js';
 // nxFileViewerEditor — target STATIS id="nx-file-viewer-editor" (area
 // editor CodeMirror, system/directory/editor.js).
 import * as nxFileViewerEditorMod from './nx-file-viewer-editor.js';
@@ -75,12 +78,28 @@ const ENABLED = true;
 const REGISTRY = [
   // { id: 'contes1', module: contes1Mod, buildMenu: 'contes1' },
   // { id: 'contes2', module: contes2Mod, buildMenu: 'contes2' },
-  { id: 'nx-file-viewer-editor', module: nxFileViewerEditorMod, buildMenu: 'nxFileViewerEditor' },
+  // Editor CM6: id statis (directory) ATAU nx-file-viewer-editor::<hash> (OS multi-window).
+  {
+    match: (id) =>
+      id === 'nx-file-viewer-editor' ||
+      (typeof id === 'string' && id.startsWith('nx-file-viewer-editor::')),
+    module: nxFileViewerEditorMod,
+    buildMenu: 'nxFileViewerEditor',
+  },
   { id: 'nx-file-viewer-mount', module: nxFileViewerMountMod, buildMenu: 'nxFileViewerMount' },
   {
     match: (targetId) => targetId.startsWith('nxfile::') || targetId === 'nx-directory-tree-mount',
     module: nxDirectoryEntryMod,
     buildMenu: 'nxDirectoryEntry',
+  },
+  {
+    match: (id) =>
+      id === 'nx-drives-app' ||
+      id === 'fm-view' ||
+      (typeof id === 'string' &&
+        (id.startsWith('nxdrive::') || id.startsWith('nxdrive-cwd::'))),
+    module: nxDriveEntryMod,
+    buildMenu: 'nxDriveEntry',
   },
   {
     match: (targetId) => typeof targetId === 'string' && targetId.startsWith('nxlauncher::'),

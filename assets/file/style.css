@@ -1,0 +1,58 @@
+/**
+ * Ikon file MIME (assets/file/{32x32|50x50}) — Papirus / Adwaita-style.
+ * Dipakai package/drives via class .fm-file-icon.
+ */
+.ubuntu-workbench .fm-file-icon,
+.fm-file-icon {
+  display: block;
+  object-fit: contain;
+  flex-shrink: 0;
+  pointer-events: none;
+  user-select: none;
+}
+
+.fm-file-icon--sm {
+  width: 16px;
+  height: 16px;
+}
+
+.fm-file-icon--md {
+  width: 24px;
+  height: 24px;
+}
+
+.fm-file-icon--lg {
+  width: 48px;
+  height: 48px;
+}
+
+.ubuntu-workbench .ubuntu-fm-grid .fm-item .fm-icon .fm-file-icon--lg {
+  width: 48px;
+  height: 48px;
+}
+
+.ubuntu-workbench .ubuntu-fm-list .fm-list-item .fm-icon .fm-file-icon--md,
+.ubuntu-workbench .ubuntu-fm-sidebar .fm-place-icon .fm-file-icon--sm,
+.ubuntu-workbench .ubuntu-fm-sidebar .fm-tree-icon .fm-file-icon--sm {
+  width: 100%;
+  height: 100%;
+  max-width: 24px;
+  max-height: 24px;
+}
+
+.ubuntu-workbench .ubuntu-fm-sidebar .fm-place-icon .fm-file-icon--sm {
+  max-width: 18px;
+  max-height: 18px;
+}
+
+/* Placeholder sebelum hydrate ikon native OS (.lnk) */
+.ubuntu-workbench .fm-icon .fm-os-icon-ph.icon {
+  display: inline-block;
+  width: 48px;
+  height: 48px;
+  background: transparent;
+}
+.ubuntu-workbench .ubuntu-fm-list .fm-icon .fm-os-icon-ph.icon {
+  width: 24px;
+  height: 24px;
+}

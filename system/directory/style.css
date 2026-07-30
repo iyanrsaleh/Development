@@ -24,12 +24,29 @@
    .nx-scroll langsung di markup (daftar file murni, aman). Kolom viewer
    (.nx-directory-layout__viewer, id="editor") TIDAK diberi .nx-scroll di
    level ini — isinya berganti-ganti (placeholder/gambar/editor CM6/
-   preview markdown), scroll internal CM6 (.cm-scroller) ditempel class
-   nx-scroll lewat JS di editor.js sendiri (lihat komentar lengkap +
-   .nx-file-viewer di bawah). Lihat README.md "Aturan pemakaian scroll". */
+   preview markdown), scroll internal CM6 (.cm-scroller) — JANGAN
+   ditempel .nx-scroll (mengganggu measure/tile CM6). Scrollbar di-style
+   lewat CSS `.nx-file-viewer .cm-scroller`. Lihat README.md
+   "Aturan pemakaian scroll". */
 .nx-directory-layout {
   display: flex;
   align-items: stretch;
+  min-height: 0;
+  box-sizing: border-box;
+}
+
+/* Directory di app window: body TIDAK scroll (editor CM6 punya scroll sendiri) */
+.nx-app-window__body.has-nx-directory-layout {
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: 0 !important;
+}
+
+.nx-app-window__body.has-nx-directory-layout > .nx-directory-layout {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
 }
 
 .nx-directory-layout__tree {
@@ -97,14 +114,12 @@
 
    PENTING — id elemen ini BERUBAH dinamis: editor.js (openFileEditor())
    mengganti id dari "nx-file-viewer-mount" jadi "nx-file-viewer-editor"
-   TEPAT saat file dibuka (disposeActiveEditor() mengembalikannya ke
-   "nx-file-viewer-mount" saat editor ditutup, lihat komentar di editor.js
-   dekat activeEditorContainerOriginalId). Rule ini WAJIB menyasar KEDUA id
-   itu — kalau cuma #nx-file-viewer-mount, rule ini batal berlaku persis
-   saat editor CM6 aktif (yaitu satu-satunya saat scroll benar-benar
-   dibutuhkan), karena id sudah bukan itu lagi. */
+   (directory) atau "nx-file-viewer-editor::<hash>" (OS multi-window).
+   Saat dispose, id dikembalikan ke asalnya. Rule WAJIB menyasar semua
+   bentuk id itu. */
 #nx-file-viewer-mount,
-#nx-file-viewer-editor {
+#nx-file-viewer-editor,
+[id^="nx-file-viewer-editor"] {
   display: flex;
   flex-direction: column;
   flex: 1 1 auto;
@@ -285,6 +300,29 @@
   min-height: 0;
 }
 
+/* Scrollbar tipis untuk .cm-scroller CM6 — TANPA class .nx-scroll (lihat
+   editor.js). Override inherit scrollbar-width supaya ::-webkit-scrollbar
+   tidak diabaikan Chromium. */
+.nx-file-viewer .cm-scroller {
+  scrollbar-width: auto;
+  scrollbar-color: auto;
+}
+.nx-file-viewer .cm-scroller::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.nx-file-viewer .cm-scroller::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+.nx-file-viewer .cm-scroller::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+.nx-file-viewer .cm-scroller::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
 .nx-file-viewer__body {
   margin: 0;
   padding: 8px;
@@ -310,26 +348,64 @@
   opacity: 0.6;
 }
 
-/* Pratinjau gambar (editor.js, openImagePreview()) — read-only, tidak ada CodeMirror. */
-.nx-file-viewer__image-stage {
+/* Pratinjau gambar (editor.js, openImagePreview()) — scroll = .nx-scroll kernel (§4a). */
+.nx-file-viewer__image-stage.nx-scroll {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 60vh;
-  max-height: 80vh;
-  overflow: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+  /* kernel default overflow-x:hidden — gambar zoom boleh scroll X/Y */
+  overflow-x: auto;
+  overflow-y: auto;
   padding: 12px;
+  box-sizing: border-box;
   background:
     linear-gradient(45deg, rgba(128, 128, 128, 0.08) 25%, transparent 25%) 0 0 / 20px 20px,
     linear-gradient(-45deg, rgba(128, 128, 128, 0.08) 25%, transparent 25%) 0 0 / 20px 20px,
     linear-gradient(45deg, transparent 75%, rgba(128, 128, 128, 0.08) 75%) 0 0 / 20px 20px,
     linear-gradient(-45deg, transparent 75%, rgba(128, 128, 128, 0.08) 75%) 0 0 / 20px 20px;
+  cursor: default;
 }
 
+/* Default: muat dalam stage (tidak melebar penuh). Zoom = ubah width/height via JS. */
 .nx-file-viewer__image {
+  display: block;
   max-width: 100%;
-  max-height: 76vh;
+  max-height: 100%;
+  width: auto;
+  height: auto;
   object-fit: contain;
+  flex: 0 0 auto;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* Pratinjau PDF (editor.js, openPdfPreview()) — iframe Chromium PDF. */
+.nx-file-viewer--pdf {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+}
+
+.nx-file-viewer__pdf-stage {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #525659;
+}
+
+.nx-file-viewer__pdf-frame {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #525659;
 }
 
 /* Toggle [Markdown | Preview] (editor.js, wireMarkdownPreviewToggle()). */

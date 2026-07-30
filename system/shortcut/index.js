@@ -231,6 +231,8 @@ export const NATIVE_LAUNCHER_DEFAULTS = {
     iconSize: '35px',
     /** auto = baca kecerahan wallpaper; light/dark = paksa */
     labelStyle: 'auto',
+    /** both = label + tooltip; tooltip = hover saja; hidden = tanpa nama */
+    labelMode: 'both',
   },
 };
 
@@ -278,10 +280,11 @@ export async function saveLauncherPrefs(prefs = {}) {
   const position = normalized.position || NATIVE_LAUNCHER_DEFAULTS.settings.position;
   const iconSize = normalized.iconSize || NATIVE_LAUNCHER_DEFAULTS.settings.iconSize;
   const labelStyle = normalized.labelStyle || NATIVE_LAUNCHER_DEFAULTS.settings.labelStyle;
+  const labelMode = normalized.labelMode || NATIVE_LAUNCHER_DEFAULTS.settings.labelMode;
   const row = {
     id: LAUNCHER_PREFS_ID,
     disabled,
-    settings: { position, iconSize, labelStyle },
+    settings: { position, iconSize, labelStyle, labelMode },
     updatedAt: new Date().toISOString(),
   };
   await launcherStore().set(row);
@@ -454,25 +457,38 @@ export async function reorderLauncherShortcuts(orderedIds) {
   return saveLauncherShortcuts(next);
 }
 
-function launcherItemMarkup(s) {
+function launcherItemMarkup(s, labelMode = 'text') {
   const id = String(s.id || s.componenName || '').trim();
-  const title = escapeHtml(s.title || s.componenName);
+  const titleRaw = String(s.title || s.componenName || '').trim() || id;
+  const title = escapeHtml(titleRaw);
   const desc = escapeHtml(s.description || '');
   const href = escapeHtml(s.href || '#');
-  // id HTML untuk context-menu dinamis (system/contextmenu/nxLauncherItem.js)
   const htmlId = id
     ? ` id="nxlauncher::${escapeHtml(encodeURIComponent(id))}"`
     : '';
   const dataId = id ? ` data-launcher-id="${escapeHtml(id)}"` : '';
   const iconPath = resolveBrendIcon(s.brend);
-  const icon = iconPath
+  const iconInner = iconPath
     ? `<img class="nx-launcher__icon" src="/templates${escapeHtml(iconPath)}" alt="" draggable="false" />`
     : `<span class="nx-launcher__icon nx-launcher__icon--fallback" aria-hidden="true">${title.slice(0, 1)}</span>`;
+  const icon = `<span class="nx-launcher__icon-wrap">${iconInner}</span>`;
+
+  const mode = ['both', 'tooltip', 'hidden'].includes(labelMode) ? labelMode : 'both';
+  const useTooltip = mode === 'tooltip' || mode === 'both';
+  const tipAttr = useTooltip
+    ? ` data-tooltip="${escapeAttr(titleRaw)}"`
+    : '';
+  const titleAttr = ` aria-label="${escapeAttr(titleRaw)}"`;
+
   return (
-    `<a class="nx-launcher__item"${htmlId}${dataId} href="${href}" title="${desc || title}" draggable="true">` +
+    `<a class="nx-launcher__item"${htmlId}${dataId}${tipAttr}${titleAttr} href="${href}" draggable="true">` +
     `${icon}<span class="nx-launcher__title">${title}</span>` +
     `</a>`
   );
+}
+
+function escapeAttr(s) {
+  return escapeHtml(s).replace(/'/g, '&#39;');
 }
 
 /** Id elemen dock di dalam host halaman (bukan body / title bar). */
@@ -495,10 +511,18 @@ export function normalizeLauncherSettings(raw) {
     .toLowerCase()
     .trim();
   if (!['auto', 'light', 'dark'].includes(labelStyle)) labelStyle = 'auto';
+  let labelMode = String(s.labelMode || NATIVE_LAUNCHER_DEFAULTS.settings.labelMode || 'both')
+    .toLowerCase()
+    .trim();
+  // Alias / migrasi
+  if (labelMode === 'label' || labelMode === 'text') labelMode = 'both';
+  if (labelMode === 'none' || labelMode === 'hide') labelMode = 'hidden';
+  if (!['both', 'tooltip', 'hidden'].includes(labelMode)) labelMode = 'both';
   return {
     position,
     iconSize,
     labelStyle,
+    labelMode,
     dock: position !== '',
   };
 }
@@ -583,95 +607,96 @@ export async function applyLauncherLabelContrast(settings) {
     'nx-launcher--label-dark',
     'nx-launcher--label-tone-light',
     'nx-launcher--label-tone-dark',
+    'nx-launcher--label-mode-text',
+    'nx-launcher--label-mode-both',
+    'nx-launcher--label-mode-tooltip',
+    'nx-launcher--label-mode-hidden',
   );
   nav.classList.add(`nx-launcher--label-${s.labelStyle || 'auto'}`);
   nav.classList.add(`nx-launcher--label-tone-${tone}`);
+  nav.classList.add(`nx-launcher--label-mode-${s.labelMode || 'both'}`);
   nav.dataset.labelStyle = s.labelStyle || 'auto';
   nav.dataset.labelTone = tone;
+  nav.dataset.labelMode = s.labelMode || 'both';
   return tone;
 }
 
 function launcherNavMarkup(itemsHtml, settings) {
   const size = escapeHtml(settings.iconSize || '40px');
   const labelStyle = escapeHtml(settings.labelStyle || 'auto');
+  const labelMode = escapeHtml(settings.labelMode || 'both');
   if (settings.dock) {
     const pos = escapeHtml(settings.position);
     return (
-      `<nav id="${LAUNCHER_DOCK_ID}" class="nx-launcher nx-launcher--dock nx-launcher--${pos} nx-launcher--label-${labelStyle} nx-scroll"` +
+      `<nav id="${LAUNCHER_DOCK_ID}" class="nx-launcher nx-launcher--dock nx-launcher--${pos} nx-launcher--label-${labelStyle} nx-launcher--label-mode-${labelMode} nx-scroll"` +
       ` style="--nx-launcher-icon-size:${size}"` +
-      ` data-position="${pos}" data-label-style="${labelStyle}"` +
+      ` data-position="${pos}" data-label-style="${labelStyle}" data-label-mode="${labelMode}"` +
       ` aria-label="Shortcut launcher">${itemsHtml}</nav>`
     );
   }
   return (
-    `<nav class="nx-launcher"` +
+    `<nav class="nx-launcher nx-launcher--label-mode-${labelMode}"` +
     ` style="--nx-launcher-icon-size:${size}"` +
-    ` data-position="inline"` +
+    ` data-position="inline" data-label-mode="${labelMode}"` +
     ` aria-label="Shortcut componen">${itemsHtml}</nav>`
   );
 }
 
-const LAUNCHER_LAYOUT_CLASSES = [
+/** Class lama (flex/pad) — dibersihkan saat mount overlay. */
+const LAUNCHER_LEGACY_LAYOUT_CLASSES = [
   'nx-launcher-layout-top',
   'nx-launcher-layout-bottom',
   'nx-launcher-layout-left',
   'nx-launcher-layout-right',
-];
-
-/** Legacy pad class — dibersihkan agar tidak dobel dengan layout flex. */
-const LAUNCHER_PAD_CLASSES = [
   'nx-launcher-pad-top',
   'nx-launcher-pad-bottom',
   'nx-launcher-pad-left',
   'nx-launcher-pad-right',
+  'nx-launcher-auto-hide',
+];
+
+const LAUNCHER_OVERLAY_CLASSES = [
+  'nx-launcher-overlay-top',
+  'nx-launcher-overlay-bottom',
+  'nx-launcher-overlay-left',
+  'nx-launcher-overlay-right',
 ];
 
 function clearLauncherDockPad() {
+  const strip = [...LAUNCHER_LEGACY_LAYOUT_CLASSES, ...LAUNCHER_OVERLAY_CLASSES];
   const root = document.documentElement;
   const main = document.getElementById('main');
-  root.classList.remove(...LAUNCHER_LAYOUT_CLASSES, ...LAUNCHER_PAD_CLASSES);
+  root.classList.remove(...strip);
   root.style.removeProperty('--nx-launcher-dock-inset');
   if (main) {
-    main.classList.remove(...LAUNCHER_LAYOUT_CLASSES, ...LAUNCHER_PAD_CLASSES);
+    main.classList.remove(...strip);
     main.style.removeProperty('--nx-launcher-dock-inset');
   }
   document.querySelectorAll('.nx-page').forEach((page) => {
-    page.classList.remove(...LAUNCHER_LAYOUT_CLASSES, ...LAUNCHER_PAD_CLASSES);
+    page.classList.remove(...strip);
     page.style.removeProperty('--nx-launcher-dock-inset');
   });
+  const host = document.getElementById(LAUNCHER_HOST_ID);
+  if (host) {
+    host.classList.remove('is-auto-hidden');
+    host.style.removeProperty('opacity');
+    host.style.removeProperty('visibility');
+    host.style.removeProperty('pointer-events');
+  }
 }
 
-/**
- * Cadangan ruang konten lewat flex layout di .nx-page
- * (dock + body), bukan overlay absolute + padding perkiraan.
- */
+/** Overlay: bersihkan layout lama, tandai posisi dock di .nx-page. */
 function applyLauncherDockPad(settings, hostEl) {
   clearLauncherDockPad();
   if (!settings || !settings.dock) return;
   const page = (hostEl && hostEl.closest && hostEl.closest('.nx-page'))
-    || document.querySelector('.nx-page');
-  if (!page) return;
-  const pos = settings.position || 'left';
-  page.classList.add(`nx-launcher-layout-${pos}`);
-
-  // Ukuran nyata dock → var (opsional), work area ikut flex otomatis
-  requestAnimationFrame(() => {
-    try {
-      const dock = hostEl && hostEl.querySelector
-        ? hostEl.querySelector('.nx-launcher--dock')
-        : null;
-      const el = dock || hostEl;
-      if (!el || !page) return;
-      const rect = el.getBoundingClientRect();
-      const inset = (pos === 'left' || pos === 'right')
-        ? `${Math.ceil(rect.width)}px`
-        : `${Math.ceil(rect.height)}px`;
-      page.style.setProperty('--nx-launcher-dock-inset', inset);
-    } catch (_) { /* ignore */ }
-    try {
-      window.dispatchEvent(new Event('resize'));
-    } catch (_) { /* ignore */ }
-  });
+    || document.getElementById(LAUNCHER_HOST_ID)?.closest('.nx-page');
+  if (page) {
+    page.classList.add(`nx-launcher-overlay-${settings.position || 'left'}`);
+  }
+  try {
+    window.dispatchEvent(new Event('resize'));
+  } catch (_) { /* ignore */ }
 }
 
 function resolveLauncherMount(opts = {}) {
@@ -684,9 +709,8 @@ function resolveLauncherMount(opts = {}) {
 }
 
 /**
- * Pasang dock ke host di dalam halaman index (bukan body / title bar).
- * Host ikut flex di tepi .nx-page (layout-left|right|top|bottom) —
- * area kerja (.nx-page__body) mengisi sisa ruang sampai batas Launcher.
+ * Pasang dock ke host — overlay absolute di tepi .nx-page,
+ * di atas area kerja (jendela app tidak mendorong Launcher).
  * @param {string} html
  * @param {ReturnType<typeof normalizeLauncherSettings>} settings
  * @param {Element} mountEl #nx-launcher-host
@@ -708,10 +732,19 @@ function mountLauncherDock(html, settings, mountEl) {
     'nx-launcher-host--bottom',
     'nx-launcher-host--left',
     'nx-launcher-host--right',
+    'nx-launcher-host--tooltip',
   );
   mountEl.classList.add('nx-launcher-host', `nx-launcher-host--${pos}`);
+  if (settings.labelMode === 'tooltip' || settings.labelMode === 'both') {
+    mountEl.classList.add('nx-launcher-host--tooltip');
+  }
   mountEl.replaceChildren(next);
   applyLauncherDockPad(settings, mountEl);
+  try {
+    if (typeof window.syncLauncherWindowBadge === 'function') {
+      window.syncLauncherWindowBadge();
+    }
+  } catch (_) { /* ignore */ }
   return next;
 }
 
@@ -864,7 +897,7 @@ export function attachLauncherDragReorder() {
  * Sync + render launcher.
  *
  * Mode dock (settings.position): dipasang ke `opts.mount` / `#nx-launcher-host`
- * di dalam halaman index distro — flex di tepi `.nx-page` (bukan overlay).
+ * di dalam halaman index distro — overlay absolute di tepi `.nx-page`.
  * JANGAN mount ke document.body / #nx-titlebar: itu layer kernel/shell,
  * di luar distro, dan mengganggu chrome aplikasi (title bar, window controls).
  * Return `''` (jangan embed string ke konten).
@@ -909,7 +942,7 @@ export async function renderShortcutLauncher(opts = {}) {
     return '<p class="nx-launcher__empty">Tidak ada item launcher (cek disabled / add / manifest / bucket)</p>';
   }
 
-  const items = shortcuts.map(launcherItemMarkup).join('');
+  const items = shortcuts.map((s) => launcherItemMarkup(s, settings.labelMode || 'both')).join('');
   const html = launcherNavMarkup(items, settings);
 
   if (settings.dock) {

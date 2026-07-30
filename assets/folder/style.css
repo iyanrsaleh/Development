@@ -1,0 +1,45 @@
+/**
+ * Ikon folder Yaru (assets/folder) — dipakai package/files + class .fm-folder-icon.
+ */
+.ubuntu-workbench .fm-folder-icon,
+.fm-folder-icon {
+  display: block;
+  object-fit: contain;
+  flex-shrink: 0;
+  pointer-events: none;
+  user-select: none;
+}
+
+.fm-folder-icon--sm {
+  width: 16px;
+  height: 16px;
+}
+
+.fm-folder-icon--md {
+  width: 24px;
+  height: 24px;
+}
+
+.fm-folder-icon--lg {
+  width: 48px;
+  height: 48px;
+}
+
+.ubuntu-workbench .ubuntu-fm-grid .fm-item .fm-icon .fm-folder-icon--lg {
+  width: 48px;
+  height: 48px;
+}
+
+.ubuntu-workbench .ubuntu-fm-list .fm-list-item .fm-icon .fm-folder-icon--md,
+.ubuntu-workbench .ubuntu-fm-sidebar .fm-place-icon .fm-folder-icon--sm,
+.ubuntu-workbench .ubuntu-fm-sidebar .fm-tree-icon .fm-folder-icon--sm {
+  width: 100%;
+  height: 100%;
+  max-width: 24px;
+  max-height: 24px;
+}
+
+.ubuntu-workbench .ubuntu-fm-sidebar .fm-place-icon .fm-folder-icon--sm {
+  max-width: 18px;
+  max-height: 18px;
+}

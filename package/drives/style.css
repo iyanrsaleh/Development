@@ -1,0 +1,739 @@
+/* Package drives — isi penuh .nx-app-window__body (pola directory layout).
+   Status bar (.ubuntu-fm-status) menempel di bawah lewat flex:
+   normal, drag-resize, maximize, dan restore. */
+
+.nx-app-window__body.has-nx-drives-layout {
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box;
+  flex: 1 1 auto !important;
+  height: auto !important;
+  align-self: stretch;
+}
+
+/* Maximize: body harus mengisi sisa tinggi frame (header + body). */
+.nx-app-window--maximized > .nx-app-window__body.has-nx-drives-layout {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+}
+
+.nx-app-window__body.has-nx-drives-layout > #nx-drives-root,
+.nx-app-window__body.has-nx-drives-layout > .ubuntu-workbench {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  height: auto !important;
+  max-height: none;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  align-self: stretch;
+}
+
+.ubuntu-workbench#nx-drives-root,
+#nx-drives-root.ubuntu-workbench {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+#nx-drives-app.ubuntu-fm-app {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: none;
+  align-self: stretch;
+}
+
+#nx-drives-app .ubuntu-fm-status {
+  flex: 0 0 auto;
+  margin-top: auto;
+}
+
+#nx-drives-app .ubuntu-fm-toolbar .linked {
+  display: inline-flex;
+  gap: 2px;
+}
+
+#nx-drives-app .ubuntu-fm-toolbar button:disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* Fluent System Icons di toolbar .linked (pola FluentSystemIcons.js) */
+#nx-drives-app .ubuntu-fm-toolbar .icon-button [class*="icon-ic_fluent_"] {
+  font-size: 16px;
+  line-height: 1;
+  color: var(--window-fg-color, #241f31);
+  vertical-align: middle;
+}
+
+#nx-drives-app .ubuntu-fm-toolbar .icon-button.active [class*="icon-ic_fluent_"] {
+  color: var(--accent-bg-color, #3584e4);
+}
+
+/* Search bar (Yaru / Nautilus-style) */
+#nx-drives-app .fm-search {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: 0 1 220px;
+  min-width: 140px;
+  max-width: 280px;
+  margin: 0 4px;
+  padding: 0 4px 0 8px;
+  min-height: 28px;
+  border: 1px solid var(--border-color, #c0bfbc);
+  border-radius: var(--border-radius, 6px);
+  background: var(--view-bg-color, #fff);
+  box-sizing: border-box;
+}
+
+#nx-drives-app .fm-search:focus-within {
+  border-color: var(--ub-orange, #e95420);
+  box-shadow: inset 0 0 0 1px var(--ub-orange, #e95420);
+}
+
+#nx-drives-app .fm-search-icon {
+  flex: 0 0 auto;
+  font-size: 14px;
+  line-height: 1;
+  color: var(--window-fg-color, #241f31);
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+#nx-drives-app .fm-search-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font-size: 13px;
+  font-family: var(--nx-font-sans, inherit);
+  color: var(--view-fg-color, #241f31);
+  padding: 2px 4px;
+  min-height: 24px;
+}
+
+#nx-drives-app .fm-search-input::-webkit-search-cancel-button {
+  display: none;
+}
+
+#nx-drives-app .fm-search .fm-search-clear,
+#nx-drives-app .fm-search .fm-search-recursive {
+  flex: 0 0 auto;
+  min-width: 24px;
+  min-height: 24px;
+  padding: 0;
+}
+
+#nx-drives-app .fm-search-path {
+  display: block;
+  font-size: 11px;
+  line-height: 1.2;
+  color: var(--window-fg-color, #241f31);
+  opacity: 0.55;
+  font-weight: 400;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+#nx-drives-app .ubuntu-fm-list .fm-name {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  min-width: 0;
+  gap: 1px;
+}
+
+#nx-drives-app .ubuntu-fm-list .fm-name > .fm-search-path {
+  margin-top: 0;
+}
+
+#nx-drives-app .fm-icon .icon {
+  font-size: 0;
+  line-height: 1;
+  color: transparent;
+  opacity: 1;
+  width: 48px;
+  height: 48px;
+  background-size: contain;
+}
+
+#nx-drives-app .ubuntu-fm-list .fm-icon .icon {
+  width: 24px;
+  height: 24px;
+}
+
+/* Ikon file distro (assets/file) — class di assets/file/style.css */
+#nx-drives-app .fm-icon .fm-file-icon {
+  display: block;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+/* Ikon native OS (shortcut .lnk) */
+#nx-drives-app .fm-icon .fm-os-icon {
+  display: block;
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+#nx-drives-app .ubuntu-fm-list .fm-icon .fm-os-icon {
+  width: 24px;
+  height: 24px;
+}
+
+/* Inline rename / new file / new folder (bukan modal) */
+#nx-drives-app .fm-item--editing {
+  z-index: 2;
+}
+
+#nx-drives-app .fm-name-edit {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 2px 4px;
+  border: 1px solid var(--accent-bg-color, #3584e4);
+  border-radius: 3px;
+  background: #fff;
+  color: #241f31;
+  font: inherit;
+  font-size: 11px;
+  line-height: 1.3;
+  text-align: center;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(53, 132, 228, 0.25);
+  /* Parent grid sering user-select:none + item draggable — wajib override agar bisa ketik. */
+  user-select: text;
+  -webkit-user-select: text;
+  pointer-events: auto;
+  cursor: text;
+}
+
+#nx-drives-app .ubuntu-fm-list .fm-name-edit {
+  flex: 1 1 auto;
+  min-width: 0;
+  text-align: left;
+  font-size: 13px;
+  padding: 3px 6px;
+}
+
+#nx-drives-app .ubuntu-fm-list {
+  position: relative;
+}
+
+#nx-drives-app .fm-list-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  opacity: 0.75;
+  border-bottom: 1px solid rgba(128, 128, 128, 0.25);
+  flex: 0 0 auto;
+  user-select: none;
+}
+
+#nx-drives-app .fm-list-header .fm-sort-wrap {
+  display: flex;
+  min-width: 0;
+}
+
+#nx-drives-app .fm-list-header .fm-sort {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  padding: 2px 0;
+  margin: 0;
+  cursor: pointer;
+  text-align: inherit;
+  width: 100%;
+}
+
+#nx-drives-app .fm-list-header .fm-sort:hover,
+#nx-drives-app .fm-list-header .fm-sort.is-active {
+  opacity: 1;
+  color: var(--accent-bg-color, #3584e4);
+}
+
+#nx-drives-app .fm-place.fm-drag-over,
+#nx-drives-app .badge.fm-drag-over {
+  outline: 2px dashed var(--ub-orange, #e95420);
+  outline-offset: -2px;
+  background: rgba(233, 84, 32, 0.12);
+}
+
+#nx-drives-app [data-fm-open] {
+  user-select: none;
+}
+
+/* Sidebar: overflow di #fm-sidebar-scroll.nx-scroll (bukan aside). */
+#nx-drives-app .ubuntu-fm-sidebar {
+  overflow: hidden !important;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0 !important;
+}
+
+#nx-drives-app .fm-sidebar-scroll.nx-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 6px 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-width: auto;
+  scrollbar-color: auto;
+}
+
+/* History section = induk (header + scroll). TANPA .nx-scroll di sini. */
+#nx-drives-app .fm-history-section {
+  flex: 0 0 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  margin-top: 4px;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+#nx-drives-app .fm-history-section > .fm-history-head {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding-right: 8px;
+}
+
+#nx-drives-app .fm-history-section > .fm-history-head > .fm-section-label {
+  padding-right: 0;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+#nx-drives-app .fm-history-actions {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+#nx-drives-app .fm-history-toggle,
+#nx-drives-app .fm-history-clear {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: #77767b;
+  cursor: pointer;
+  padding: 0;
+  border-radius: 3px;
+}
+
+#nx-drives-app .fm-history-toggle [class*="icon-ic_fluent_"],
+#nx-drives-app .fm-history-clear [class*="icon-ic_fluent_"] {
+  font-size: 14px;
+  line-height: 1;
+  color: inherit;
+}
+
+#nx-drives-app .fm-history-toggle:hover {
+  color: #241f31;
+  background: rgba(0, 0, 0, 0.06);
+}
+
+#nx-drives-app .fm-history-clear:hover {
+  color: #c01c28;
+  background: rgba(192, 28, 40, 0.08);
+}
+
+#nx-drives-app .fm-history-clear[hidden] {
+  display: none !important;
+}
+
+#nx-drives-app .fm-history-section.is-collapsed {
+  flex: 0 0 auto;
+  min-height: 0;
+}
+
+#nx-drives-app .fm-history-scroll[hidden] {
+  display: none !important;
+}
+
+/*
+ * History list — scroll kernel; max-height agar Places/Drives tetap
+ * terlihat; scroll utama sidebar di #fm-sidebar-scroll.
+ */
+#nx-drives-app .fm-history-scroll.nx-scroll {
+  flex: 0 1 auto;
+  min-height: 0;
+  width: 100%;
+  box-sizing: border-box;
+  max-height: min(280px, 40vh);
+  /* Override inherit .ubuntu-workbench { scrollbar-width:thin } */
+  scrollbar-width: auto;
+  scrollbar-color: auto;
+}
+
+#nx-drives-app .fm-open-history {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+#nx-drives-app .fm-drives-section {
+  flex: 0 0 auto;
+}
+
+#nx-drives-app .fm-history-empty {
+  padding: 4px 12px 8px;
+  font-size: 11px;
+  color: #77767b;
+}
+
+#nx-drives-app .fm-history-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding-right: 4px;
+  position: relative;
+}
+
+#nx-drives-app .fm-history-row:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+#nx-drives-app .fm-history-item {
+  flex: 1 1 auto;
+  min-width: 0;
+  position: relative;
+  font-size: 12px;
+  padding: 5px 4px 5px 12px;
+  cursor: pointer;
+  pointer-events: auto;
+  z-index: 1;
+  background: transparent;
+}
+
+#nx-drives-app .fm-history-item:hover {
+  background: transparent;
+}
+
+#nx-drives-app .fm-history-item .fm-history-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#nx-drives-app .fm-history-item .fm-place-icon .icon {
+  width: 16px;
+  height: 16px;
+  background-size: 16px 16px;
+}
+
+#nx-drives-app .fm-history-item .fm-place-icon .fm-file-icon,
+#nx-drives-app .fm-history-item .fm-place-icon .fm-os-icon {
+  width: 16px;
+  height: 16px;
+}
+
+#nx-drives-app .fm-history-item .fm-history-dot {
+  flex: 0 0 auto;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  box-sizing: border-box;
+  opacity: 0;
+}
+
+#nx-drives-app .fm-history-row.is-window-open .fm-history-dot {
+  opacity: 1;
+  background: var(--ub-orange, #e95420);
+}
+
+#nx-drives-app .fm-history-row.is-window-minimized .fm-history-dot {
+  opacity: 1;
+  background: transparent;
+  box-shadow: inset 0 0 0 2px var(--ub-orange, #e95420);
+}
+
+/* Hapus item — hanya tampil saat hover baris */
+#nx-drives-app .fm-history-remove {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: none;
+  border-radius: 3px;
+  background: transparent;
+  color: #77767b;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 80ms ease, color 80ms ease, background 80ms ease;
+}
+
+#nx-drives-app .fm-history-remove [class*="icon-ic_fluent_"] {
+  font-size: 14px;
+  line-height: 1;
+  color: inherit;
+}
+
+#nx-drives-app .fm-history-row:hover .fm-history-remove,
+#nx-drives-app .fm-history-row:focus-within .fm-history-remove {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+#nx-drives-app .fm-history-remove:hover {
+  color: #fff;
+  background: #c01c28;
+}
+
+.nx-app-window__body.has-nx-os-editor-layout {
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box;
+}
+
+.nx-app-window__body.has-nx-os-editor-layout > .nx-os-editor-shell {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.nx-os-editor-mount {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Loading: overlay penuh .ubuntu-fm-content — lepas dari CSS grid/list lama. */
+#nx-drives-app .ubuntu-fm-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/**
+ * Area daftar file — scroll kernel .nx-scroll saja (§4a).
+ * Jangan overflow-y di #fm-view / .ubuntu-fm-grid (itu native Windows).
+ */
+#nx-drives-app .fm-view-scroll.nx-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+#nx-drives-app .fm-view-scroll > #fm-view.ubuntu-fm-grid,
+#nx-drives-app .fm-view-scroll > #fm-view.ubuntu-fm-list {
+  overflow: visible !important;
+  flex: none;
+  min-height: 0;
+  height: auto;
+  max-height: none;
+}
+
+#nx-drives-app .fm-loading-host {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  background: var(--view-bg-color, #fff);
+  pointer-events: none;
+}
+
+#nx-drives-app .fm-loading-host[hidden] {
+  display: none !important;
+}
+
+#nx-drives-app .fm-loading-host > .nxui-spinner {
+  position: static !important;
+  inset: auto !important;
+  width: auto !important;
+  height: auto !important;
+  min-height: 0 !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex: 0 0 auto;
+  background: transparent !important;
+}
+
+#nx-drives-app .ubuntu-fm-content.is-loading > #fm-view-scroll {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* ——— Breadcrumb Nautilus / Yaru (bukan .badge pill) ——— */
+#nx-drives-app .ubuntu-fm-breadcrumb {
+  display: none;
+  align-items: center;
+  gap: 0;
+  padding: 3px 6px;
+  min-height: 32px;
+  box-sizing: border-box;
+  background: color-mix(in srgb, var(--window-bg-color, #faf9f8) 88%, var(--border-color, #cdc7c2));
+  border-bottom: 1px solid var(--border-color, #cdc7c2);
+}
+
+#nx-drives-app .ubuntu-fm-breadcrumb .fm-bc-sep {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  color: #9a9996;
+  opacity: 0.85;
+  pointer-events: none;
+  user-select: none;
+}
+
+#nx-drives-app .ubuntu-fm-breadcrumb .fm-bc-sep [class*="icon-ic_fluent_"] {
+  font-size: 10px;
+  line-height: 1;
+  color: inherit;
+}
+
+#nx-drives-app .ubuntu-fm-breadcrumb .fm-bc-seg {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 160px;
+  margin: 0;
+  padding: 3px 8px 3px 6px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--window-fg-color, #241f31);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.25;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 80ms ease, color 80ms ease;
+}
+
+#nx-drives-app .ubuntu-fm-breadcrumb .fm-bc-seg:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+#nx-drives-app .ubuntu-fm-breadcrumb .fm-bc-seg:active {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+#nx-drives-app .ubuntu-fm-breadcrumb .fm-bc-seg.is-current {
+  background: color-mix(in srgb, var(--ub-orange, #e95420) 16%, transparent);
+  color: var(--window-fg-color, #241f31);
+  font-weight: 600;
+  cursor: default;
+}
+
+#nx-drives-app .ubuntu-fm-breadcrumb .fm-bc-seg.is-current:hover {
+  background: color-mix(in srgb, var(--ub-orange, #e95420) 22%, transparent);
+}
+
+#nx-drives-app .ubuntu-fm-breadcrumb .fm-bc-icon {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+}
+
+#nx-drives-app .ubuntu-fm-breadcrumb .fm-bc-icon .fm-folder-icon {
+  width: 16px;
+  height: 16px;
+}
+
+#nx-drives-app .ubuntu-fm-breadcrumb .fm-bc-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#nx-drives-app .ubuntu-fm-breadcrumb .fm-bc-seg.fm-drag-over {
+  outline: 2px dashed var(--ub-orange, #e95420);
+  outline-offset: -2px;
+  background: rgba(233, 84, 32, 0.12);
+}
+
+.nx-os-editor-mount > .nx-file-viewer {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.nx-os-editor-mount .nx-file-viewer__image-stage.nx-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+}
+
+.nx-os-editor-mount .nx-file-viewer__md-preview {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.nx-os-editor-mount .nx-file-viewer--pdf,
+.nx-os-editor-mount .nx-file-viewer__pdf-stage,
+.nx-os-editor-mount .nx-file-viewer__pdf-frame {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+}

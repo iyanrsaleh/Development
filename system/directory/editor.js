@@ -68,32 +68,86 @@ function saveLastOpenPath(relPath) {
 const MODE_BY_EXT = {
   js: 'javascript', mjs: 'javascript', cjs: 'javascript', jsx: 'javascript',
   ts: 'typescript', tsx: 'typescript',
-  html: 'htmlmixed', htm: 'htmlmixed',
-  css: 'css', scss: 'css', less: 'css',
-  json: 'javascript',
+  vue: 'javascript', svelte: 'javascript',
+  html: 'htmlmixed', htm: 'htmlmixed', astro: 'htmlmixed',
+  css: 'css', scss: 'css', sass: 'css', less: 'css',
+  json: 'javascript', jsonc: 'javascript',
   md: 'markdown', mdx: 'markdown',
   xml: 'xml', svg: 'xml',
   php: 'php', yaml: 'yaml', yml: 'yaml',
   py: 'python', rb: 'ruby', go: 'go', rs: 'rust', java: 'java',
   kt: 'kotlin', cs: 'csharp', swift: 'swift', lua: 'lua', dart: 'dart',
   sh: 'shell', bash: 'shell', zsh: 'shell', ps1: 'powershell',
-  toml: 'toml', pl: 'perl',
+  bat: 'shell', cmd: 'shell',
+  toml: 'toml', pl: 'perl', sql: 'sql',
 };
+
+/** Ekstensi plain-text yang tetap dibuka di editor meski tanpa mode khusus. */
+const PLAIN_TEXT_EXT = new Set([
+  'txt', 'csv', 'tsv', 'log', 'ini', 'cfg', 'conf', 'env', 'gitignore',
+  'editorconfig', 'npmrc', 'lock',
+]);
+
+/** Binary / office — jangan buka di CodeMirror. */
+const NON_TEXT_EXT = new Set([
+  'docx', 'xlsx', 'pptx', 'doc', 'xls', 'ppt', 'pdf', 'zip', 'rar', '7z',
+  'exe', 'dll', 'wasm', 'bin',
+  'nxtext', 'nxdocx', 'nxxlsx', 'nxpptx', 'nxstat', 'diagram',
+  'png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'ico', 'avif', 'svg',
+]);
+
 function modeForFile(name) {
   const lower = String(name || '').toLowerCase();
   if (lower === 'dockerfile') return 'dockerfile';
+  if (lower === '.env' || lower.startsWith('.env.')) return null;
   const ext = lower.includes('.') ? lower.slice(lower.lastIndexOf('.') + 1) : '';
   return MODE_BY_EXT[ext] || null;
 }
 
+function fileBaseName(filePath) {
+  const s = String(filePath || '').replace(/[/\\]+$/, '');
+  const i = Math.max(s.lastIndexOf('/'), s.lastIndexOf('\\'));
+  return i < 0 ? s : s.slice(i + 1);
+}
+
+/**
+ * Apakah path cocok dibuka di editor teks (sama CM6 directory / drives).
+ * @param {string} nameOrPath
+ */
+export function canOpenInTextEditor(nameOrPath) {
+  const name = fileBaseName(nameOrPath);
+  const lower = String(name || '').toLowerCase();
+  if (lower === '.env' || lower.startsWith('.env.')) return true;
+  const ext = fileExt(name);
+  if (!ext) return false;
+  if (NON_TEXT_EXT.has(ext)) return false;
+  return !!modeForFile(name) || PLAIN_TEXT_EXT.has(ext);
+}
+
 /**
  * File GAMBAR ditampilkan sebagai <img> (window.NxDirectory.readImage,
- * endpoint TERPISAH dari readFile teks) — BUKAN dibuka di CodeMirror,
- * sumber biner gambar mustahil ditampilkan sebagai teks yang berguna.
+ * endpoint TERPISAH dari readFile teks) — BUKAN dibuka di CodeMirror.
+ * Termasuk SVG (pratinjau visual, sama png/jpg).
  * Daftar ekstensi HARUS SAMA dengan DIRECTORY_IMAGE_MIME_BY_EXT di
  * index.js (root) — endpoint menolak ekstensi di luar daftar itu.
  */
 const IMAGE_EXTENSIONS = new Set(['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'ico', 'svg', 'avif']);
+
+/** MIME untuk data-URL pratinjau (selaras DIRECTORY_IMAGE_MIME_BY_EXT di index.js root). */
+const IMAGE_MIME_BY_EXT = {
+  png: 'image/png',
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  gif: 'image/gif',
+  webp: 'image/webp',
+  bmp: 'image/bmp',
+  ico: 'image/x-icon',
+  svg: 'image/svg+xml',
+  avif: 'image/avif',
+};
+
+const OS_IMAGE_MAX_BYTES = 5 * 1024 * 1024;
+const OS_PDF_MAX_BYTES = 32 * 1024 * 1024;
 
 function fileExt(name) {
   const lower = String(name || '').toLowerCase();
@@ -104,110 +158,225 @@ function isImageFile(name) {
   return IMAGE_EXTENSIONS.has(fileExt(name));
 }
 
+function isPdfFile(name) {
+  return fileExt(name) === 'pdf';
+}
+
+/** Pratinjau gambar (termasuk SVG) sebagai <img>. */
+export function canOpenOsImage(nameOrPath) {
+  return IMAGE_EXTENSIONS.has(fileExt(fileBaseName(nameOrPath)));
+}
+
+/** PDF — pratinjau di iframe (Chromium PDF viewer). */
+export function canOpenOsPdf(nameOrPath) {
+  return isPdfFile(fileBaseName(nameOrPath));
+}
+
+/**
+ * Boleh dibuka di jendela viewer FM (teks CM6, markdown, gambar, PDF).
+ * @param {string} nameOrPath
+ */
+export function canOpenInFileViewer(nameOrPath) {
+  return (
+    canOpenInTextEditor(nameOrPath) ||
+    canOpenOsImage(nameOrPath) ||
+    canOpenOsPdf(nameOrPath)
+  );
+}
+
 function isMarkdownFile(name) {
   const ext = fileExt(name);
   return ext === 'md' || ext === 'mdx';
 }
 
-/** Instance editor AKTIF saat ini — SATU per halaman (tab file tunggal, bukan multi-tab). */
-let activeEditor = null;
-let activeEditorRelPath = null;
-let activeEditorKeyHandler = null;
-// Fungsi simpan file yang SEDANG aktif — di-assign ulang tiap kali
-// openFileEditor() berhasil sampai tahap render (lihat bawah). Diekspor
-// (saveActiveFile()) supaya system/contextmenu/nxEditorTarget.js bisa
-// memanggil aksi simpan yang SAMA PERSIS dengan Ctrl+S, tanpa duplikasi
-// logic writeFile+setStatus di dua tempat.
-let activeSaveFn = null;
-// Naik SETIAP kali openFileEditor() dipanggil — dipakai sebagai guard race
-// condition (lihat pemakaian di bawah): kalau user klik file lain sebelum
-// loadDependencies() versi panggilan SEBELUMNYA selesai, token yang
-// "dipegang" pemanggilan lama sudah tidak cocok lagi dengan yang terbaru,
-// jadi hasil load yang telat itu dibatalkan, tidak menimpa editor file baru.
-let openGeneration = 0;
+/** Instance editor — mendukung beberapa jendela OS sekaligus. */
+const instances = new Map();
+let lastFocusedMount = null;
+let globalSaveKeyInstalled = false;
+let openSeq = 0;
 
 /**
- * id "asal" viewerContainer (mis. "nx-file-viewer-mount", dari
- * package/directory/index.js) — disimpan supaya disposeActiveEditor() bisa
- * mengembalikannya persis, bukan menebak/hardcode nama id tetap.
+ * @typedef {{
+ *   editor: object|null,
+ *   path: string,
+ *   saveFn: (() => Promise<void>)|null,
+ *   originalId: string|null,
+ *   container: HTMLElement,
+ *   token: number,
+ * }} EditorInstance
  */
-let activeEditorContainer = null;
-let activeEditorContainerOriginalId = null;
 
-/**
- * Bersihkan instance editor sebelumnya (kalau ada) sebelum membuka file
- * baru — mencegah listener/CM6 view menumpuk saat user gonta-ganti file.
- * Juga mengembalikan id viewerContainer ke id ASAL-nya (lihat openFileEditor()
- * — id container DIGANTI SEMENTARA jadi "nx-file-viewer-editor" selama file
- * terbuka, supaya context-menu tahu kapan klik-kanan sedang kena editor
- * aktif vs viewer kosong/placeholder, lihat komentar lengkap di bawah).
- */
-function disposeActiveEditor() {
-  if (activeEditor) {
-    try { activeEditor.destroy(); } catch (_) { /* ignore */ }
-    activeEditor = null;
+function hashPath(p) {
+  let h = 2166136261;
+  const s = String(p || '');
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619);
   }
-  if (activeEditorKeyHandler) {
-    document.removeEventListener('keydown', activeEditorKeyHandler, true);
-    activeEditorKeyHandler = null;
+  return (h >>> 0).toString(36);
+}
+
+function pruneDeadEditorInstances() {
+  for (const [mount, rec] of [...instances.entries()]) {
+    if (!mount.isConnected) disposeEditorInstance(rec);
   }
-  if (activeEditorContainer) {
-    if (activeEditorContainerOriginalId) activeEditorContainer.id = activeEditorContainerOriginalId;
-    else activeEditorContainer.removeAttribute('id');
+}
+
+function disposeEditorInstance(rec) {
+  if (!rec) return;
+  if (rec.editor) {
+    try { rec.editor.destroy(); } catch (_) { /* ignore */ }
+    rec.editor = null;
   }
-  activeEditorContainer = null;
-  activeEditorContainerOriginalId = null;
-  activeEditorRelPath = null;
-  activeSaveFn = null;
+  const container = rec.container;
+  if (container) {
+    revokePdfObjectUrl(container);
+    if (rec.originalId) container.id = rec.originalId;
+    else if (container.id && container.id.startsWith('nx-file-viewer-editor')) {
+      container.removeAttribute('id');
+    }
+    instances.delete(container);
+    if (lastFocusedMount === container) lastFocusedMount = null;
+  }
+  rec.saveFn = null;
+}
+
+function revokePdfObjectUrl(el) {
+  if (!el || !el._nxPdfObjectUrl) return;
+  try {
+    URL.revokeObjectURL(el._nxPdfObjectUrl);
+  } catch (_) {
+    /* ignore */
+  }
+  el._nxPdfObjectUrl = null;
 }
 
 /**
- * Simpan file yang SEDANG aktif — dipanggil dari context-menu editor
- * (system/contextmenu/nxEditorTarget.js, item "Save", lewat
- * helpers.sendAction('nxSaveActiveFile') → nexaContextAction.js → fungsi
- * ini). No-op kalau tidak ada editor aktif (mis. viewer masih placeholder,
- * belum ada file dibuka).
+ * Bersihkan HANYA editor di container ini (bukan semua jendela).
  */
-export async function saveActiveEditorFile() {
-  if (!activeSaveFn) return;
-  await activeSaveFn();
+function disposeEditorForContainer(viewerContainer) {
+  if (!viewerContainer) return;
+  const rec = instances.get(viewerContainer);
+  if (rec) disposeEditorInstance(rec);
+}
+
+function ensureGlobalSaveKeyHandler() {
+  if (globalSaveKeyInstalled) return;
+  globalSaveKeyInstalled = true;
+  document.addEventListener(
+    'keydown',
+    (event) => {
+      const isSaveCombo =
+        (event.ctrlKey || event.metaKey) &&
+        !event.altKey &&
+        String(event.key || '').toLowerCase() === 's';
+      if (!isSaveCombo) return;
+      const mount =
+        (event.target instanceof Element &&
+          event.target.closest('[id^="nx-file-viewer-editor"]')) ||
+        lastFocusedMount;
+      const rec = mount && instances.get(mount);
+      if (!rec?.saveFn) return;
+      event.preventDefault();
+      rec.saveFn();
+    },
+    true,
+  );
+  document.addEventListener(
+    'pointerdown',
+    (event) => {
+      if (!(event.target instanceof Element)) return;
+      const mount = event.target.closest('[id^="nx-file-viewer-editor"]');
+      if (mount && instances.has(mount)) lastFocusedMount = mount;
+    },
+    true,
+  );
+}
+
+/**
+ * Simpan file editor — dari context-menu Save atau Ctrl+S.
+ * @param {string} [editorId] id mount (nx-file-viewer-editor / nx-file-viewer-editor::…)
+ */
+export async function saveActiveEditorFile(editorId) {
+  pruneDeadEditorInstances();
+  if (editorId) {
+    const mount = document.getElementById(editorId);
+    const rec = mount && instances.get(mount);
+    if (rec?.saveFn) {
+      await rec.saveFn();
+      return;
+    }
+  }
+  const rec =
+    (lastFocusedMount && instances.get(lastFocusedMount)) ||
+    [...instances.values()].at(-1);
+  if (rec?.saveFn) await rec.saveFn();
 }
 
 /**
  * Baca isi file lalu render editor CodeMirror BACA-TULIS ke
- * `viewerContainer`. Ctrl+S (atau Cmd+S di macOS) memicu simpan lewat
- * window.NxDirectory.writeFile() — status simpan ditampilkan di header
- * (bukan alert/confirm, supaya tidak mengganggu alur ketik).
- * @param {string} relPath path file relatif root distro ini
+ * `viewerContainer`. Ctrl+S memicu simpan.
+ *
+ * Beberapa instance boleh hidup bersamaan (multi jendela OS). Membuka file
+ * baru di container YANG SAMA mengganti editor sebelumnya di container itu
+ * (package/directory tetap satu panel).
+ *
+ * @param {string} filePath path relatif distro (io directory) ATAU absolut OS (io os)
  * @param {HTMLElement} viewerContainer elemen tempat editor dipasang
+ * @param {{ io?: 'directory'|'os' }} [opts]
+ *   - `directory` (default): window.NxDirectory.readFile/writeFile (sandbox)
+ *   - `os`: window.readFile/writeFile (File Manager drives, path absolut)
  */
-export async function openFileEditor(relPath, viewerContainer) {
-  disposeActiveEditor();
+export async function openFileEditor(filePath, viewerContainer, opts = {}) {
   if (!viewerContainer) return;
-  const myGeneration = ++openGeneration;
+  pruneDeadEditorInstances();
+  disposeEditorForContainer(viewerContainer);
 
-  const fileName = relPath.split('/').pop();
-  const safePath = escapeHtml(relPath);
+  const io = opts.io === 'os' ? 'os' : 'directory';
+  const token = ++openSeq;
+  const originalId = viewerContainer.id || null;
+  /** @type {EditorInstance} */
+  const rec = {
+    editor: null,
+    path: filePath,
+    saveFn: null,
+    originalId,
+    container: viewerContainer,
+    token,
+  };
+  instances.set(viewerContainer, rec);
 
-  // Gambar: JALUR TERPISAH SEPENUHNYA — TIDAK memanggil readFile()/CodeMirror
-  // sama sekali (sumber biner gambar via readFile() teks UTF-8 akan korup).
-  // Lihat openImagePreview() di bawah — id viewerContainer TIDAK diganti
-  // (beda dari jalur teks di bawah), gambar tidak punya Save/Undo yang
-  // relevan, jadi target context-menu tetap "nx-file-viewer-mount" (§7c).
+  const fileName = fileBaseName(filePath);
+  const safePath = escapeHtml(filePath);
+  const stillMine = () => instances.get(viewerContainer)?.token === token;
+
+  // Gambar (termasuk SVG): sandbox → NxDirectory.readImage; OS → data URL.
   if (isImageFile(fileName)) {
-    return openImagePreview(relPath, fileName, safePath, viewerContainer, myGeneration);
+    return openImagePreview(filePath, fileName, safePath, viewerContainer, stillMine, {
+      io,
+    });
+  }
+
+  // PDF — iframe + blob URL (viewer PDF bawaan Chromium).
+  if (isPdfFile(fileName)) {
+    return openPdfPreview(filePath, fileName, safePath, viewerContainer, stillMine, {
+      io,
+    });
   }
 
   let initial;
   try {
-    initial = await window.NxDirectory.readFile(relPath);
+    if (io === 'os') {
+      if (typeof window.readFile !== 'function') {
+        throw new Error('window.readFile belum siap');
+      }
+      initial = await window.readFile(filePath);
+    } else {
+      initial = await window.NxDirectory.readFile(filePath);
+    }
   } catch (err) {
-    if (myGeneration !== openGeneration) return; // file lain sudah diklik selagi ini masih loading
-    // Hapus dari persistensi — kalau TIDAK dihapus, refresh berikutnya akan
-    // mencoba memulihkan file yang sama (mis. sudah dihapus/dipindah lewat
-    // context-menu tree di tab lain) dan gagal lagi selamanya, loop error
-    // diam-diam setiap kali halaman dibuka.
-    saveLastOpenPath(null);
+    if (!stillMine()) return;
+    if (io === 'directory') saveLastOpenPath(null);
     viewerContainer.innerHTML = `<div class="nx-file-viewer nx-file-viewer--error">
       <div class="nx-file-viewer__header">
         <span class="icon icon-delete"></span>
@@ -217,86 +386,53 @@ export async function openFileEditor(relPath, viewerContainer) {
     </div>`;
     return;
   }
-  if (myGeneration !== openGeneration) return; // file lain sudah diklik selagi readFile() masih berjalan
+  if (!stillMine()) return;
 
-  // Simpan SEBELUM render editor (bukan di akhir fungsi) — path ini sudah
-  // pasti valid (readFile() sukses), dan kalau proses render CM6 di bawah
-  // gagal/lambat, path yang mau dipulihkan tetap benar untuk refresh
-  // berikutnya (lebih baik daripada tidak tersimpan sama sekali).
-  saveLastOpenPath(relPath);
+  // Persist last-open HANYA untuk sandbox directory (attachFileClickViewer).
+  if (io === 'directory') saveLastOpenPath(filePath);
 
-  // id viewerContainer DIGANTI SEMENTARA jadi "nx-file-viewer-editor" —
-  // BUKAN dipasang di elemen internal CM6. NexaCmirror6._init() TIDAK
-  // merender CM6 ke dalam elemen yang diberikan ke konstruktor: ia membuat
-  // <div class="nexacmirror6-wrap"> BARU sebagai SIBLING elemen itu, lalu
-  // menyembunyikan elemen aslinya (display:none) — lihat _init() di
-  // assets/modules/codemirror6/NexaCmirror6.js. Kalau id context-menu
-  // dipasang di elemen mount biasa, klik di teks yang terlihat (yang jatuh
-  // di .nexacmirror6-wrap, TANPA id) tidak pernah closest() sampai ke situ
-  // — inilah bug yang SEMPAT terjadi (klik-kanan di editor selalu jatuh ke
-  // menu default). Mengganti id CONTAINER LUAR (viewerContainer, id asalnya
-  // "nx-file-viewer-mount" dari package/directory/index.js) menghindari
-  // masalah ini sepenuhnya — tidak perlu tahu struktur DOM internal CM6
-  // sama sekali, closest('[id]') dari titik mana pun di dalam viewerContainer
-  // (termasuk di dalam .nexacmirror6-wrap) akan selalu sampai ke id ini.
-  // disposeActiveEditor() mengembalikan id ke ASAL-nya saat editor ditutup
-  // (viewer balik ke placeholder → id balik ke "nx-file-viewer-mount",
-  // target nxFileViewerMount §7c — lihat system/contextmenu/README.md).
-  activeEditorContainer = viewerContainer;
-  activeEditorContainerOriginalId = viewerContainer.id || null;
-  viewerContainer.id = 'nx-file-viewer-editor';
+  viewerContainer.id =
+    io === 'os'
+      ? `nx-file-viewer-editor::${hashPath(filePath)}`
+      : 'nx-file-viewer-editor';
+  viewerContainer.setAttribute('data-nx-file-editor', '1');
 
   viewerContainer.innerHTML = `<div class="nx-file-viewer">
     <div class="nx-file-viewer__header">
       <span class="icon ${modeForFile(fileName) ? 'icon-' + fileName.toLowerCase().split('.').pop() : 'icon'}"></span>
-      <span class="nx-file-viewer__name">${escapeHtml(fileName)}</span>
-      <span class="nx-file-viewer__status" id="nx-file-viewer-status">memuat editor…</span>
+      <span class="nx-file-viewer__name" title="${safePath}">${escapeHtml(fileName)}</span>
+      <span class="nx-file-viewer__status">memuat editor…</span>
       <span class="nx-file-viewer__meta">Ctrl+S untuk simpan</span>
     </div>
-    <div class="nx-file-viewer__editor" id="nx-file-viewer-editor-mount"></div>
+    <div class="nx-file-viewer__editor"></div>
   </div>`;
 
-  const editorEl = viewerContainer.querySelector('#nx-file-viewer-editor-mount');
-  const statusEl = viewerContainer.querySelector('#nx-file-viewer-status');
+  const editorEl = viewerContainer.querySelector('.nx-file-viewer__editor');
+  const statusEl = viewerContainer.querySelector('.nx-file-viewer__status');
 
-  // WAJIB di-await SEBELUM instansiasi — NexaCmirror6 lazy-load bundle CM6
-  // terpisah (codemirror6.bundle.js) secara async. Konstruktor HANYA
-  // memanggil _init() (yang benar-benar merender editor + isi awal) kalau
-  // dependency ini SUDAH selesai dimuat saat konstruktor dipanggil —
-  // tanpa await ini, `new NXUI.Codemirror(...)` membuat instance "kosong"
-  // (elemen DOM ada, tapi CM6 belum pernah _init() sama sekali, sehingga
-  // isi file tidak pernah tampil). Ini bug yang SEMPAT terjadi sebelum
-  // baris await ini ditambahkan — dicatat supaya tidak terulang.
   await window.NXUI.Codemirror.loadDependencies();
+  if (!stillMine()) return;
 
-  // Guard: kalau user sempat klik file LAIN sebelum loadDependencies()
-  // selesai (async, race condition), batalkan — jangan render editor file
-  // lama ke atas file baru yang sudah diklik user. Dicek via openGeneration
-  // (BUKAN activeEditorRelPath — itu sudah di-reset null oleh
-  // disposeActiveEditor() di awal fungsi setiap panggilan baru, jadi tidak
-  // bisa dipakai membedakan "panggilan lama" dari "panggilan baru").
-  if (myGeneration !== openGeneration) return;
+  const content =
+    initial && typeof initial.content === 'string'
+      ? initial.content
+      : String(initial?.content ?? initial ?? '');
 
-  activeEditor = new window.NXUI.Codemirror(editorEl, {
-    value: initial.content,
+  const editor = new window.NXUI.Codemirror(editorEl, {
+    value: content,
     mode: modeForFile(fileName) || undefined,
     theme: 'dracula',
     lineNumbers: true,
     tabSize: 2,
   });
-  activeEditorRelPath = relPath;
+  rec.editor = editor;
+  lastFocusedMount = viewerContainer;
   if (statusEl) statusEl.textContent = '';
 
-  // Pasang class nx-scroll (scrollbar tema aplikasi, assets/modules/scroll/)
-  // LANGSUNG ke elemen scroll internal CM6 (.cm-scroller) — dicari SETELAH
-  // instance CM6 selesai _init() (di atas), karena elemen ini dibuat CM6
-  // sendiri (di dalam .nexacmirror6-wrap, sibling dari editorEl — lihat
-  // NexaCmirror6.js), tidak ada di markup viewerContainer.innerHTML di atas.
-  // TIDAK dipasang lewat CSS descendant selector (.nexacmirror6-wrap
-  // .cm-scroller {...}) — class ditempel NYATA ke elemennya, konsisten
-  // dengan cara .nx-scroll dipakai di tempat lain (langsung di markup).
-  const cmScroller = editorEl.parentElement?.querySelector('.nexacmirror6-wrap .cm-scroller');
-  if (cmScroller) cmScroller.classList.add('nx-scroll');
+  // JANGAN tambah .nx-scroll ke .cm-scroller — CM6 punya scroll sendiri;
+  // class itu (overflow/width) ikut mengganggu measure/tile → crash
+  // "Cannot destructure property 'tile'" (codemirror/dev#1652). Scrollbar
+  // .cm-scroller di-style di system/directory/style.css.
 
   const setStatus = (text, cls) => {
     if (!statusEl) return;
@@ -304,40 +440,29 @@ export async function openFileEditor(relPath, viewerContainer) {
     statusEl.className = 'nx-file-viewer__status' + (cls ? ` nx-file-viewer__status--${cls}` : '');
   };
 
-  activeEditor.on('change', () => setStatus('belum disimpan', 'dirty'));
+  editor.on('change', () => setStatus('belum disimpan', 'dirty'));
 
-  async function saveActiveEditor() {
-    if (!activeEditor || activeEditorRelPath !== relPath) return;
+  async function saveThisEditor() {
+    const cur = instances.get(viewerContainer);
+    if (!cur?.editor || cur.path !== filePath) return;
     setStatus('menyimpan…', 'saving');
     try {
-      await window.NxDirectory.writeFile(relPath, activeEditor.getValue());
+      const value = cur.editor.getValue();
+      if (io === 'os') await window.writeFile(filePath, value);
+      else await window.NxDirectory.writeFile(filePath, value);
       setStatus('tersimpan', 'saved');
     } catch (err) {
       setStatus('gagal simpan: ' + (err && err.message ? err.message : String(err)), 'error');
     }
   }
-  activeSaveFn = saveActiveEditor;
+  rec.saveFn = saveThisEditor;
+  ensureGlobalSaveKeyHandler();
 
-  // Ctrl+S/Cmd+S — capture di document (bukan cuma di editor) supaya tetap
-  // tertangkap walau fokus keyboard ada di elemen CM6 internal. preventDefault
-  // WAJIB (tanpa ini browser membuka dialog "Save Page As" bawaan).
-  activeEditorKeyHandler = (event) => {
-    const isSaveCombo = (event.ctrlKey || event.metaKey) && !event.altKey && String(event.key || '').toLowerCase() === 's';
-    if (!isSaveCombo) return;
-    event.preventDefault();
-    saveActiveEditor();
-  };
-  document.addEventListener('keydown', activeEditorKeyHandler, true);
-
-  // File Markdown — tab [Markdown | Preview] di atas editor CM6. Preview
-  // dirender lewat NexaMarkdown (assets/modules/markdown/NexaMarkdown.js,
-  // sudah GLOBAL via window.NXUI.Markdown/NexaMarkdown) — fromContent(md)
-  // dipakai (BUKAN fromFile()/load() biasa, yang butuh
-  // window.electronAPI.discoveryReadFile — API khusus project lain, TIDAK
-  // ada di kernel ini) karena isi file SUDAH ada di tangan (initial.content,
-  // dibaca lewat window.NxDirectory.readFile() di atas).
   if (isMarkdownFile(fileName)) {
-    wireMarkdownPreviewToggle(viewerContainer, () => activeEditor?.getValue() ?? initial.content);
+    wireMarkdownPreviewToggle(viewerContainer, () => {
+      const cur = instances.get(viewerContainer);
+      return cur?.editor?.getValue() ?? content;
+    });
   }
 }
 
@@ -354,7 +479,7 @@ export async function openFileEditor(relPath, viewerContainer) {
  */
 function wireMarkdownPreviewToggle(viewerContainer, getCurrentMd) {
   const header = viewerContainer.querySelector('.nx-file-viewer__header');
-  const editorEl = viewerContainer.querySelector('#nx-file-viewer-editor-mount');
+  const editorEl = viewerContainer.querySelector('.nx-file-viewer__editor');
   if (!header || !editorEl) return;
 
   const tabs = document.createElement('div');
@@ -373,14 +498,9 @@ function wireMarkdownPreviewToggle(viewerContainer, getCurrentMd) {
   const tabSource = tabs.querySelector('[data-md-view="source"]');
   const tabPreview = tabs.querySelector('[data-md-view="preview"]');
 
-  // editorEl (#nx-file-viewer-editor-mount) SUDAH di-display:none-kan oleh
-  // CM6 sendiri setelah _init() (lihat komentar besar di style.css dekat
-  // .nx-file-viewer > .nexacmirror6-wrap) — elemen yang BENAR-BENAR
-  // terlihat adalah .nexacmirror6-wrap, SIBLING-nya, dibuat CM6 di
-  // parentNode yang sama (viewerContainer > .nx-file-viewer). Toggle
-  // editorEl.hidden SAJA tidak berpengaruh apa pun ke tampilan CM6 — harus
-  // ikut sembunyikan/tampilkan .nexacmirror6-wrap juga, kalau tidak CM6
-  // tetap menumpuk kelihatan di balik preview markdown.
+  // .nx-file-viewer__editor SUDAH di-display:none-kan oleh CM6 setelah
+  // _init() — elemen yang terlihat adalah .nexacmirror6-wrap (sibling).
+  // Toggle editorEl.hidden saja tidak cukup; ikut sembunyikan wrap.
   const cmWrap = editorEl.parentElement?.querySelector('.nexacmirror6-wrap') || null;
 
   tabSource.addEventListener('click', () => {
@@ -417,28 +537,32 @@ function wireMarkdownPreviewToggle(viewerContainer, getCurrentMd) {
 }
 
 /**
- * File GAMBAR — jalur TERPISAH dari openFileEditor() teks: baca via
- * window.NxDirectory.readImage() (base64 data URL, endpoint TERPISAH dari
- * readFile teks), render <img>. TIDAK ada CodeMirror/Ctrl+S/aksi Save sama
- * sekali — gambar murni pratinjau baca-saja (mengubah isi biner gambar
- * lewat editor teks tidak masuk akal). id viewerContainer TIDAK diganti
- * (BEDA dari openFileEditor() teks) — tanpa instance editor aktif, target
- * context-menu yang relevan tetap "nx-file-viewer-mount" (§7c, menu
- * Refresh Tree), bukan §7b (Save/Undo/dst yang tidak relevan untuk gambar).
- * @param {string} relPath
+ * File GAMBAR — jalur TERPISAH dari openFileEditor() teks.
+ * - directory: window.NxDirectory.readImage()
+ * - os: window.readFile({ encoding: 'binary' }) → data URL
+ * TIDAK ada CodeMirror/Ctrl+S. Untuk OS, id mount diganti
+ * `nx-file-viewer-editor::<hash>` supaya restore jendela FM mendeteksi viewer.
+ *
+ * @param {string} filePath
  * @param {string} fileName
- * @param {string} safePath fileName ter-escape HTML (dipakai pesan error)
+ * @param {string} safePath fileName/path ter-escape HTML (pesan error)
  * @param {HTMLElement} viewerContainer
- * @param {number} myGeneration token race-condition, sama pola dengan openFileEditor()
+ * @param {() => boolean} stillMine
+ * @param {{ io?: 'directory'|'os' }} [opts]
  */
-async function openImagePreview(relPath, fileName, safePath, viewerContainer, myGeneration) {
-  saveLastOpenPath(relPath);
+async function openImagePreview(filePath, fileName, safePath, viewerContainer, stillMine, opts = {}) {
+  const io = opts.io === 'os' ? 'os' : 'directory';
   let result;
   try {
-    result = await window.NxDirectory.readImage(relPath);
+    if (io === 'os') {
+      result = await readOsImageAsDataUrl(filePath);
+    } else {
+      result = await window.NxDirectory.readImage(filePath);
+      saveLastOpenPath(filePath);
+    }
   } catch (err) {
-    if (myGeneration !== openGeneration) return; // file lain sudah diklik selagi ini masih loading
-    saveLastOpenPath(null);
+    if (typeof stillMine === 'function' ? !stillMine() : false) return;
+    if (io === 'directory') saveLastOpenPath(null);
     viewerContainer.innerHTML = `<div class="nx-file-viewer nx-file-viewer--error">
       <div class="nx-file-viewer__header">
         <span class="icon icon-delete"></span>
@@ -448,18 +572,195 @@ async function openImagePreview(relPath, fileName, safePath, viewerContainer, my
     </div>`;
     return;
   }
-  if (myGeneration !== openGeneration) return; // file lain sudah diklik selagi readImage() masih berjalan
+  if (typeof stillMine === 'function' ? !stillMine() : false) return;
 
+  if (io === 'os') {
+    viewerContainer.id = `nx-file-viewer-editor::${hashPath(filePath)}`;
+    viewerContainer.setAttribute('data-nx-file-editor', 'image');
+  }
+
+  const ext = fileExt(fileName);
+  const sizeLabel = formatFileSizeBrief(result.size);
+  const mimeLabel = result.mime || 'image';
   viewerContainer.innerHTML = `<div class="nx-file-viewer nx-file-viewer--image">
     <div class="nx-file-viewer__header">
-      <span class="icon ${fileExt(fileName) === 'svg' ? 'icon-svg' : 'icon-png'}"></span>
+      <span class="icon ${ext === 'svg' ? 'icon-svg' : 'icon-png'}"></span>
       <span class="nx-file-viewer__name">${escapeHtml(fileName)}</span>
-      <span class="nx-file-viewer__meta">${escapeHtml(formatFileSizeBrief(result.size))} · ${escapeHtml(result.mime || 'image')} · hanya pratinjau</span>
+      <span class="nx-file-viewer__meta" data-nx-image-meta>${escapeHtml(sizeLabel)} · ${escapeHtml(mimeLabel)} · pratinjau · Ctrl+scroll zoom</span>
     </div>
-    <div class="nx-file-viewer__image-stage">
+    <div class="nx-file-viewer__image-stage nx-scroll" tabindex="0" title="Ctrl + scroll untuk zoom">
       <img class="nx-file-viewer__image" src="${escapeHtml(result.dataUrl)}" alt="${escapeHtml(fileName)}" draggable="false" decoding="async" />
     </div>
   </div>`;
+
+  const stage = viewerContainer.querySelector('.nx-file-viewer__image-stage');
+  const img = viewerContainer.querySelector('.nx-file-viewer__image');
+  const metaEl = viewerContainer.querySelector('[data-nx-image-meta]');
+  if (stage && img) attachImagePreviewZoom(stage, img, metaEl, { sizeLabel, mimeLabel });
+}
+
+/**
+ * Ukuran awal: fit di dalam stage (tidak melebar). Ctrl/Meta + wheel = zoom.
+ * @param {HTMLElement} stage
+ * @param {HTMLImageElement} img
+ * @param {HTMLElement|null} metaEl
+ * @param {{ sizeLabel: string, mimeLabel: string }} labels
+ */
+function attachImagePreviewZoom(stage, img, metaEl, labels) {
+  const MIN = 0.1;
+  const MAX = 8;
+  let zoom = 1;
+  let baseW = 0;
+  let baseH = 0;
+  let ready = false;
+
+  const paintMeta = () => {
+    if (!metaEl) return;
+    const pct = Math.round(zoom * 100);
+    metaEl.textContent = `${labels.sizeLabel} · ${labels.mimeLabel} · ${pct}% · Ctrl+scroll zoom`;
+  };
+
+  const apply = () => {
+    if (!ready || !baseW || !baseH) return;
+    img.style.maxWidth = 'none';
+    img.style.maxHeight = 'none';
+    img.style.width = `${Math.max(1, Math.round(baseW * zoom))}px`;
+    img.style.height = `${Math.max(1, Math.round(baseH * zoom))}px`;
+    paintMeta();
+  };
+
+  const fitToStage = () => {
+    const nw = img.naturalWidth || 0;
+    const nh = img.naturalHeight || 0;
+    if (!nw || !nh) return;
+    baseW = nw;
+    baseH = nh;
+    const pad = 24;
+    const sw = Math.max(40, stage.clientWidth - pad);
+    const sh = Math.max(40, stage.clientHeight - pad);
+    // Muat dalam stage; jangan perbesar gambar kecil di atas 100%.
+    zoom = Math.min(1, sw / nw, sh / nh);
+    ready = true;
+    apply();
+  };
+
+  if (img.complete && img.naturalWidth) fitToStage();
+  else img.addEventListener('load', fitToStage, { once: true });
+
+  stage.addEventListener(
+    'wheel',
+    (ev) => {
+      if (!ev.ctrlKey && !ev.metaKey) return;
+      ev.preventDefault();
+      if (!ready) return;
+      const factor = ev.deltaY > 0 ? 0.9 : 1.1;
+      zoom = Math.min(MAX, Math.max(MIN, zoom * factor));
+      apply();
+    },
+    { passive: false },
+  );
+}
+
+/**
+ * Baca gambar OS → { dataUrl, mime, size } (pola sama NxDirectory.readImage).
+ * @param {string} absPath
+ */
+async function readOsImageAsDataUrl(absPath) {
+  if (typeof window.readFile !== 'function') {
+    throw new Error('window.readFile belum siap');
+  }
+  const ext = fileExt(fileBaseName(absPath));
+  const mime = IMAGE_MIME_BY_EXT[ext];
+  if (!mime) {
+    throw new Error(`Ekstensi bukan format gambar yang didukung: .${ext || '?'}`);
+  }
+  const res = await window.readFile(absPath, {
+    encoding: 'binary',
+    maxBytes: OS_IMAGE_MAX_BYTES,
+  });
+  const b64 = res && typeof res.content === 'string' ? res.content : '';
+  if (!b64) throw new Error('Konten gambar kosong');
+  return {
+    dataUrl: `data:${mime};base64,${b64}`,
+    mime,
+    size: Number(res.size) || 0,
+  };
+}
+
+/**
+ * PDF — baca biner → blob URL → iframe (viewer PDF Chromium).
+ * @param {string} filePath
+ * @param {string} fileName
+ * @param {string} safePath
+ * @param {HTMLElement} viewerContainer
+ * @param {() => boolean} stillMine
+ * @param {{ io?: 'directory'|'os' }} [opts]
+ */
+async function openPdfPreview(filePath, fileName, safePath, viewerContainer, stillMine, opts = {}) {
+  const io = opts.io === 'os' ? 'os' : 'directory';
+  revokePdfObjectUrl(viewerContainer);
+
+  let size = 0;
+  let objectUrl = '';
+  try {
+    if (io !== 'os') {
+      throw new Error('Pratinjau PDF sandbox (directory) belum tersedia — buka dari File Manager.');
+    }
+    if (typeof window.readFile !== 'function') {
+      throw new Error('window.readFile belum siap');
+    }
+    const res = await window.readFile(filePath, {
+      encoding: 'binary',
+      maxBytes: OS_PDF_MAX_BYTES,
+    });
+    const b64 = res && typeof res.content === 'string' ? res.content : '';
+    if (!b64) throw new Error('Konten PDF kosong');
+    size = Number(res.size) || 0;
+    objectUrl = base64ToPdfObjectUrl(b64);
+  } catch (err) {
+    if (typeof stillMine === 'function' ? !stillMine() : false) return;
+    viewerContainer.innerHTML = `<div class="nx-file-viewer nx-file-viewer--error">
+      <div class="nx-file-viewer__header">
+        <span class="icon icon-pdf"></span>
+        <span class="nx-file-viewer__name">${safePath}</span>
+      </div>
+      <p class="nx-file-viewer__error-message">${escapeHtml(err && err.message ? err.message : String(err))}</p>
+    </div>`;
+    return;
+  }
+  if (typeof stillMine === 'function' ? !stillMine() : false) {
+    try { URL.revokeObjectURL(objectUrl); } catch (_) { /* ignore */ }
+    return;
+  }
+
+  viewerContainer.id = `nx-file-viewer-editor::${hashPath(filePath)}`;
+  viewerContainer.setAttribute('data-nx-file-editor', 'pdf');
+  viewerContainer._nxPdfObjectUrl = objectUrl;
+
+  viewerContainer.innerHTML = `<div class="nx-file-viewer nx-file-viewer--pdf">
+    <div class="nx-file-viewer__header">
+      <span class="icon icon-pdf"></span>
+      <span class="nx-file-viewer__name">${escapeHtml(fileName)}</span>
+      <span class="nx-file-viewer__meta">${escapeHtml(formatFileSizeBrief(size))} · PDF · hanya pratinjau</span>
+    </div>
+    <div class="nx-file-viewer__pdf-stage">
+      <iframe class="nx-file-viewer__pdf-frame" src="${escapeHtml(objectUrl)}" title="${escapeHtml(fileName)}" type="application/pdf"></iframe>
+    </div>
+  </div>`;
+}
+
+/**
+ * @param {string} b64
+ * @returns {string} blob: URL
+ */
+function base64ToPdfObjectUrl(b64) {
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i += 1) {
+    bytes[i] = bin.charCodeAt(i);
+  }
+  const blob = new Blob([bytes], { type: 'application/pdf' });
+  return URL.createObjectURL(blob);
 }
 
 function formatFileSizeBrief(bytes) {

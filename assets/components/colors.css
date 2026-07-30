@@ -64,3 +64,125 @@
   --panel-bg: #151515;
   --panel-fg: #ffffff;
 }
+
+/* ——— Dark Chrome (Settings → Window theme "dark") ———
+   Global lewat html[data-nx-components-theme="dark"], atau lokal di jendela bertema dark. */
+[data-nx-components-theme="dark"] .ubuntu-workbench,
+.nx-app-window--theme-dark .ubuntu-workbench,
+.ubuntu-workbench.nx-components-theme-dark {
+  color-scheme: dark;
+  --window-bg-color: #2d2d2d;
+  --window-fg-color: #f0f0f0;
+  --view-bg-color: #242424;
+  --view-fg-color: #f0f0f0;
+  --border-color: #454545;
+  --accent-bg-color: #3584e4;
+  --accent-fg-color: #ffffff;
+  --accent-color: #62a0ea;
+  --success-bg-color: #33d17a;
+  --warning-bg-color: #f6d32d;
+  --error-bg-color: #e01b24;
+  --panel-bg: #1a1a1a;
+  --panel-fg: #ffffff;
+  --fgColor-default: #f0f0f0;
+  --color-fg-default: #f0f0f0;
+  --fgColor-muted: #c0bfbc;
+  --color-fg-muted: #c0bfbc;
+  --bgColor-default: #242424;
+  --color-canvas-default: #242424;
+  --bgColor-muted: #2d2d2d;
+  --color-canvas-inset: #2d2d2d;
+  --control-borderColor-rest: #555555;
+  --control-borderColor-disabled: #3a3a3a;
+  --color-border-default: #555555;
+  --borderColor-default: #555555;
+  --focus-outlineColor: #62a0ea;
+  --color-accent-fg: #62a0ea;
+  color: var(--window-fg-color);
+  background-color: var(--window-bg-color);
+}
+
+/* Tombol / kontrol yang masih hardcode gradient light */
+[data-nx-components-theme="dark"] .ubuntu-workbench .button,
+[data-nx-components-theme="dark"] .ubuntu-workbench .ubuntu-button,
+[data-nx-components-theme="dark"] .ubuntu-workbench .ubuntu-btn,
+[data-nx-components-theme="dark"] .ubuntu-workbench button.suggested-action,
+[data-nx-components-theme="dark"] .ubuntu-workbench button.destructive-action,
+[data-nx-components-theme="dark"] .ubuntu-workbench button.orange-action,
+[data-nx-components-theme="dark"] .ubuntu-workbench button.flat,
+[data-nx-components-theme="dark"] .ubuntu-workbench button.raised,
+[data-nx-components-theme="dark"] .ubuntu-workbench label.button,
+[data-nx-components-theme="dark"] .ubuntu-workbench label.suggested-action,
+[data-nx-components-theme="dark"] .ubuntu-workbench label.destructive-action,
+[data-nx-components-theme="dark"] .ubuntu-workbench label.orange-action,
+.nx-app-window--theme-dark .ubuntu-workbench .button,
+.nx-app-window--theme-dark .ubuntu-workbench .ubuntu-button,
+.nx-app-window--theme-dark .ubuntu-workbench .ubuntu-btn,
+.nx-app-window--theme-dark .ubuntu-workbench button.suggested-action,
+.nx-app-window--theme-dark .ubuntu-workbench button.destructive-action,
+.nx-app-window--theme-dark .ubuntu-workbench button.orange-action,
+.nx-app-window--theme-dark .ubuntu-workbench button.flat,
+.nx-app-window--theme-dark .ubuntu-workbench button.raised,
+.nx-app-window--theme-dark .ubuntu-workbench label.button,
+.nx-app-window--theme-dark .ubuntu-workbench label.suggested-action,
+.nx-app-window--theme-dark .ubuntu-workbench label.destructive-action,
+.nx-app-window--theme-dark .ubuntu-workbench label.orange-action {
+  background: linear-gradient(to bottom, #3a3a3a, #2f2f2f);
+  color: #f0f0f0;
+  border-color: #555555;
+}
+
+[data-nx-components-theme="dark"] .ubuntu-workbench .button:hover,
+[data-nx-components-theme="dark"] .ubuntu-workbench .ubuntu-button:hover,
+[data-nx-components-theme="dark"] .ubuntu-workbench .ubuntu-btn:hover,
+.nx-app-window--theme-dark .ubuntu-workbench .button:hover,
+.nx-app-window--theme-dark .ubuntu-workbench .ubuntu-button:hover,
+.nx-app-window--theme-dark .ubuntu-workbench .ubuntu-btn:hover {
+  background: linear-gradient(to bottom, #454545, #383838);
+}
+
+[data-nx-components-theme="dark"] .ubuntu-workbench .entry,
+[data-nx-components-theme="dark"] .ubuntu-workbench .ubuntu-entry,
+[data-nx-components-theme="dark"] .ubuntu-workbench select.select,
+[data-nx-components-theme="dark"] .ubuntu-workbench select.ubuntu-select,
+.nx-app-window--theme-dark .ubuntu-workbench .entry,
+.nx-app-window--theme-dark .ubuntu-workbench .ubuntu-entry,
+.nx-app-window--theme-dark .ubuntu-workbench select.select,
+.nx-app-window--theme-dark .ubuntu-workbench select.ubuntu-select {
+  background: #1e1e1e;
+  color: #f0f0f0;
+  border-color: #555555;
+}
+
+[data-nx-components-theme="dark"] .ubuntu-workbench .entry::placeholder,
+[data-nx-components-theme="dark"] .ubuntu-workbench .ubuntu-entry::placeholder,
+.nx-app-window--theme-dark .ubuntu-workbench .entry::placeholder,
+.nx-app-window--theme-dark .ubuntu-workbench .ubuntu-entry::placeholder {
+  color: #9a9996;
+}
+
+[data-nx-components-theme="dark"] .ubuntu-workbench .card.activatable:hover,
+.nx-app-window--theme-dark .ubuntu-workbench .card.activatable:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+[data-nx-components-theme="dark"] .ubuntu-workbench .caption,
+[data-nx-components-theme="dark"] .ubuntu-workbench .statusbar,
+.nx-app-window--theme-dark .ubuntu-workbench .caption,
+.nx-app-window--theme-dark .ubuntu-workbench .statusbar {
+  color: #c0bfbc;
+}
+
+[data-nx-components-theme="dark"] .ubuntu-workbench .nx-app-shell__nav a,
+.nx-app-window--theme-dark .ubuntu-workbench .nx-app-shell__nav a,
+.nx-app-window--theme-dark .nx-app-shell__nav a {
+  color: #62a0ea;
+}
+
+[data-nx-components-theme="dark"] .ubuntu-workbench .nx-window-theme-preview__option,
+.nx-app-window--theme-dark .ubuntu-workbench .nx-window-theme-preview__option {
+  background: var(--view-bg-color);
+  border-color: var(--border-color);
+  color: var(--view-fg-color);
+}
+

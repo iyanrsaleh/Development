@@ -7,7 +7,11 @@
 .ubuntu-workbench .ubuntu-fm-app {
   display: flex;
   flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
   height: 100%;
+  width: 100%;
+  box-sizing: border-box;
   background: var(--window-bg-color);
   color: var(--window-fg-color);
   font-family: var(--nx-font-sans);
@@ -140,7 +144,8 @@
 /* ────────── Main area: sidebar + content ────────── */
 .ubuntu-workbench .ubuntu-fm-body {
   display: flex;
-  flex: 1;
+  flex: 1 1 auto;
+  min-height: 0;
   overflow: hidden;
 }
 
@@ -149,7 +154,8 @@
   width: 200px;
   min-width: 160px;
   max-width: 480px;
-  background: var(--border-color)
+  min-height: 0;
+  background: var(--border-color);
   border-right: 1px solid var(--border-color);
   overflow-y: auto;
   padding: 6px 0;
@@ -293,7 +299,9 @@
 
 /* ────────── Content area ────────── */
 .ubuntu-workbench .ubuntu-fm-content {
-  flex: 1;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -307,7 +315,8 @@
   gap: 4px;
   padding: 8px;
   overflow-y: auto;
-  flex: 1;
+  flex: 1 1 auto;
+  min-height: 0;
   align-content: start;
   position: relative;
 }
@@ -408,7 +417,8 @@
   display: flex;
   flex-direction: column;
   overflow-y: auto;
-  flex: 1;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 .ubuntu-workbench .ubuntu-fm-list .fm-list-header {
   display: flex;
@@ -495,16 +505,15 @@
   flex-shrink: 0;
 }
 
-/* ────────── Breadcrumb ────────── */
-/* display:none sebagai default (bukan flex) — updateBreadcrumb() di
-   renderer.js men-set 'flex' hanya kalau path cukup dalam (bukan root/drive
-   level). Tanpa ini, sebelum updateBreadcrumb() sempat dipanggil sekali,
-   strip kosong (padding+border tanpa isi) sempat "berkedip" tampil. */
+/* ────────── Breadcrumb ──────────
+   Base: strip tersembunyi sampai ada path.
+   Tampilan Nautilus/Yaru untuk package drives di package/drives/style.css
+   (.fm-bc-seg — BUKAN .badge pill lama). */
 .ubuntu-workbench .ubuntu-fm-breadcrumb {
   display: none;
   align-items: center;
-  gap: 4px;
-  padding: 6px 8px;
+  gap: 2px;
+  padding: 4px 8px;
   border-bottom: 1px solid var(--border-color);
   background: var(--window-bg-color);
   flex-shrink: 0;
@@ -514,24 +523,10 @@
 .ubuntu-workbench .ubuntu-fm-breadcrumb::-webkit-scrollbar {
   display: none;
 }
-.ubuntu-workbench .ubuntu-fm-breadcrumb .fm-bc-arrow {
-  display: inline-flex;
-  align-items: center;
-  color: #9a9996;
-  font-size: 16px;
-  font-weight: 300;
-  user-select: none;
-  flex-shrink: 0;
-  line-height: 1;
-}
-.ubuntu-workbench .ubuntu-fm-breadcrumb .badge {
-  flex-shrink: 0;
-}
-.ubuntu-workbench .ubuntu-fm-breadcrumb .badge.orange {
-  cursor: default;
-}
 
-/* ────────── Status bar ────────── */
+/* ────────── Status bar ──────────
+   flex-shrink:0 + margin-top:auto — tetap di kaki .ubuntu-fm-app
+   saat body jendela floating di-resize (bukan hanya window.resize). */
 .ubuntu-workbench .ubuntu-fm-status {
   display: flex;
   align-items: center;
@@ -541,8 +536,12 @@
   border-top: 1px solid var(--border-color);
   font-size: 12px;
   color: #77767b;
+  flex: 0 0 auto;
   flex-shrink: 0;
+  margin-top: auto;
   min-height: 22px;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 /* ────────── Empty state ────────── */
@@ -564,13 +563,4 @@
 }
 .ubuntu-workbench .ubuntu-fm-empty .fm-empty-text {
   font-size: 14px;
-}
-
-/* ────────── Loading ────────── */
-.ubuntu-workbench .ubuntu-fm-loading {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: 1;
-  padding: 40px;
 }

@@ -14,7 +14,7 @@
 // system/directory/index.js, system/directory/editor.js, dan
 // system/buckets/index.js (modul biasa, di-import HANYA dari sini).
 import { renderDirectoryTreeHtml, attachDirectoryTreePersistence } from './directory/index.js';
-import { openFileEditor, attachFileClickViewer } from './directory/editor.js';
+import { openFileEditor, attachFileClickViewer, canOpenInTextEditor, canOpenInFileViewer, canOpenOsImage, canOpenOsPdf } from './directory/editor.js';
 import { initDistroBuckets, bucket } from './buckets/index.js';
 import { loadSSHConfig, loadSSHPresets, getSSHPreset, runActiveConnection, runQuery, listTables, readTable, closeActiveConnection, syncTablesToIndexedDB, updateRow, deleteRow } from './ssh/index.js';
 import { loadDistroShortcuts, getDistroShortcuts, clearDistroShortcutsCache, renderShortcutLauncher, refreshShortcutLauncher, attachLauncherDragReorder, normalizeLauncherSettings, applyLauncherLabelContrast, resolveLauncherShortcuts, loadLauncherShortcuts, saveLauncherShortcuts, syncLauncherShortcuts, updateLauncherShortcut, reorderLauncherShortcuts, loadLauncherPrefs, saveLauncherPrefs, mergeLauncherOpts, NATIVE_LAUNCHER_DEFAULTS, LAUNCHER_PREFS_ID } from './shortcut/index.js';
@@ -30,8 +30,48 @@ import {
   refreshWallpaper,
 } from './utilities/wallpaper.js';
 import {
+  NATIVE_DRIVES_DEFAULTS,
+  DRIVES_STORE,
+  DRIVES_PREFS_ID,
+  FOLDER_COLORS,
+  loadDrivesPrefs,
+  saveDrivesPrefs,
+  mergeDrivesPrefs,
+  normalizeDrivesPrefs,
+  applyDrivesPrefs,
+  refreshDrivesPrefs,
+  getFolderColor,
+  getDrivesPrefsCached,
+} from './utilities/drivesPrefs.js';
+import {
+  listDrives,
+  listUserPlaces,
+  listDir,
+  statPath,
+  pathExists,
+  searchDir,
+  getOsFileIcon,
+  openOsPath,
+  emptyRecycleBin,
+  restoreRecycleItems,
+  permanentlyDeleteRecycleItems,
+  readFile,
+  writeFile,
+  editFile,
+  appendFile,
+  unlink,
+  mkdir,
+  rm,
+  rename,
+  move,
+  copy,
+  watch,
+  unwatch,
+} from './IPC/index.js';
+import {
   openAppWindow,
   setAppWindowState,
+  restoreAppWindow,
   closeAppWindow,
   getAppWindowBody,
   getActiveAppWindow,
@@ -39,8 +79,24 @@ import {
   prepareAppWindowContainer,
   attachAutoAppWindow,
   setLauncherAutoHidden,
+  syncLauncherWindowBadge,
+  bringAppWindowToFront,
+  listAppWindows,
+  findAppWindow,
   WINDOW_STORE,
 } from './window/index.js';
+import {
+  NATIVE_WINDOW_THEME_DEFAULTS,
+  WINDOW_THEME_STORE,
+  WINDOW_THEME_PREFS_ID,
+  WINDOW_THEMES,
+  loadWindowThemePrefs,
+  saveWindowThemePrefs,
+  mergeWindowThemePrefs,
+  normalizeWindowThemePrefs,
+  applyWindowThemePrefs,
+  refreshWindowTheme,
+} from './window/settings.js';
 import {
   NATIVE_TITLEBAR_DEFAULTS,
   TITLEBAR_STORE,
@@ -59,6 +115,34 @@ window.renderDirectoryTreeHtml = renderDirectoryTreeHtml;
 window.attachDirectoryTreePersistence = attachDirectoryTreePersistence;
 window.openFileEditor = openFileEditor;
 window.attachFileClickViewer = attachFileClickViewer;
+window.canOpenInTextEditor = canOpenInTextEditor;
+window.canOpenInFileViewer = canOpenInFileViewer;
+window.canOpenOsImage = canOpenOsImage;
+window.canOpenOsPdf = canOpenOsPdf;
+// IPC OS (drives + FS) — thin alias ke window.NxDrives / electronAPI
+window.listDrives = listDrives;
+window.listUserPlaces = listUserPlaces;
+window.listDir = listDir;
+window.statPath = statPath;
+window.pathExists = pathExists;
+window.searchDir = searchDir;
+window.getOsFileIcon = getOsFileIcon;
+window.openOsPath = openOsPath;
+window.emptyRecycleBin = emptyRecycleBin;
+window.restoreRecycleItems = restoreRecycleItems;
+window.permanentlyDeleteRecycleItems = permanentlyDeleteRecycleItems;
+window.readFile = readFile;
+window.writeFile = writeFile;
+window.editFile = editFile;
+window.appendFile = appendFile;
+window.unlink = unlink;
+window.mkdir = mkdir;
+window.rm = rm;
+window.rename = rename;
+window.move = move;
+window.copy = copy;
+window.watch = watch;
+window.unwatch = unwatch;
 // Shortcut / launcher — data manifest + layout user di DistroBuckets("nx-launcher")
 window.loadDistroShortcuts = loadDistroShortcuts;
 window.getDistroShortcuts = getDistroShortcuts;
@@ -90,17 +174,45 @@ window.mergeWallpaperPrefs = mergeWallpaperPrefs;
 window.normalizeWallpaperPrefs = normalizeWallpaperPrefs;
 window.applyWallpaper = applyWallpaper;
 window.refreshWallpaper = refreshWallpaper;
+// File Manager prefs — DistroBuckets("nx-drives") __prefs__, UI: package/settings/drives
+window.NATIVE_DRIVES_DEFAULTS = NATIVE_DRIVES_DEFAULTS;
+window.DRIVES_STORE = DRIVES_STORE;
+window.DRIVES_PREFS_ID = DRIVES_PREFS_ID;
+window.FOLDER_COLORS = FOLDER_COLORS;
+window.loadDrivesPrefs = loadDrivesPrefs;
+window.saveDrivesPrefs = saveDrivesPrefs;
+window.mergeDrivesPrefs = mergeDrivesPrefs;
+window.normalizeDrivesPrefs = normalizeDrivesPrefs;
+window.applyDrivesPrefs = applyDrivesPrefs;
+window.refreshDrivesPrefs = refreshDrivesPrefs;
+window.getFolderColor = getFolderColor;
+window.getDrivesPrefsCached = getDrivesPrefsCached;
 // App window floating di work area (#nxhome)
 window.openAppWindow = openAppWindow;
 window.setAppWindowState = setAppWindowState;
+window.restoreAppWindow = restoreAppWindow;
 window.closeAppWindow = closeAppWindow;
 window.setLauncherAutoHidden = setLauncherAutoHidden;
+window.syncLauncherWindowBadge = syncLauncherWindowBadge;
+window.bringAppWindowToFront = bringAppWindowToFront;
+window.listAppWindows = listAppWindows;
+window.findAppWindow = findAppWindow;
 window.getAppWindowBody = getAppWindowBody;
 window.getActiveAppWindow = getActiveAppWindow;
 window.wrapNxhomeInAppWindow = wrapNxhomeInAppWindow;
 window.prepareAppWindowContainer = prepareAppWindowContainer;
 window.attachAutoAppWindow = attachAutoAppWindow;
 window.WINDOW_STORE = WINDOW_STORE;
+window.NATIVE_WINDOW_THEME_DEFAULTS = NATIVE_WINDOW_THEME_DEFAULTS;
+window.WINDOW_THEME_STORE = WINDOW_THEME_STORE;
+window.WINDOW_THEME_PREFS_ID = WINDOW_THEME_PREFS_ID;
+window.WINDOW_THEMES = WINDOW_THEMES;
+window.loadWindowThemePrefs = loadWindowThemePrefs;
+window.saveWindowThemePrefs = saveWindowThemePrefs;
+window.mergeWindowThemePrefs = mergeWindowThemePrefs;
+window.normalizeWindowThemePrefs = normalizeWindowThemePrefs;
+window.applyWindowThemePrefs = applyWindowThemePrefs;
+window.refreshWindowTheme = refreshWindowTheme;
 // Title bar — prefs DistroBuckets("nx-titlebar"), UI: package/settings/titlebar
 window.NATIVE_TITLEBAR_DEFAULTS = NATIVE_TITLEBAR_DEFAULTS;
 window.TITLEBAR_STORE = TITLEBAR_STORE;
@@ -159,8 +271,8 @@ window.deleteSSHRow = deleteRow;
 // BUKAN oleh readTable() itu sendiri — lihat komentar arsitektur lengkap
 // di system/ssh/index.js (syncTablesToIndexedDB()).
 try {
-  // version 7: pastikan store nx-titlebar ada (migrasi dari v5/v6)
-  await initDistroBuckets('Development', ['nx-ssh-table-cache', 'nx-launcher', 'nx-wallpaper', 'nx-window', 'nx-titlebar'], 7);
+  // version 8: store nx-drives (FM open-history, dll.)
+  await initDistroBuckets('Development', ['nx-ssh-table-cache', 'nx-launcher', 'nx-wallpaper', 'nx-window', 'nx-titlebar', 'nx-drives'], 8);
 } catch (err) {
   console.error('[system/index.js] gagal inisialisasi DistroBuckets:', err);
 }
@@ -172,6 +284,13 @@ try {
   await refreshTitlebar();
 } catch (err) {
   console.warn('[system/index.js] refreshTitlebar:', err);
+}
+
+// Warm prefs FM (warna folder, view, hidden) — cache sync untuk icon URL
+try {
+  await refreshDrivesPrefs();
+} catch (err) {
+  console.warn('[system/index.js] refreshDrivesPrefs:', err);
 }
 
 // Prefetch shortcut dari manifest, lalu sync ke bucket launcher (layout user).

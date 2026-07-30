@@ -1,0 +1,11 @@
+{
+  "id": "drives",
+  "title": "Files",
+  "description": "File manager OS (Yaru) — window.listDrives + listDir.",
+  "version": "1.0.0",
+  "author": "iyan",
+  "brend": {
+    "ico": "/distro/Development/assets/folder/user-orange-home.png",
+    "icon": "/distro/Development/assets/folder/user-orange-home.png"
+  }
+}

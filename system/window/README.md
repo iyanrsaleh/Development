@@ -1,15 +1,18 @@
 # `system/window/` — Area kerja & bingkai app window
 
-Kontrak **work area** di dalam NXHOME dan **bingkai jendela aplikasi** (floating) yang bisa digeser / diubah ukuran / min–max.  
+Dokumentasi **keadaan sebelumnya** (referensi `screenshot/a5.png`) dan **kontrak bingkai floating** di dalam area kerja: minimize / maximize / restore, drag, resize.
+
 **Bukan** Electron `BrowserWindow` dan **bukan** titlebar shell (`system/titlebar/` / `#nx-titlebar`).
 
-Status dokumen: **spesifikasi + implementasi awal** (`index.js`, `style.css` sudah ada).
-
-Referensi visual masalah sebelumnya: `screenshot/a5.png`.
+> Implementasi hidup di `index.js`, `style.css`, `settings.js` (tema visual).  
+> Tema UI: Settings → Window (`package/settings/stwindow.js`).  
+> Ringkasan panel settings: `package/settings/README.md`.
 
 ---
 
 ## 1. Tujuan
+
+`system/window/` = **bingkai app di work area** (bukan frame OS).
 
 | Yang diatur di sini | Yang **tidak** di sini |
 |---------------------|-------------------------|
@@ -18,35 +21,34 @@ Referensi visual masalah sebelumnya: `screenshot/a5.png`.
 | Body scroll di dalam bingkai | Wallpaper layer (`system/utilities/wallpaper`) |
 | Batas geometri vs pad launcher | Routing package (`#package/…`) — hanya dikonsumsi |
 
-User melihat wallpaper + dock di belakang; **isi package** (settings, dll.) hidup di **satu jendela mengambang** yang rapi, bukan panel full-bleed menempel tepi.
+Keputusan UI:
+
+- Chrome window: title + kontrol **min / max (maximize) / close** (close = tutup ke home / unload package — **bukan** Electron `windowClose`).
+- Geometri user: **drag** title bar, **resize** dari tepi/sudut, dalam batas work area (`#nx-home-scroll` / `#nxhome`).
+- Maximize = isi penuh work area (bukan fullscreen OS); restore = ukuran/posisi terakhir.
+- Minimize = sembunyikan body window (atau collapse); restore mengembalikan geometry.
+- Wallpaper + launcher tetap di belakang/tepi; window mengambang di atas wallpaper.
 
 ---
 
-## 2. Lapisan (sekarang vs target)
+## 2. Diagram lapisan + istilah
 
-### 2.1 Sekarang (audit kode)
+### 2.1 Keadaan bermasalah (audit a5 / sebelum bingkai)
 
 ```text
 #nx-titlebar          ← NXTITLEBAR (shell Electron)
 .nx-page (NXHOME)     ← index.js
   #nx-wallpaper-host
-  #nx-launcher-host   ← dock absolute + nx-launcher-pad-*
+  #nx-launcher-host   ← dock overlay
   .nx-page__body
-    #nx-home-scroll.nx-scroll   ← tinggi = NXUI.Window.height − top
+    #nx-home-scroll.nx-scroll
       #nxhome
-        package/settings → <article class="nx-page">   ← MASALAH: nested .nx-page
-          link nav pipe
-          #nxpackage → form Wallpaper (ubuntu-workbench)
+        package/settings → <article class="nx-page">   ← nested .nx-page
+          link nav pipe (launcher | Wallpaper | …)
+          #nxpackage → form Wallpaper
 ```
 
-File kunci:
-
-- Desktop: `templates/distro/Development/index.js`
-- Dock: `system/shortcut/`
-- Shell settings: `package/settings/index.js` (nested `.nx-page` + `#nxpackage`)
-- Titlebar OS: `system/titlebar/` — **tetap** chrome aplikasi Electron
-
-### 2.2 Target
+### 2.2 Target (dengan bingkai)
 
 ```text
 #nx-titlebar
@@ -64,23 +66,33 @@ File kunci:
 
 ```mermaid
 flowchart TB
-  Titlebar["nx_titlebar_NXTITLEBAR"]
-  Page["nx_page_NXHOME"]
-  Wall["nx_wallpaper_host"]
-  Launch["nx_launcher_host"]
-  Scroll["nx_home_scroll_work_area"]
-  Win["nx_app_window"]
-  Body["nx_app_window_body_scroll"]
-  Nest["nxpackage_content"]
+  Titlebar["#nx-titlebar NXTITLEBAR"]
+  Page[".nx-page NXHOME"]
+  Wall["#nx-wallpaper-host"]
+  Launch["#nx-launcher-host dock"]
+  Body[".nx-page__body"]
+  Scroll["#nx-home-scroll.nx-scroll"]
+  Nxhome["#nxhome work area"]
+  FloatWin[".nx-app-window bingkai"]
+  Nest["#nxpackage isi form"]
 
   Titlebar --> Page
   Page --> Wall
   Page --> Launch
-  Page --> Scroll
-  Scroll --> Win
-  Win --> Body
-  Body --> Nest
+  Page --> Body
+  Body --> Scroll
+  Scroll --> Nxhome
+  Nxhome --> FloatWin
+  FloatWin --> Nest
 ```
+
+| Layer | File | Peran |
+|-------|------|--------|
+| Titlebar shell | `system/titlebar/` | Chrome Electron (min/max/close OS) — **bukan** bingkai app |
+| Desktop NXHOME | `templates/distro/Development/index.js` | wallpaper + launcher + `#nxhome` |
+| Work area | `#nxhome` / `#nx-home-scroll` | Batas drag/resize window app |
+| App window | `system/window/` | Bingkai floating + kontrol min/max/maximize |
+| Konten (a5) | `package/settings/` | Dulu: nested `.nx-page` full tanpa bingkai |
 
 ### 2.3 Istilah
 
@@ -96,33 +108,21 @@ flowchart TB
 
 ## 3. Audit `screenshot/a5.png`
 
-Yang terlihat di lingkaran merah (settings Wallpaper):
+Referensi: settings **Wallpaper** (lingkaran merah di screenshot) di atas desktop Development.
 
-1. **Tanpa bingkai window** — konten abu-abu penuh menutup wallpaper; tidak terasa “jendela di desktop”.
+1. **Tanpa bingkai window** — panel abu penuh menutup wallpaper; tidak terasa “jendela di desktop”.
 2. **Nested `.nx-page`** — shell settings memakai class desktop → padding / overflow / kontrak tinggi bentrok dengan NXHOME.
-3. **Chrome app absen** — tidak ada title bar app; navigasi = `launcher | Wallpaper | …` mentah.
-4. **Konten terpotong** — Blur / Opacity / Color di bawah viewport; tidak ada body scroll **di dalam** frame tetap (scroll work area saja, form memanjang tanpa kontrak isi).
-5. **Tidak bisa digeser / diubah ukuran** — user tidak punya kontrol geometri.
-6. **Dock vs konten** — pad launcher ada, tapi panel settings menempel visual ke area kerja tanpa margin jendela.
+3. **Chrome app absen** — tidak ada title bar app (min/max/close); navigasi = `launcher | Wallpaper | components | …` mentah.
+4. **Konten terpotong** — kontrol bawah (Blur / Opacity / Color) keluar viewport; tidak ada body scroll **di dalam** frame tetap.
+5. **Tidak bisa digeser / diubah ukuran** — user tidak punya kontrol geometri di work area.
 
 Penyebab struktural: package di-render sebagai halaman penuh di `#nxhome`, bukan sebagai instance `.nx-app-window`.
 
 ---
 
-## 4. Kontrak target — bingkai floating
+## 4. Kontrak target bingkai
 
-### 4.0 Otomatis di setiap halaman package
-
-`attachAutoAppWindow()` (dipanggil dari `system/index.js`) mendengarkan `nxui:routeChange`:
-
-- Route `package/{nama}/…` yang mengisi `#nxhome` → dibungkus `.nx-app-window` otomatis.
-- `distro/home` (dan route distro lain) → **tidak** dibungkus (desktop polos).
-- Nested `#nxpackage` (mis. `package/settings/wallpaper`) → **tidak** buat window baru (pakai shell yang sudah ada).
-- Package boleh tetap memanggil `openAppWindow` sendiri (seperti settings); auto-wrap dilewati jika bingkai sudah ada.
-
-API: `window.wrapNxhomeInAppWindow({ id, title })`, `window.attachAutoAppWindow()`.
-
-### 4.1 Markup (sketsa)
+### 4.1 Markup
 
 ```html
 <div class="nx-app-window" data-state="normal" data-app="settings"
@@ -136,103 +136,102 @@ API: `window.wrapNxhomeInAppWindow({ id, title })`, `window.attachAutoAppWindow(
     </div>
   </header>
   <div class="nx-app-window__body nx-scroll">
-    <!-- chrome app: nav tabs settings -->
+    <!-- chrome app: nav tabs settings (opsional) -->
     <div id="nxpackage"><!-- isi route nested --></div>
   </div>
   <!-- resize handles: n, e, s, w, ne, nw, se, sw -->
 </div>
 ```
 
-- Body **wajib** `.nx-scroll` (kontrak distro) — scroll **hanya** di sini, bukan double-scroll dengan `#nx-home-scroll` untuk isi form panjang.
-- Form settings **tidak** memakai `<article class="nx-page">` desktop; pakai layout di dalam body window (mis. `.ubuntu-workbench` saja).
+- Body **wajib** `.nx-scroll` (kontrak distro / kernel scroll) — scroll isi form **hanya** di sini.
+- Form settings **tidak** memakai `<article class="nx-page">` desktop; pakai layout di dalam body window (mis. `.ubuntu-workbench`).
 
 ### 4.2 State
 
 | State | Perilaku |
 |-------|----------|
 | `normal` | Posisi + ukuran user; drag + resize aktif |
-| `maximized` | Isi **penuh work area** (inset 0 relatif `#nxhome` / bounds setelah pad launcher). **Bukan** maximize Electron. Tombol max → restore. |
-| `minimized` | Body disembunyikan; sisa strip header di work area (atau dock-minimize strip — detail UI saat implementasi). Restore mengembalikan `normal` + geometry. |
+| `maximized` | Isi **penuh work area** (inset 0 relatif bounds work area). **Bukan** maximize Electron. Tombol max → restore ke `normal`. |
+| `minimized` | Body disembunyikan; restore mengembalikan state **sebelum** minimize (`normal` **atau** `maximized`). |
 
-Geometry `normal` terakhir disimpan saat maximize/minimize supaya restore akurat.
+Geometry `normal` terakhir disimpan saat maximize/minimize supaya un-maximize akurat.  
+Target restore setelah minimize dicatat di `data-restore-to` + WeakMap (`restoreTargetByEl`) — tanpa ini, maximize→minimize→restore jatuh ke ukuran normal (“flat”) dan kehilangan mode maximize.
 
 ### 4.3 Kontrol (beda dengan titlebar shell)
 
 | Kontrol | App window (`data-nx-app`) | Shell (`data-nx-win`) |
 |---------|----------------------------|------------------------|
-| Minimize | Collapse window app | `electronAPI.windowMinimize` |
+| Minimize | Collapse / hide window app | `electronAPI.windowMinimize` |
 | Maximize | Toggle isi work area | `electronAPI.windowMaximizeToggle` |
-| Close | Tutup app → `#distro/home` / kosongkan `#nxhome` window | `electronAPI.windowClose` |
+| Close | Tutup app → `#distro/home` / kosongkan window | `electronAPI.windowClose` |
 
 **Jangan** panggil `windowClose` Electron dari tombol close app window.
 
 ### 4.4 Drag & resize
 
 - **Drag**: pointer down di `.nx-app-window__header` (bukan di tombol kontrol).
-- **Resize**: handle tepi/sudut; min-width / min-height (mis. 320×200 — angka final di CSS).
-- **Clamp**: seluruh box tetap di dalam work area (`getBoundingClientRect` `#nx-home-scroll` atau `#nxhome`), menghormati ruang yang sudah di-pad launcher (`nx-launcher-pad-*`).
+- **Resize**: handle tepi/sudut; min-width / min-height di CSS.
+- **Clamp**: seluruh box tetap di dalam work area (`#nxhome` / `#nx-home-scroll`).
 - Saat `maximized`: drag/resize nonaktif sampai restore.
 
-### 4.5 Persistensi (fase implementasi)
+### 4.5 Persistensi
 
-- Store DistroBuckets disarankan: `nx-window` (naikkan version buckets di `system/index.js`).
-- Per app id (`settings`, dll.): `{ left, top, width, height, state }`.
-- Default geometry: ~80% work area, centered — jika belum ada prefs.
+- Store DistroBuckets: `nx-window` (lihat `system/index.js` / buckets version).
+- Per app id: `{ left, top, width, height, state }` (+ prefs tema terpisah `__prefs__`).
+- Default geometry: relatif work area, centered — jika belom ada prefs.
 
 ### 4.6 Multi-window
 
-**Fase 1:** satu app window aktif.  
-**Fase kemudian:** z-index stack, focus click-to-front — disebut di sini agar tidak bentrok desain, belum wajib di implementasi pertama.
+Fase awal: satu window aktif.  
+Fase lanjut: z-index stack, focus click-to-front, badge launcher — jangan bentrok desain header.
 
----
-
-## 5. Aturan tinggi & scroll (wajib)
+### 4.7 Tinggi & scroll (wajib)
 
 Selaras `Development/README.md` § scroll:
 
-1. Work area tinggi sudah dihitung NXHOME (`NXUI.Window.height() − top` pada `#nx-home-scroll`).
-2. App window **persentase / px** relatif work area — **jangan** `100vh` untuk body form.
-3. Isi panjang (Wallpaper form, components showcase) scroll di `.nx-app-window__body.nx-scroll`.
-4. Komponen dengan scroll internal sendiri (editor CM6, dll.) **jangan** dibungkus `.nx-scroll` luar yang ikut menggulung header window — header window tetap di luar body scroll.
+1. Work area tinggi dihitung NXHOME (`NXUI.Window.height() − top` pada `#nx-home-scroll`).
+2. App window ukuran relatif work area — **jangan** `100vh` untuk body form.
+3. Isi panjang scroll di `.nx-app-window__body.nx-scroll`.
+4. Komponen scroll internal (editor, dll.) jangan diganda dengan scroll body window yang ikut menggulung header.
 
 ---
 
-## 6. Pemetaan file (rencana implementasi — belum dikerjakan)
+## 5. Pemetaan file
 
 | File | Peran |
 |------|--------|
-| `system/window/README.md` | Dokumen ini |
-| `system/window/style.css` | `.nx-app-window`, header, handles, states |
-| `system/window/index.js` | `openAppWindow`, `setWindowState`, drag/resize, persist; assign `window.*` dari `system/index.js` |
-| `package/settings/index.js` | Shell tanpa nested `.nx-page`; nav di dalam window chrome / body atas |
+| `system/window/README.md` | Dokumen ini (analisis + kontrak) |
+| `system/window/style.css` | `.nx-app-window`, header, handles, states, tema |
+| `system/window/index.js` | `openAppWindow`, `setAppWindowState`, drag/resize, persist; assign `window.*` dari `system/index.js` |
+| `system/window/settings.js` | Prefs tema visual bingkai (`nx-window` / `__prefs__`) |
+| `package/settings/index.js` | Shell tanpa nested `.nx-page`; nav di dalam body window |
 | `templates/workspace.css` | `@import` style window saat regenerasi / manual |
 
-API sketsa (fase kode):
+API (kontrak `window.*` — package **tidak** import path relatif ke `system/window`):
 
 ```js
-// window.openAppWindow({ id, title, mount, contentEl? })
+// window.openAppWindow({ id, title, mount, … })
 // window.setAppWindowState('maximized' | 'minimized' | 'normal')
 // window.closeAppWindow()
+// window.prepareAppWindowContainer / attachAutoAppWindow / …
 ```
-
-Package hanya mengisi konten; **tidak** meng-import path relatif ke `system/window` — ikut kontrak `window.*` seperti launcher/wallpaper.
 
 ---
 
-## 7. Non-goals
+## 6. Non-goals
 
 - Mengganti atau menduplikasi `system/titlebar` / frame Electron.
 - Memindahkan launcher atau wallpaper ke modul window.
-- Window manager multi-desktop / snap Windows 11 lengkap (boleh fase jauh).
-- Mengubah kernel `grafis.js` kecuali jika mount work area memang perlu hook tipis.
+- Window manager multi-desktop / snap Windows 11 lengkap (fase jauh).
+- Mengubah kernel `grafis.js` kecuali hook mount work area yang memang perlu.
 
 ---
 
-## 8. Ringkasan keputusan
+## 7. Ringkasan keputusan
 
 1. Area kerja = `#nx-home-scroll` / `#nxhome` di belakang dock/wallpaper.
 2. Isi package = **bingkai floating** dengan min / maximize / restore / close-app.
-3. User **menarik (drag)** dan **mengubah ukuran** sesuai kebutuhan, di-clamp ke work area.
+3. User **menarik (drag)** dan **mengubah ukuran**, di-clamp ke work area.
 4. Maximize = penuh work area, bukan OS maximize.
 5. Scroll form di **body bingkai**; hilangkan nested `.nx-page` desktop di shell settings.
-6. Dokumen ini = spesifikasi; kode menyusul di `style.css` + `index.js`.
+6. Close app window ≠ `electronAPI.windowClose`.

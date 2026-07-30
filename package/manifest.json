@@ -5,6 +5,7 @@
     "directory",
     "models",
     "settings",
-    "tables"
+    "tables",
+    "drives"
   ]
 }

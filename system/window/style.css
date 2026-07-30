@@ -63,14 +63,15 @@
   transition: none !important;
 }
 
-.nx-app-window--maximized {
-  border-radius: 0;
-  box-shadow: none;
+.nx-app-window.is-focused {
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.32);
 }
 
 .nx-app-window--minimized {
-  height: 36px !important;
-  min-height: 36px;
+  /* Hide penuh — restore lewat ikon launcher (bukan strip mengambang) */
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
 .nx-app-window--minimized .nx-app-window__body,
@@ -151,7 +152,7 @@
   flex: 1 1 auto;
   min-height: 0;
   overflow: auto;
-  padding: 12px 14px 16px;
+  padding: 0;
   box-sizing: border-box;
   background: var(--window-bg-color, #f6f5f4);
   position: relative;
@@ -226,3 +227,279 @@
 .nx-app-window--maximized .nx-app-window__resize {
   display: none;
 }
+
+/* ——— Tema visual bingkai (Settings → Window) ——— */
+
+.nx-app-window--theme-dark {
+  background: #2d2d2d;
+  color: #f0f0f0;
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 10px 32px rgba(0, 0, 0, 0.45),
+    0 1px 0 rgba(255, 255, 255, 0.06) inset;
+}
+
+.nx-app-window--theme-dark .nx-app-window__header {
+  background: linear-gradient(to bottom, #3a3a3a, #2a2a2a);
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+  color: #f2f2f2;
+}
+
+.nx-app-window--theme-dark .nx-app-window__btn {
+  color: #e8e8e8;
+}
+
+.nx-app-window--theme-dark .nx-app-window__btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.nx-app-window--theme-dark .nx-app-window__btn--close:hover {
+  background: #e01b24;
+  color: #fff;
+}
+
+.nx-app-window--theme-dark .nx-app-window__body {
+  background: #2d2d2d;
+  color: #f0f0f0;
+}
+
+.nx-app-window--theme-dark .nx-app-shell__nav {
+  border-bottom-color: #454545;
+}
+
+.nx-app-window--theme-dark .nx-app-shell__nav a {
+  color: #62a0ea;
+}
+
+.nx-app-window--theme-dark .nx-app-shell__nav a.is-active {
+  color: #e95420;
+}
+
+.nx-app-window--theme-ubuntu {
+  border-color: rgba(0, 0, 0, 0.22);
+  box-shadow:
+    0 8px 28px rgba(0, 0, 0, 0.32),
+    0 1px 0 rgba(255, 255, 255, 0.25) inset;
+}
+
+.nx-app-window--theme-ubuntu .nx-app-window__header {
+  background: linear-gradient(to bottom, #3d3d3d, #2c2c2c);
+  border-bottom-color: rgba(0, 0, 0, 0.35);
+  color: #fafafa;
+  box-shadow: inset 3px 0 0 #e95420;
+  padding-left: 14px;
+}
+
+.nx-app-window--theme-ubuntu .nx-app-window__btn {
+  color: #f0f0f0;
+}
+
+.nx-app-window--theme-ubuntu .nx-app-window__btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.nx-app-window--theme-ubuntu .nx-app-window__btn--close:hover {
+  background: #e95420;
+  color: #fff;
+}
+
+.nx-app-window--theme-minimal {
+  border-radius: 4px;
+  border-color: rgba(0, 0, 0, 0.14);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+}
+
+.nx-app-window--theme-minimal .nx-app-window__header {
+  height: 32px;
+  background: #f0efed;
+  border-bottom-color: rgba(0, 0, 0, 0.08);
+}
+
+.nx-app-window--theme-minimal .nx-app-window__btn {
+  width: 26px;
+  height: 22px;
+  border-radius: 2px;
+}
+
+.nx-app-window--theme-glass {
+  border-radius: 12px;
+  border-color: rgba(255, 255, 255, 0.35);
+  background: rgba(246, 245, 244, 0.88);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.22),
+    0 0 0 1px rgba(255, 255, 255, 0.25) inset;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.nx-app-window--theme-glass .nx-app-window__header {
+  background: rgba(255, 255, 255, 0.45);
+  border-bottom-color: rgba(0, 0, 0, 0.06);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.nx-app-window--theme-glass .nx-app-window__body {
+  background: transparent;
+}
+
+.nx-app-window--maximized.nx-app-window--theme-glass,
+.nx-app-window--maximized.nx-app-window--theme-minimal {
+  border-radius: 0;
+}
+
+/* Preview cards di Settings → Window */
+.nx-window-theme-preview {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.85rem;
+  margin-top: 0.75rem;
+}
+
+.nx-window-theme-preview__option {
+  display: block;
+  padding: 0.65rem;
+  border: 1px solid var(--border-color, #deddda);
+  border-radius: 8px;
+  cursor: pointer;
+  background: var(--view-bg-color, #fff);
+}
+
+.nx-window-theme-preview__option * {
+  pointer-events: none;
+}
+
+.nx-window-theme-preview__option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: auto;
+}
+
+.nx-window-theme-preview__option:hover {
+  border-color: var(--accent-color, #3584e4);
+}
+
+.nx-window-theme-preview__option.is-selected {
+  border-color: var(--ub-orange, #e95420);
+  box-shadow: 0 0 0 1px var(--ub-orange, #e95420);
+}
+
+.nx-window-theme-mock {
+  height: 88px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.16);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+  font-size: 11px;
+}
+
+.nx-window-theme-mock__header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 26px;
+  padding: 0 6px 0 8px;
+  gap: 6px;
+}
+
+.nx-window-theme-mock__title {
+  flex: 1;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nx-window-theme-mock__controls {
+  display: flex;
+  gap: 2px;
+}
+
+.nx-window-theme-mock__btn {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.12);
+}
+
+.nx-window-theme-mock__body {
+  flex: 1;
+  padding: 8px;
+  font-size: 10px;
+  opacity: 0.75;
+}
+
+.nx-window-theme-mock--adwaita {
+  background: #f6f5f4;
+  color: #241f31;
+}
+.nx-window-theme-mock--adwaita .nx-window-theme-mock__header {
+  background: linear-gradient(to bottom, #faf9f8, #ebe9e6);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.nx-window-theme-mock--dark {
+  background: #2d2d2d;
+  color: #f0f0f0;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+.nx-window-theme-mock--dark .nx-window-theme-mock__header {
+  background: linear-gradient(to bottom, #3a3a3a, #2a2a2a);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.nx-window-theme-mock--dark .nx-window-theme-mock__btn {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.nx-window-theme-mock--ubuntu {
+  background: #f6f5f4;
+  color: #241f31;
+}
+.nx-window-theme-mock--ubuntu .nx-window-theme-mock__header {
+  background: linear-gradient(to bottom, #3d3d3d, #2c2c2c);
+  color: #fafafa;
+  box-shadow: inset 3px 0 0 #e95420;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.35);
+}
+.nx-window-theme-mock--ubuntu .nx-window-theme-mock__btn {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.nx-window-theme-mock--minimal {
+  background: #f6f5f4;
+  color: #241f31;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+.nx-window-theme-mock--minimal .nx-window-theme-mock__header {
+  height: 22px;
+  background: #f0efed;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.nx-window-theme-mock--glass {
+  background: rgba(246, 245, 244, 0.75);
+  color: #241f31;
+  border-radius: 12px;
+  border-color: rgba(255, 255, 255, 0.4);
+}
+.nx-window-theme-mock--glass .nx-window-theme-mock__header {
+  background: rgba(255, 255, 255, 0.5);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.nx-window-theme-preview__meta {
+  margin-top: 0.55rem;
+}
+
+.nx-window-theme-preview__meta .heading {
+  margin: 0;
+}
+
+.nx-window-theme-preview__meta .caption {
+  margin: 0.2rem 0 0;
+}
+
